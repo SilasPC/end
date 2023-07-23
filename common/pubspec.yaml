@@ -1,0 +1,17 @@
+name: common
+description: A new Flutter package project.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: '>=2.18.2 <3.0.0'
+
+dependencies:
+  json_annotation: ^4.7.0
+  http: ^0.13.5
+  crypto_keys: ^0.3.0
+
+dev_dependencies:
+  json_serializable: ^6.5.3
+  build_runner: any
+  test: ^1.21.6

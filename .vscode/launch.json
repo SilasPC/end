@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "client",
+			"cwd": "endclient",
+			"request": "launch",
+			"type": "dart"
+		},
+		{
+			"name": "server",
+			"cwd": "endserver",
+			"request": "launch",
+			"type": "dart",
+			"program": "bin/endserver.dart"
+		}
+	]
+}

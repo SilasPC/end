@@ -1,0 +1,128 @@
+import 'package:common/AbstractEventModel.dart';
+import 'package:common/AbstractEventModelWithRemoteSync.dart';
+import 'package:common/util.dart';
+import 'package:test/test.dart';
+
+void main() {
+	test("empty model", () {
+		var s = ServerModel.withBase(Model());
+		var c = ClientModel.withBase(s, Model(), []);
+		expect(s.model.result, "");
+		expect(c.model.result, "");
+	});
+	test("one-client sync", (() async {
+		var s = ServerModel.withBase(Model());
+		var c = ClientModel.withBase(s, Model(), []);
+
+		s.addEvents([StrEv("A", 10), StrEv("B", 20)]);
+		c.addNoSync([       StrEv("X", 15)         ]);
+		expect(s.model.result, "AB");
+		expect(c.model.result, "X");
+
+		await c.syncRemote();
+		expect(s.model.result, "AXB");
+		expect(c.model.result, "AXB");
+		expect(s.events.toString(), s.events.toString());
+	}));
+	test("two-client sync", () async {
+		var s = ServerModel.withBase(Model());
+		var c1 = ClientModel.withBase(s, Model(), []);
+		var c2 = ClientModel.withBase(s, Model(), []);
+
+		s.addEvents([StrEv("A", 10), StrEv("B", 20)]);
+		await c2.syncRemote();
+		await c1.addAndSync([StrEv("X", 15), StrEv("Y", 25)]);
+		expect(s.model.result,  "AXBY");
+		expect(c1.model.result, "AXBY");
+		expect(c2.model.result, "AB");
+
+		c2.addNoSync([StrEv("1", 30)]);
+		expect(c2.model.result, "AB1");
+
+		await c2.syncRemote();
+		expect(s.model.result,  "AXBY1");
+		expect(c2.model.result, "AXBY1");
+		expect(c1.model.result, "AXBY");
+
+		await c1.addAndSync([StrEv("Z", 23)]);
+		expect(s.model.result,  "AXBZY1");
+		expect(c1.model.result, "AXBZY1");
+
+		await c2.syncRemote();
+		expect(c2.model.result, "AXBZY1");
+	});
+}
+
+class StrEv extends Event<Model> {
+	
+	final String str;
+	StrEv(this.str, int time): super(time, "kind", "author");
+
+  @override
+  JSON toJson() => {
+	  "time": time,
+	  "char": str
+  };
+
+  @override
+  String toString() => "[$time;$str]";
+
+  @override
+  bool build(AbstractEventModel<Model> m) {
+	  m.model.result += str;
+	  return true;
+  }
+
+}
+
+class Model extends IJSON {
+	String result = "";
+
+	@override
+	JSON toJson() => {
+		"result": result
+	};
+	
+	Model();
+	Model.fromJSON(JSON json):
+		result = json["result"];
+
+	@override
+	String toString() => result;
+	
+}
+
+class ClientModel extends AbstractEventModelWithRemoteSync<Model> {
+
+	ServerModel server;
+	ClientModel.withBase(this.server, super.model, super.events);
+
+	@override
+	Model $reviveModel(JSON json) => Model.fromJSON(json);
+
+	@override
+	Future<SyncResult<Model>> $doRemoteSync(SyncRequest a) async =>
+		server.sync(a.events, a.lastSync, a.newGen);
+
+	@override
+	String toString() => "$gen, $events, $model";
+
+	@override
+	void $onUpdate() {}
+
+}
+
+class ServerModel extends AbstractEventModel<Model> {
+
+	ServerModel.withBase(Model m) : super.withBase(m);
+
+	@override
+	Model $reviveModel(JSON json) => Model.fromJSON(json);
+
+	@override
+	String toString() => "$gen, $events, $model";
+
+	@override
+	void $onUpdate() {}
+
+}
