@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of common;
+part of 'model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -26,9 +26,19 @@ Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
       'loops': instance.loops,
     };
 
+EventId _$EventIdFromJson(Map<String, dynamic> json) => EventId(
+      json['time'] as int,
+      json['author'] as String,
+    );
+
+Map<String, dynamic> _$EventIdToJson(EventId instance) => <String, dynamic>{
+      'time': instance.time,
+      'author': instance.author,
+    };
+
 EventError _$EventErrorFromJson(Map<String, dynamic> json) => EventError(
       json['description'] as String,
-      eventFromJSON(json['causedBy'] as Map<String, dynamic>),
+      EventId.fromJson(json['causedBy'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$EventErrorToJson(EventError instance) =>
@@ -37,7 +47,52 @@ Map<String, dynamic> _$EventErrorToJson(EventError instance) =>
       'causedBy': instance.causedBy,
     };
 
-LoopData _$LoopDataFromJson(Map<String, dynamic> json) => LoopData()
+Model _$ModelFromJson(Map<String, dynamic> json) => Model()
+  ..rideName = json['rideName'] as String
+  ..categories = (json['categories'] as Map<String, dynamic>).map(
+    (k, e) => MapEntry(k, Category.fromJson(e as Map<String, dynamic>)),
+  )
+  ..errors = (json['errors'] as List<dynamic>)
+      .map((e) => EventError.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..warnings = (json['warnings'] as List<dynamic>)
+      .map((e) => EventError.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+Map<String, dynamic> _$ModelToJson(Model instance) => <String, dynamic>{
+      'rideName': instance.rideName,
+      'categories': instance.categories,
+      'errors': instance.errors,
+      'warnings': instance.warnings,
+    };
+
+Equipage _$EquipageFromJson(Map<String, dynamic> json) => Equipage.raw(
+      json['eid'] as int,
+      json['rider'] as String,
+      json['horse'] as String,
+    )
+      ..status = EquipageStatus.fromJson(json['status'])
+      ..preExam = json['preExam'] == null
+          ? null
+          : VetData.fromJson(json['preExam'] as Map<String, dynamic>)
+      ..loops = (json['loops'] as List<dynamic>)
+          .map((e) => LoopData.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..currentLoop = json['currentLoop'] as int?
+      ..dsqReason = json['dsqReason'] as String?;
+
+Map<String, dynamic> _$EquipageToJson(Equipage instance) => <String, dynamic>{
+      'status': instance.status,
+      'eid': instance.eid,
+      'rider': instance.rider,
+      'horse': instance.horse,
+      'preExam': instance.preExam,
+      'loops': instance.loops,
+      'currentLoop': instance.currentLoop,
+      'dsqReason': instance.dsqReason,
+    };
+
+LoopData _$LoopDataFromJson(Map<String, dynamic> json) => LoopData.raw()
   ..expDeparture = json['expDeparture'] as int?
   ..departure = json['departure'] as int?
   ..arrival = json['arrival'] as int?

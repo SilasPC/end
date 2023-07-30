@@ -74,7 +74,7 @@ class DisqualifyEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.dsqReason != null) {
-			m.model.errors.add(EventError("${eid} double dsq: ${reason}", this));
+			m.model.errors.add(EventError.of("${eid} double dsq: ${reason}", this));
 			return false;
 		}
 		eq.dsqReason = reason;
@@ -102,7 +102,7 @@ class ChangeCategoryEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.WAITING) {
-			m.model.errors.add(EventError("${eid} category change, status ${eq.status}", this));
+			m.model.errors.add(EventError.of("${eid} category change, status ${eq.status}", this));
 			return false;
 		}
 		var cat = m.model.categories[category]!;
@@ -133,8 +133,7 @@ class RetireEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status == EquipageStatus.RESTING) {
-			m.model.errors.add(EventError("Cannot retire ${eq.eid}", this));
-			return false;
+			m.model.warnings.add(EventError.of("Retire ${eq.eid} when status is ${eq.status.toString()}", this));
 		}
 		eq.status = EquipageStatus.RETIRED;
 		return true;
@@ -161,21 +160,19 @@ class ExamEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		int cl = eq.currentLoop ?? -1;
-		int el = loop ?? -1;
-		if (el != cl) {
-			m.model.errors.add(EventError("${eid} exam out of order loop ${loop}", this));
+		if (eq.status != EquipageStatus.VET) {
+			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
 			return false;
 		}
-		if (eq.status != EquipageStatus.VET) {
-			m.model.errors.add(EventError("${eid} not ready for gate", this));
-			return false;
+		if ((loop ?? -1) != cl) {
+			m.model.warnings.add(EventError.of("${eid} exam out of order loop ${loop}", this));
 		}
 		bool p = data.passed;
 		if (eq.currentLoop == null) {
 			// preExam
 			if (p) eq.currentLoop = 0;
 			eq.preExam = data;
-			eq.loops = eq.category.loops.map(LoopData.withLoop).toList();
+			eq.loops = eq.category.loops.map((l) => LoopData(l)).toList();
 			eq.loops.first.expDeparture = nowUNIX() + 60; // todo
 		} else {
 			// regular gate
@@ -213,13 +210,12 @@ class VetEvent extends Event<Model> {
 	@override
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
-		if (loop != eq.currentLoop) {
-			m.model.errors.add(EventError("${eid} departure out of order loop ${loop}", this));
+		if (eq.status != EquipageStatus.COOLING) {
+			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
 			return false;
 		}
-		if (eq.status != EquipageStatus.COOLING) {
-			m.model.errors.add(EventError("${eid} not ready for gate", this));
-			return false;
+		if (loop != eq.currentLoop) {
+			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
 		}
 		var l = eq.loops[loop];
 		l.vet = time;
@@ -247,11 +243,10 @@ class ArrivalEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
-			m.model.errors.add(EventError("${eid} arrival out of order loop ${loop}", this));
-			return false;
+			m.model.warnings.add(EventError.of("${eid} arrival out of order loop ${loop}", this));
 		}
 		if (eq.status != EquipageStatus.RIDING) {
-			m.model.errors.add(EventError("${eid} not ready for gate", this));
+			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
 			return false;
 		}
 		var l = eq.loops[loop];
@@ -281,7 +276,7 @@ class StartClearanceEvent extends Event<Model> {
 		for (int eid in eids) {
 			var eq = m.model.equipages[eid]!;
 			if (eq.status != EquipageStatus.WAITING) {
-				m.model.errors.add(EventError("Cannot clear $eid for start", this));
+				m.model.errors.add(EventError.of("Cannot clear $eid for start", this));
 				fail = true;
 			} else {
 				eq.status = EquipageStatus.VET;
@@ -309,11 +304,10 @@ class DepartureEvent extends Event<Model> {
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
-			m.model.errors.add(EventError("${eid} departure out of order loop ${loop}", this));
-			return false;
+			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
 		}
 		if (eq.status != EquipageStatus.WAITING) {
-			m.model.errors.add(EventError("${eid} not ready for gate", this));
+			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
 			return false;
 		}
 		var l = eq.loops[loop];

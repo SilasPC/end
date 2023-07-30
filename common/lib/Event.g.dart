@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of common;
+part of 'Event.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

@@ -1,7 +1,5 @@
 library common;
 
-import 'package:common/Event.dart';
-import 'package:crypto_keys/crypto_keys.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'AbstractEventModel.dart';
 import 'util.dart';
@@ -21,7 +19,7 @@ class Loop extends IJSON {
 class Category extends IJSON {
 	String name;
 	List<Loop> loops;
-	@JsonKey(ignore: false)
+	@JsonKey(ignore: true)
 	List<Equipage> equipages;
 	Category(this.name, this.loops) :
 		equipages = [];
@@ -50,7 +48,7 @@ class Category extends IJSON {
 	
 }
 
-/* // todo: not unique id
+// todo: not unique id
 @JsonSerializable()
 class EventId extends IJSON {
 
@@ -59,21 +57,22 @@ class EventId extends IJSON {
 	final int time;
 	final String author;
 
-	JSON toJson() => _$EventIdFromJson(this);
+	JSON toJson() => _$EventIdToJson(this);
 	factory EventId.fromJson(JSON json) =>
 		_$EventIdFromJson(json);
 
-} */
+}
 
 // todo: make enum of errors
 @JsonSerializable()
 class EventError extends IJSON {
 
    EventError(this.description, this.causedBy);
+   EventError.of(this.description, Event<Model> ev):
+		this.causedBy = EventId(ev.time, ev.author);
 
    String description;
-   @JsonKey(fromJson: eventFromJSON)
-   Event<Model> causedBy;
+   EventId causedBy;
 
 	JSON toJson() => _$EventErrorToJson(this);
 	factory EventError.fromJson(JSON json) =>
@@ -81,10 +80,12 @@ class EventError extends IJSON {
 
 }
 
+@JsonSerializable()
 class Model extends IJSON {
 
 	String rideName = "";
 	Map<String, Category> categories = {};
+	@JsonKey(ignore: true)
 	Map<int, Equipage> equipages = {};
 	List<EventError> errors = [];
 	List<EventError> warnings = [];
@@ -116,39 +117,39 @@ class Model extends IJSON {
 	}
 
 	Model();
-	Model.fromJson(JSON json) {
-		JSON c0 = json["categories"];
-		Map<String, Category> c1 = c0.map((key, value) => MapEntry(key,Category.fromJson(value)));
-		JSON e0 = json["equipages"];
-		Map<int, Equipage> e1 = e0.map((key, value) => MapEntry(int.parse(key),Equipage.fromJson(value, c1)));
-		categories = c1;
-		equipages = e1;
-		rideName = json["rideName"];
+	JSON toJson() => _$ModelToJson(this);
+	factory Model.fromJson(JSON json) {
+		Model m = _$ModelFromJson(json);
+		for (var cat in m.categories.values) {
+			for (var eq in cat.equipages) {
+				eq.category = cat;
+				for (int i = 0; i < cat.loops.length; i++) {
+					eq.loops[i].loop = cat.loops[i];
+				}
+			}
+		}
+		return m;
 	}
-
-	JSON toJson() => {
-		"categories": categories.map((key, value)
-			=> MapEntry(key, value.toJson())),
-		"equipages": equipages.map((key, value)
-			=> MapEntry(key.toString(), value.toJson())),
-		"rideName": rideName,
-	};
 
 }
 
+@JsonSerializable(constructor: "raw")
 class Equipage extends IJSON {
 	
 	EquipageStatus status = EquipageStatus.WAITING;
 	int eid;
 	String rider;
 	String horse;
-	late Category category;
 	VetData? preExam;
 	List<LoopData> loops = [];
 	int? currentLoop;
 	String? dsqReason;
+	
+	@JsonKey(ignore: true)
+	late Category category;
 
-	Equipage(this.eid, this.rider,this.horse,this.category);
+	Equipage(this.eid, this.rider,this.horse, this.category);
+	Equipage.raw(this.eid, this.rider,this.horse);
 
 	LoopData? get currentLoopData =>
 		currentLoop == null ? null : loops[currentLoop!];
@@ -265,32 +266,9 @@ class Equipage extends IJSON {
 		}
 	}
 	
-	Equipage.fromJson(JSON json, Map<String, Category> catMap) :
-		status = EquipageStatus.fromJson(json["status"]),
-		eid = json["eid"],
-		rider = json["rider"],
-		horse = json["horse"],
-		currentLoop = json["currentLoop"],
-		dsqReason = json["dsqReason"] {
-			category = catMap[json["category"]]!;
-			category.equipages.add(this);
-			preExam = jmap(json, "preExam", VetData.fromJson);
-			loops = jlist_map(json["loops"], LoopData.fromJson);
-			for (int i = 0; i < loops.length; i++)
-				loops[i].loop = category.loops[i];
-		}
-
-	JSON toJson() => {
-		"status": status.name,
-		"eid": eid,
-		"rider": rider,
-		"horse": horse,
-		"dsqReason": dsqReason,
-		"category": category.name,
-		"preExam": preExam?.toJson(),
-		"loops": listj(loops),
-		"currentLoop": currentLoop,
-	};
+	JSON toJson() => _$EquipageToJson(this);
+	factory Equipage.fromJson(JSON json) =>
+		_$EquipageFromJson(json);
 
 	String toString() {
 		return "${category.name} $eid $rider";
@@ -298,15 +276,20 @@ class Equipage extends IJSON {
 
 }
 
-@JsonSerializable()
+@JsonSerializable(constructor: "raw")
 class LoopData extends IJSON {
-	@JsonKey(ignore: false)
-	late Loop loop;
+
 	int? expDeparture;
 	int? departure;
 	int? arrival;
 	int? vet;
 	VetData? data;
+
+	@JsonKey(ignore: true)
+	late Loop loop;
+
+	LoopData(this.loop);
+	LoopData.raw();
 
 	double? speed({bool finish = false}) {
 		int? t = finish ? timeToArrival : timeToVet;
@@ -323,9 +306,6 @@ class LoopData extends IJSON {
 	int? get timeToArrival =>
 		expDeparture != null && arrival != null ? arrival! - expDeparture! : null;
 	
-	/** does NOT initialize `loop` field */
-	LoopData();
-	LoopData.withLoop(this.loop);
 	JSON toJson() => _$LoopDataToJson(this);
 	factory LoopData.fromJson(JSON json) =>
 		_$LoopDataFromJson(json);
