@@ -132,7 +132,7 @@ class RetireEvent extends Event<Model> {
 	@override
 	bool build(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
-		if (eq.status == EquipageStatus.RESTING) {
+		if (eq.status != EquipageStatus.RESTING) {
 			m.model.warnings.add(EventError.of("Retire ${eq.eid} when status is ${eq.status.toString()}", this));
 		}
 		eq.status = EquipageStatus.RETIRED;
@@ -165,7 +165,7 @@ class ExamEvent extends Event<Model> {
 			return false;
 		}
 		if ((loop ?? -1) != cl) {
-			m.model.warnings.add(EventError.of("${eid} exam out of order loop ${loop}", this));
+			m.model.warnings.add(EventError.of("${eid} exam out of order loop ${loop}, current $cl", this));
 		}
 		bool p = data.passed;
 		if (eq.currentLoop == null) {
@@ -306,7 +306,7 @@ class DepartureEvent extends Event<Model> {
 		if (loop != eq.currentLoop) {
 			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
 		}
-		if (eq.status != EquipageStatus.WAITING) {
+		if (eq.status != EquipageStatus.RESTING) {
 			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
 			return false;
 		}

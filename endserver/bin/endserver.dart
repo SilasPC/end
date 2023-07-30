@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
 import 'package:common/AbstractEventModel.dart';
+import 'package:common/Equipe.dart';
 import 'package:common/Event.dart';
 import 'package:common/model.dart';
 import 'package:common/util.dart';
@@ -18,8 +19,10 @@ Future<List<Event>> readCachedEvents() async {
 }
 
 Future<void> main() async {
-	
-	List<Event> evs = await loadEventsFromFile("roddingeritten");
+
+	List<Event<Model>> evs =
+		// await loadModelEvents(44178);
+		await loadEventsFromFile("roddingeritten");
 	//evs.removeRange(1, evs.length);
 
 	//List<Event> evs = await readCachedEvents();
@@ -68,7 +71,7 @@ class EventModel extends AbstractEventModel<Model> {
 
 }
 
-Future<List<Event>> loadEventsFromFile(String fileName) async {
+Future<List<Event<Model>>> loadEventsFromFile(String fileName) async {
 	var json = jsonDecode(await File("../$fileName.events.json").readAsString());
 	return jlist_map(json, eventFromJSON);
 }

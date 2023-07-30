@@ -1,0 +1,88 @@
+[
+	{
+		"kind": "init",
+		"author": "root",
+		"model": {
+			"rideName": "TestEvents",
+			"errors": [],
+			"warnings": [],
+			"categories": {
+				"20km": {
+					"name": "20km",
+					"loops": [
+						{
+							"distance": 20
+						}
+					],
+					"equipages": [
+						{
+							"status": "WAITING",
+							"eid": 1,
+							"rider": "Anne Safft",
+							"horse": "Wasim Jamaal",
+							"dsqReason": null,
+							"preExam": null,
+							"loops": [],
+							"currentLoop": null
+						}
+					]
+				}
+			}
+		}
+	},
+	{
+		"kind": "start-clearance",
+		"author": "root",
+		"time": 1666216801,
+		"eids": [
+			1
+		]
+	},
+	{
+		"kind": "exam",
+		"author": "root",
+		"time": 1666216802,
+		"eid": 1,
+		"loop": null,
+		"data": {
+			"passed": true,
+			"hr1": null,
+			"hr2": null,
+			"gait": null
+		}
+	},
+	{
+		"kind": "departure",
+		"author": "root",
+		"time": 1666260060,
+		"eid": 1,
+		"loop": 0
+	},
+	{
+		"kind": "arrival",
+		"author": "root",
+		"time": 1666266246,
+		"loop": 0,
+		"eid": 1
+	},
+	{
+		"kind": "vet",
+		"author": "root",
+		"time": 1666267286,
+		"eid": 1,
+		"loop": 0
+	},
+	{
+		"kind": "exam",
+		"author": "root",
+		"time": 1666267346,
+		"eid": 1,
+		"loop": 0,
+		"data": {
+			"passed": true,
+			"hr1": 60,
+			"hr2": null,
+			"gait": null
+		}
+	}
+]

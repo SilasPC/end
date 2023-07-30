@@ -19,7 +19,6 @@ class Loop extends IJSON {
 class Category extends IJSON {
 	String name;
 	List<Loop> loops;
-	@JsonKey(ignore: true)
 	List<Equipage> equipages;
 	Category(this.name, this.loops) :
 		equipages = [];
@@ -122,8 +121,9 @@ class Model extends IJSON {
 		Model m = _$ModelFromJson(json);
 		for (var cat in m.categories.values) {
 			for (var eq in cat.equipages) {
+				m.equipages[eq.eid] = eq;
 				eq.category = cat;
-				for (int i = 0; i < cat.loops.length; i++) {
+				for (int i = 0; i < eq.loops.length; i++) {
 					eq.loops[i].loop = cat.loops[i];
 				}
 			}

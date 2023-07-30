@@ -19,11 +19,14 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
       (json['loops'] as List<dynamic>)
           .map((e) => Loop.fromJson(e as Map<String, dynamic>))
           .toList(),
-    );
+    )..equipages = (json['equipages'] as List<dynamic>)
+        .map((e) => Equipage.fromJson(e as Map<String, dynamic>))
+        .toList();
 
 Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
       'name': instance.name,
       'loops': instance.loops,
+      'equipages': instance.equipages,
     };
 
 EventId _$EventIdFromJson(Map<String, dynamic> json) => EventId(

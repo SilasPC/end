@@ -6,13 +6,13 @@ import 'package:http/http.dart' as http;
 import 'AbstractEventModel.dart';
 import 'model.dart';
 
-Future<List<Event>> loadModelEvents(int classId) async {
+Future<List<Event<Model>>> loadModelEvents(int classId) async {
 	dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");
 	if (schd["discipline"] != "endurance")
 		throw Exception("Could not load a non-endurance event");
 
 	Model m = Model();
-	List<Event> mevs = [];
+	List<Event<Model>> mevs = [];
 	m.rideName = schd["display_name"];
 	
 	for (var day in schd["days"]) {
@@ -24,7 +24,7 @@ Future<List<Event>> loadModelEvents(int classId) async {
 			try {
 				var id = cl["class_sections"][0]["id"];
 				var cat = Category(name, [Loop(int.parse(dist))]);
-				List<Event> evs = [];
+				List<Event<Model>> evs = [];
 
 				dynamic cls = await _loadJSON("api/v1/class_sections/$id");
 				for (var eq in cls["starts"]) {

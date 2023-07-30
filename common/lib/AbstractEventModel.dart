@@ -184,12 +184,13 @@ abstract class AbstractEventModel<M extends IJSON> {
 
 	void unsafeBuildFromIndex(int i) {
 		for (; i < events.length; i++) {
-			try {
-				if (!events[i].build(this))
-					print("build ${events[i].toJson()} failed");
+			if (!events[i].build(this)) {
+				print("build ${events[i].toJson()} failed");
+			}
+			/* try {
 			} catch (e) {
 				print("build ${events[i].toJson()} exception: $e");
-			}
+			} */
 		}
 	}
 
