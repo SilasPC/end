@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
 class EquipagePage extends StatefulWidget {

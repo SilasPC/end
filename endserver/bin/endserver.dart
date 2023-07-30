@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
 import 'package:common/AbstractEventModel.dart';
-import 'package:common/Equipe.dart';
 import 'package:common/Event.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 
@@ -23,7 +22,7 @@ Future<void> main() async {
 	List<Event<Model>> evs =
 		// await loadModelEvents(44178);
 		await loadEventsFromFile("roddingeritten");
-	//evs.removeRange(1, evs.length);
+	evs.removeRange((evs.length / 2).floor(), evs.length);
 
 	//List<Event> evs = await readCachedEvents();
 	//await loadEventsFromFile("roddingeritten");

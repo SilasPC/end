@@ -4,7 +4,7 @@ import 'package:common/Event.dart';
 import 'package:common/util.dart';
 import 'package:http/http.dart' as http;
 import 'AbstractEventModel.dart';
-import 'model.dart';
+import 'models/glob.dart';
 
 Future<List<Event<Model>>> loadModelEvents(int classId) async {
 	dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");

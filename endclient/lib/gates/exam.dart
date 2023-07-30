@@ -5,7 +5,7 @@ import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/timer.dart';
 import 'package:flutter/material.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';

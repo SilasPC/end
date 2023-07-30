@@ -1,6 +1,6 @@
 
 import 'package:common/Event.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';

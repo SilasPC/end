@@ -2,8 +2,9 @@ library common;
 
 import 'package:common/util.dart';
 import 'AbstractEventModel.dart';
-import 'model.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'models/glob.dart';
 
 // MUST RUN REPLACE ON PART AFTER BUILD:
 // replace		<String, dynamic>\{\n(\s+)

@@ -8,7 +8,7 @@ import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 
 import '../LocalModel.dart';
 import '../util/submit_button.dart';

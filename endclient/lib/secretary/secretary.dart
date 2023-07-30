@@ -1,5 +1,5 @@
 
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

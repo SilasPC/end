@@ -1,5 +1,5 @@
 
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:flutter/material.dart';
 
 class EquipageTile extends StatelessWidget {
@@ -21,7 +21,7 @@ class EquipageTile extends StatelessWidget {
 			onLongPress: onLongPress,
 			child: Container(
 				padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-				height: 70,
+				height: EquipageTile.height,
 				child: Row(
 					mainAxisAlignment: MainAxisAlignment.start,
 					children: [

@@ -4,7 +4,7 @@ import 'package:esys_client/gates/timing_list_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/Event.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 
 import '../LocalModel.dart';
 import '../util/text_clock.dart';

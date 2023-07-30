@@ -9,7 +9,7 @@ import 'package:esys_client/util/submit_button.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/time_lock.dart';
 import 'package:flutter/material.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';

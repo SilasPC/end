@@ -1,7 +1,6 @@
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
-import 'package:common/Event.dart';
-import 'package:common/model.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +9,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-const String serverUri = "localhost:3000";
+const String serverUri = "http://localhost:3000";
 const bool clientModelOnly = false;
 
 class LocalModel
