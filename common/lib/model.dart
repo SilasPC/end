@@ -50,6 +50,21 @@ class Category extends IJSON {
 	
 }
 
+/* // todo: not unique id
+@JsonSerializable()
+class EventId extends IJSON {
+
+	EventId(this.time, this.author);
+
+	final int time;
+	final String author;
+
+	JSON toJson() => _$EventIdFromJson(this);
+	factory EventId.fromJson(JSON json) =>
+		_$EventIdFromJson(json);
+
+} */
+
 // todo: make enum of errors
 @JsonSerializable()
 class EventError extends IJSON {
@@ -72,7 +87,7 @@ class Model extends IJSON {
 	Map<String, Category> categories = {};
 	Map<int, Equipage> equipages = {};
 	List<EventError> errors = [];
-   Map<String, PublicKey> devices = {};
+	List<EventError> warnings = [];
 			
 	List<Equipage> vetGate() {
 		List<Equipage> eqs = [];

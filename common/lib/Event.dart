@@ -31,31 +31,9 @@ Event<Model> eventFromJSON(JSON json) {
 			return ChangeCategoryEvent.fromJson(json);
 		case "disqualify":
 			return DisqualifyEvent.fromJson(json);
-      case "add-device":
-         return AddDeviceEvent.fromJson(json);
 		default:
 			throw new Exception("could not parse event kind $kind");
 	}
-}
-
-class AddDeviceEvent extends Event<Model> {
-   String deviceId;
-   AddDeviceEvent(String author, int time, this.deviceId): super(time, "add-device", author);
-
-	JSON toJson() => {
-      "time": time,
-      "kind": kind,
-      "deviceId": deviceId,
-   };
-	factory AddDeviceEvent.fromJson(JSON json) =>
-      AddDeviceEvent(json["author"], json["time"], json["deviceId"]);
-
-   bool build(AbstractEventModel<Model> m) {
-      // todo: check author
-      m.model.devices[deviceId] = unimpl();
-      return true;
-   }
-
 }
 
 @JsonSerializable()
