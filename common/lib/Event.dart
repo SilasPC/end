@@ -174,15 +174,16 @@ class ExamEvent extends Event<Model> {
 			if (p) eq.currentLoop = 0;
 			eq.preExam = data;
 			eq.loops = eq.category.loops.map((l) => LoopData(l)).toList();
-			eq.loops.first.expDeparture = nowUNIX() + 60; // todo
+			eq.loops.first.expDeparture = nowUNIX() + 60; // todo: get actual start time
 		} else {
 			// regular gate
-			var l = eq.loops[eq.currentLoop!]; // todo: e.loop
+			var l = eq.currentLoopData!;
 			l.data = data;
+			// todo: check < 20min if passed
 			if (p && eq.currentLoop! != eq.loops.length - 1) {
 				// next loop
 				var next = eq.currentLoop = eq.currentLoop! + 1;
-				// todo: assume 40 minutes break
+				// todo: assumes 40 minutes break
 				if (l.vet != null)
 					eq.loops[next].expDeparture = l.vet! + 40 * 60;
 			}

@@ -103,6 +103,7 @@ int binarySearch<T>(List<T> list, bool Function(T) p) {
  * Like `binarySearch`, but returns the index of the first element
  * not matching the predicate.
 */
+// todo: not tested, probably incorrect on all true
 int binarySearchInv<T>(List<T> list, bool Function(T) p) {
 	int i = binarySearch(list, p);
 	if (i == -1) return 0; // all false
