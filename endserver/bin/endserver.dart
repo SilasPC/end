@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/Event.dart';
+import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
@@ -19,10 +20,11 @@ Future<List<Event>> readCachedEvents() async {
 
 Future<void> main() async {
 
-	List<Event<Model>> evs =
+	List<EnduranceEvent> evs =
+		jsonDecode(demoInitEvent(nowUNIX() + 300));
 		// await loadModelEvents(44178);
-		await loadEventsFromFile("roddingeritten");
-	evs.removeRange((evs.length / 2).floor(), evs.length);
+		//await loadEventsFromFile("roddingeritten");
+	//evs.removeRange((evs.length / 2).floor(), evs.length);
 
 	//List<Event> evs = await readCachedEvents();
 	//await loadEventsFromFile("roddingeritten");
@@ -31,7 +33,7 @@ Future<void> main() async {
 	em = EventModel.withBase(Model());
 	em.addEvents(evs);
 
-	await saveCSV();
+	// await saveCSV();
 
 	io = Server();
 	io.on('connection', (client) {
@@ -70,45 +72,12 @@ class EventModel extends AbstractEventModel<Model> {
 
 }
 
-Future<List<Event<Model>>> loadEventsFromFile(String fileName) async {
+Future<List<EnduranceEvent>> loadEventsFromFile(String fileName) async {
 	var json = jsonDecode(await File("../$fileName.events.json").readAsString());
 	return jlist_map(json, eventFromJSON);
 }
 
 // todo: complete this
 Future<void> saveCSV() async {
-	List<String> lines = [];
-	hms(int? unix) => unix == null ? "-" : unixHMS(unix);
-
-	for (var cat in em.model.categories.values) {
-		lines.add([
-			"${cat.name} ${cat.distance()}km",
-			"StartNumber",
-			"Rider",
-			"Horse",
-			for (var lp in cat.loops) ... [
-				"Loop ${cat.loops.indexOf(lp) + 1} ${lp.distance}km",
-				"Departure",
-				"Arrival",
-				"Vet",
-			],
-		].join(","));
-		for (var eq in cat.equipages) {
-			lines.add([
-				"",
-				eq.eid,
-				eq.rider.replaceAll(",", ""),
-				eq.horse.replaceAll(",", ""),
-				for (var ld in eq.loops) ... [
-					"",
-					hms(ld.expDeparture),
-					hms(ld.arrival),
-					hms(ld.vet),
-				],
-			].join(","));
-		}
-	}
-	await File("../results.csv")
-		.writeAsString(lines.join("\n"), flush: true);
-
+	await File("../results.csv").writeAsString(em.model.toResultCSV(), flush: true);
 }

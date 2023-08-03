@@ -58,4 +58,39 @@ class Model extends IJSON {
 		return m;
 	}
 
+	String toResultCSV() {
+		List<String> lines = [];
+		hms(int? unix) => unix == null ? "-" : unixHMS(unix);
+
+		for (var cat in categories.values) {
+			lines.add([
+				"${cat.name} ${cat.distance()}km",
+				"StartNumber",
+				"Rider",
+				"Horse",
+				for (var lp in cat.loops) ... [
+					"Loop ${cat.loops.indexOf(lp) + 1} ${lp.distance}km",
+					"Departure",
+					"Arrival",
+					"Vet",
+				],
+			].join(","));
+			for (var eq in cat.equipages) {
+				lines.add([
+					"",
+					eq.eid,
+					eq.rider.replaceAll(",", ""),
+					eq.horse.replaceAll(",", ""),
+					for (var ld in eq.loops) ... [
+						"",
+						hms(ld.expDeparture),
+						hms(ld.arrival),
+						hms(ld.vet),
+					],
+				].join(","));
+			}
+		}
+		return lines.join("\n");
+	}
+
 }

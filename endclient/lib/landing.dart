@@ -1,5 +1,8 @@
 
+import 'package:common/Equipe.dart';
+import 'package:esys_client/admin.dart';
 import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'LocalModel.dart';
 import 'gates/arrival.dart';
@@ -18,6 +21,7 @@ class LandingPage extends StatefulWidget {
 class LandingPageState extends State<LandingPage> {
 
 	static const List<Text> buttons = [
+		Text("Admin"),
 		Text("Secretary"),
 		Text("Departure"),
 		Text("Exam"),
@@ -25,6 +29,7 @@ class LandingPageState extends State<LandingPage> {
 		Text("Arrival"),
 	];
 	static const List<Widget> pages = [
+		AdminPage(),
 		SecretaryPage(),
 		DeparturePage(),
 		ExamPage(),
@@ -32,7 +37,6 @@ class LandingPageState extends State<LandingPage> {
 		ArrivalPage(),
 	];
 
-	List<String> items = ["a","b","c"];
 	TextEditingController txtCtrl =
 		TextEditingController(text: LocalModel.instance.author);
 
