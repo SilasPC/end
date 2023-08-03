@@ -11,7 +11,11 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part "Event.g.dart";
 
-Event<Model> eventFromJSON(JSON json) {
+abstract class EnduranceEvent extends Event<Model> {
+	EnduranceEvent(super.time, super.kind, super.author);
+}
+
+EnduranceEvent eventFromJSON(JSON json) {
 	String kind = json["kind"];
 	switch (kind) {
 		case "init":
@@ -38,7 +42,7 @@ Event<Model> eventFromJSON(JSON json) {
 }
 
 @JsonSerializable()
-class InitEvent extends Event<Model> {
+class InitEvent extends EnduranceEvent {
 	Model model;
 	InitEvent(String author, this.model) : super(0, "init", author);
 
@@ -61,7 +65,7 @@ class InitEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class DisqualifyEvent extends Event<Model> {
+class DisqualifyEvent extends EnduranceEvent {
 	int eid;
 	String reason;
 	DisqualifyEvent(String author, int time, this.eid, this.reason):
@@ -89,7 +93,7 @@ class DisqualifyEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class ChangeCategoryEvent extends Event<Model> {
+class ChangeCategoryEvent extends EnduranceEvent {
 	int eid;
 	String category;
 	ChangeCategoryEvent(String author, int time, this.eid, this.category):
@@ -120,7 +124,7 @@ class ChangeCategoryEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class RetireEvent extends Event<Model> {
+class RetireEvent extends EnduranceEvent {
 
 	int eid;
 	RetireEvent(String author, int time, this.eid):
@@ -146,7 +150,7 @@ class RetireEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class ExamEvent extends Event<Model> {
+class ExamEvent extends EnduranceEvent {
 	int eid;
 	int? loop;
 	VetData data;
@@ -199,7 +203,7 @@ class ExamEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class VetEvent extends Event<Model> {
+class VetEvent extends EnduranceEvent {
 	int eid;
 	int loop;
 	VetEvent(String author, int time,this.eid,this.loop):
@@ -231,7 +235,7 @@ class VetEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class ArrivalEvent extends Event<Model> {
+class ArrivalEvent extends EnduranceEvent {
 	int loop;
 	int eid;
 	ArrivalEvent(String author, int time,this.eid,this.loop):
@@ -263,7 +267,7 @@ class ArrivalEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class StartClearanceEvent extends Event<Model> {
+class StartClearanceEvent extends EnduranceEvent {
 	List<int> eids;
 	StartClearanceEvent(String author, int time, this.eids):
 		super(time, "start-clearance", author);
@@ -293,7 +297,7 @@ class StartClearanceEvent extends Event<Model> {
 }
 
 @JsonSerializable()
-class DepartureEvent extends Event<Model> {
+class DepartureEvent extends EnduranceEvent {
 	int eid;
 	int loop;
 	DepartureEvent(String author, int time,this.eid,this.loop):

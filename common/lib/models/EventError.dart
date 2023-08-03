@@ -2,9 +2,8 @@
 // todo: not unique id
 import 'package:json_annotation/json_annotation.dart';
 
-import '../AbstractEventModel.dart';
+import '../Event.dart';
 import '../util.dart';
-import 'Model.dart';
 
 part "EventError.g.dart";
 
@@ -12,7 +11,7 @@ part "EventError.g.dart";
 class EventId extends IJSON {
 
 	EventId(this.time, this.author);
-	EventId.of(Event<Model> ev):
+	EventId.of(EnduranceEvent ev):
 		time = ev.time,
 		author = ev.author;
 
@@ -30,7 +29,7 @@ class EventId extends IJSON {
 class EventError extends IJSON {
 
    EventError(this.description, this.causedBy);
-   EventError.of(this.description, Event<Model> ev):
+   EventError.of(this.description, EnduranceEvent ev):
 		this.causedBy = EventId(ev.time, ev.author);
 
    String description;
