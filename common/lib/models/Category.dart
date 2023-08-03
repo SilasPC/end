@@ -20,7 +20,8 @@ class Category extends IJSON {
 	String name;
 	List<Loop> loops;
 	List<Equipage> equipages;
-	Category(this.name, this.loops) :
+	int startTime;
+	Category(this.name, this.loops, this.startTime) :
 		equipages = [];
 
 	int numDNF() =>
@@ -32,7 +33,7 @@ class Category extends IJSON {
 	int numEnded() =>
 		equipages.where((e) => e.isEnded).length;
 
-	bool get isEnded => numEnded() == equipages.length;
+	bool isEnded() => numEnded() == equipages.length;
 
 	int distance() {
 		int dist = 0;

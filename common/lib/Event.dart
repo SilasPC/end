@@ -174,7 +174,7 @@ class ExamEvent extends Event<Model> {
 			if (p) eq.currentLoop = 0;
 			eq.preExam = data;
 			eq.loops = eq.category.loops.map((l) => LoopData(l)).toList();
-			eq.loops.first.expDeparture = nowUNIX() + 60; // todo: get actual start time
+			eq.loops.first.expDeparture = eq.category.startTime;
 		} else {
 			// regular gate
 			var l = eq.currentLoopData!;
