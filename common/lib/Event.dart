@@ -14,6 +14,18 @@ part "Event.g.dart";
 abstract class EnduranceEvent extends Event<Model> {
 	EnduranceEvent(super.time, super.kind, super.author);
 
+	@override
+	bool build(AbstractEventModel<Model> m) {
+		try {
+			return safeBuild(m);
+		} catch (e, t) {
+			m.model.errors.add(EventError.of("$e $t", this));
+			return false;
+		}
+	}
+
+	bool safeBuild(AbstractEventModel<Model> m);
+
 	bool affectsEquipage(int eid);
 }
 
@@ -53,7 +65,7 @@ class InitEvent extends EnduranceEvent {
 		_$InitEventFromJson(json);
 
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		if (m.events.first == this) {
 			m.model = model;
 			return true;
@@ -80,7 +92,7 @@ class DisqualifyEvent extends EnduranceEvent {
 		_$DisqualifyEventFromJson(json);
 	
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.dsqReason != null) {
 			m.model.errors.add(EventError.of("${eid} double dsq: ${reason}", this));
@@ -110,7 +122,7 @@ class ChangeCategoryEvent extends EnduranceEvent {
 		_$ChangeCategoryEventFromJson(json);
 	
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.WAITING) {
 			m.model.errors.add(EventError.of("${eid} category change, status ${eq.status}", this));
@@ -143,7 +155,7 @@ class RetireEvent extends EnduranceEvent {
 		_$RetireEventFromJson(json);
 
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.RESTING) {
 			m.model.warnings.add(EventError.of("Retire ${eq.eid} when status is ${eq.status.toString()}", this));
@@ -172,7 +184,7 @@ class ExamEvent extends EnduranceEvent {
 		_$ExamEventFromJson(json);
 		
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		int cl = eq.currentLoop ?? -1;
 		if (eq.status != EquipageStatus.VET) {
@@ -225,7 +237,7 @@ class VetEvent extends EnduranceEvent {
 		_$VetEventFromJson(json);
 	
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.COOLING) {
 			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
@@ -259,7 +271,7 @@ class ArrivalEvent extends EnduranceEvent {
 		_$ArrivalEventFromJson(json);
 
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
 			m.model.warnings.add(EventError.of("${eid} arrival out of order loop ${loop}", this));
@@ -292,7 +304,7 @@ class StartClearanceEvent extends EnduranceEvent {
 		_$StartClearanceEventFromJson(json);
 
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		bool fail = false;
 		for (int eid in eids) {
 			var eq = m.model.equipages[eid]!;
@@ -324,7 +336,7 @@ class DepartureEvent extends EnduranceEvent {
 	factory DepartureEvent.fromJson(JSON json) =>
 		_$DepartureEventFromJson(json);
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool safeBuild(AbstractEventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
 			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));

@@ -18,6 +18,8 @@ class EventId extends IJSON {
 	final int time;
 	final String author;
 
+	String toString() => "$author:$time";
+
 	JSON toJson() => _$EventIdToJson(this);
 	factory EventId.fromJson(JSON json) =>
 		_$EventIdFromJson(json);

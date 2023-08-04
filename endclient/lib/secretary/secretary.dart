@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../LocalModel.dart';
 import 'category.dart';
+import 'errorview.dart';
 import 'eventview.dart';
 import 'modelview.dart';
 import 'util.dart';
@@ -79,6 +80,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 		for (Category cat in cats.values)
 			Tab(icon: const Icon(Icons.group), text: "${cat.name} ${cat.distance()}km"),
 		const Tab(icon: Icon(Icons.list), text: "Events"),
+		const Tab(icon: Icon(Icons.error), text: "Errors"),
 		const Tab(icon: Icon(Icons.account_tree), text: "Model"),
 	];
 	Widget tabView(Model model) => TabBarView(
@@ -101,6 +103,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 			for (Category cat in model.categories.values)
 				CategoryView(cat),
 			const EventView(),
+			const ErrorView(),
 			const ModelView(),
 		],
 	);
