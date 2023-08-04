@@ -13,7 +13,7 @@ class EventView extends StatefulWidget {
 }
 
 class _EventViewState extends State<EventView> {
-	bool Function(Event)? filterFn;
+	bool Function(EnduranceEvent)? filterFn;
 
 	Widget header() =>
 		Card(
@@ -37,6 +37,7 @@ class _EventViewState extends State<EventView> {
 				onChanged: (value) =>
 					setState(() {
 						switch (value) {
+							case null:
 							case "all":
 								filterFn = null;
 								break;
@@ -44,7 +45,7 @@ class _EventViewState extends State<EventView> {
 								filterFn = adminOnly;
 								break;
 							default:
-								unimpl(); // todo for each equipage (requires event.affectsEquipage)
+								filterFn = (e) => e.affectsEquipage(int.parse(value!));
 						}
 					}),
 			),

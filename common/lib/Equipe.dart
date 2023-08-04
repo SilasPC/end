@@ -41,7 +41,7 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 			try {
 				var id = cl["class_sections"][0]["id"];
 				var catStartTime = UNIX_FUTURE;
-				var cat = Category(name, [Loop(int.parse(dist))], catStartTime);
+				var cat = Category(name, [Loop(int.parse(dist), 40)], catStartTime);  // todo: assummed 40 min breaks
 				List<Event<Model>> evs = [];
 
 				dynamic cls = await _loadJSON("api/v1/class_sections/$id");
@@ -84,7 +84,7 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 						}
 
 						if (loopDists != null && loopDists.isNotEmpty)
-							cat.loops = loopDists.map((d) => Loop(d)).toList();
+							cat.loops = loopDists.map((d) => Loop(d, 40)).toList(); // todo: assummed 40 min breaks
 						if (cat.distance() != int.parse(dist))
 							throw Exception("distance loop sum mismatch");
 						

@@ -1,4 +1,8 @@
 
+- timing gate time difference indicator
+   - item dividers?
+	- departure broken
+
 # First prototype
  - no time adjustment, just locking
  - no client state saving
@@ -18,4 +22,3 @@
  - Auto events
  - Peer to peer
  - Checkpoints
-

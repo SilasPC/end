@@ -21,7 +21,7 @@ Future<List<Event>> readCachedEvents() async {
 Future<void> main() async {
 
 	List<EnduranceEvent> evs =
-		jsonDecode(demoInitEvent(nowUNIX() + 300));
+		demoInitEvent(nowUNIX() + 300);
 		// await loadModelEvents(44178);
 		//await loadEventsFromFile("roddingeritten");
 	//evs.removeRange((evs.length / 2).floor(), evs.length);

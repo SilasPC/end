@@ -1,5 +1,13 @@
 
-String demoInitEvent(int startTime) => """
+import 'dart:convert';
+
+import 'package:common/Event.dart';
+import 'package:common/util.dart';
+
+List<EnduranceEvent> demoInitEvent(int startTime) =>
+	jlist_map(jsonDecode(_demoInitEvent(startTime)) as List, eventFromJSON);
+
+String _demoInitEvent(int startTime) => """
 [
 	{
 		"kind": "init",
@@ -13,7 +21,8 @@ String demoInitEvent(int startTime) => """
 					"name": "1km",
 					"loops": [
 						{
-							"distance": 1
+							"distance": 1,
+							"restTime": 3
 						}
 					],
 					"startTime": $startTime,
@@ -44,10 +53,12 @@ String demoInitEvent(int startTime) => """
 					"name": "2km",
 					"loops": [
 						{
-							"distance": 1
+							"distance": 1,
+							"restTime": 3
 						},
 						{
-							"distance": 1
+							"distance": 1,
+							"restTime": 3
 						}
 					],
 					"startTime": ${startTime+120},

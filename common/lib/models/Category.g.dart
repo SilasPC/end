@@ -8,10 +8,12 @@ part of 'Category.dart';
 
 Loop _$LoopFromJson(Map<String, dynamic> json) => Loop(
       json['distance'] as int,
+      json['restTime'] as int,
     );
 
 Map<String, dynamic> _$LoopToJson(Loop instance) => <String, dynamic>{
       'distance': instance.distance,
+      'restTime': instance.restTime,
     };
 
 Category _$CategoryFromJson(Map<String, dynamic> json) => Category(

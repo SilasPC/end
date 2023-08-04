@@ -13,6 +13,8 @@ part "Event.g.dart";
 
 abstract class EnduranceEvent extends Event<Model> {
 	EnduranceEvent(super.time, super.kind, super.author);
+
+	bool affectsEquipage(int eid);
 }
 
 EnduranceEvent eventFromJSON(JSON json) {
@@ -59,6 +61,8 @@ class InitEvent extends EnduranceEvent {
 		return false;
 	}
 
+	bool affectsEquipage(int eid) => false;
+
 	@override
 	String toString() => "Initializes model";
 
@@ -86,6 +90,8 @@ class DisqualifyEvent extends EnduranceEvent {
 		eq.status = EquipageStatus.DNF;
 		return true;
 	}
+
+	bool affectsEquipage(int eid) => eid == this.eid;
 
 	@override
 	String toString() => "Disqualifies $eid for '$reason'";
@@ -118,6 +124,8 @@ class ChangeCategoryEvent extends EnduranceEvent {
 		return true;
 	}
 
+	bool affectsEquipage(int eid) => eid == this.eid;
+
 	@override
 	String toString() => "Moves $eid to $category";
 
@@ -143,6 +151,8 @@ class RetireEvent extends EnduranceEvent {
 		eq.status = EquipageStatus.RETIRED;
 		return true;
 	}
+
+	bool affectsEquipage(int eid) => eid == this.eid;
 
 	@override
 	String toString() => "Retires $eid";
@@ -187,14 +197,15 @@ class ExamEvent extends EnduranceEvent {
 			if (p && eq.currentLoop! != eq.loops.length - 1) {
 				// next loop
 				var next = eq.currentLoop = eq.currentLoop! + 1;
-				// todo: assumes 40 minutes break
 				if (l.vet != null)
-					eq.loops[next].expDeparture = l.vet! + 40 * 60;
+					eq.loops[next].expDeparture = l.vet! + l.loop.restTime * 60;
 			}
 		}
 		eq.updateStatus();
 		return true;
 	}
+
+	bool affectsEquipage(int eid) => eid == this.eid;
 
 	@override
 	String toString() =>
@@ -229,6 +240,8 @@ class VetEvent extends EnduranceEvent {
 		return true;
 	}
 
+	bool affectsEquipage(int eid) => eid == this.eid;
+
 	@override
 	String toString() => "Registers vet for $eid loop ${loop+1}";
 
@@ -261,6 +274,8 @@ class ArrivalEvent extends EnduranceEvent {
 		return true;
 	}
 
+	bool affectsEquipage(int eid) => eid == this.eid;
+
 	@override
 	String toString() => "Registers arrival for $eid loop ${loop+1}";
 
@@ -290,6 +305,8 @@ class StartClearanceEvent extends EnduranceEvent {
 		}
 		return !fail;
 	}
+
+	bool affectsEquipage(int eid) => eids.contains(eid);
 
 	@override
 	String toString() => "Clears $eids for start";
@@ -321,6 +338,8 @@ class DepartureEvent extends EnduranceEvent {
 		eq.updateStatus();
 		return true;
 	}
+
+	bool affectsEquipage(int eid) => eid == this.eid;
 
 	@override
 	String toString() => "Registers departure for $eid loop ${loop+1}";

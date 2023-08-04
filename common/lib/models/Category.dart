@@ -9,7 +9,8 @@ part "Category.g.dart";
 @JsonSerializable()
 class Loop extends IJSON {
 	int distance;
-	Loop(this.distance);
+	int restTime;
+	Loop(this.distance, this.restTime);
 	JSON toJson() => _$LoopToJson(this);
 	factory Loop.fromJson(JSON json) =>
 		_$LoopFromJson(json);
