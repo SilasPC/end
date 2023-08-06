@@ -3,6 +3,8 @@ import 'dart:convert';
 
 typedef JSON = Map<String, dynamic>;
 
+typedef Predicate<T> = bool Function(T);
+
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());

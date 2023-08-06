@@ -113,7 +113,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 				return DefaultTabController(
-					length: 3 + model.model.categories.length,
+					length: 4 + model.model.categories.length,
 					child: Scaffold(
 							appBar: AppBar(
 								actions: const [ConnectionIndicator()],

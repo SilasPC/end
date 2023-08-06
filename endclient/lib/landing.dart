@@ -1,12 +1,10 @@
 
-import 'package:common/Equipe.dart';
-import 'package:esys_client/admin.dart';
-import 'package:esys_client/util/connection_indicator.dart';
-import 'package:esys_client/util/input_modals.dart';
+import 'admin.dart';
+import 'gates/departure.dart';
+import 'util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'LocalModel.dart';
 import 'gates/arrival.dart';
-import 'gates/departure.dart';
 import 'gates/exam.dart';
 import 'gates/vet.dart';
 import 'secretary/secretary.dart';

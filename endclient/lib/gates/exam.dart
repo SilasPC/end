@@ -1,14 +1,12 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/gates/exam_data.dart';
-import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/gates/generic_gate.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:common/models/glob.dart';
-import 'package:provider/provider.dart';
 
-import '../LocalModel.dart';
 import '../equipage/equipage_tile.dart';
 
 class ExamPage extends StatefulWidget {
@@ -20,11 +18,15 @@ class ExamPage extends StatefulWidget {
 
 class _ExamPageState extends State<ExamPage> {
 
-	List<Widget> buildList(BuildContext context, List<Equipage> eqs)
-		=> ([...eqs /*just in case*/]
-			..sort(Equipage.byClassAndEid))
-			.where((eq) => eq.status == EquipageStatus.VET)
-			.map<Widget>((eq) {
+	@override
+	Widget build(BuildContext context) =>
+      GenericGate(
+         title: TextClock.withPrefix("Exam gate | "),
+         comparator: Equipage.byClassAndEid,
+         predicate: (eq) => eq.status == EquipageStatus.VET,
+         onSubmit: () async {}, // todo: make this unnescessary
+         submitDisabled: true,
+         builder: (eq, ok) { // todo: use ok
 				int? vet = eq.currentLoopData?.vet;
 
 				return EquipageTile(
@@ -37,30 +39,13 @@ class _ExamPageState extends State<ExamPage> {
 							onPressed: () =>
 								Navigator.push(
 									context,
-									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq))
+									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq),
+                              maintainState: false) // todo: should work differently
 								),
 						)
 					]
 				);
-			})
-			.toList();
-
-	@override
-	Widget build(BuildContext context) =>
-		Scaffold(
-			appBar: AppBar(
-				title: TextClock.withPrefix("Exam gate | "),
-				actions: const [ConnectionIndicator()],
-			),
-			body: Consumer<LocalModel>(
-				builder: (context, model, child) => 
-					ListView(
-						children: buildList(
-							context,
-							model.model.equipages.values.toList()
-						),
-					)
-			)
-		);
+			}
+      );
 
 }
