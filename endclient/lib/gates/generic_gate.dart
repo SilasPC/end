@@ -42,11 +42,17 @@ class _GenericGateState extends State<GenericGate> {
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 
+            // no custom hash impl, refresh to point to new objects
+            // representing the equipages for ptr hash/eq
+            // maybe use id instead (but what about widget.predicate /.comparator?)
+            equipages = equipages
+               .map((e) => model.model.equipages[e.eid]!) // todo: assummes no eid disappears
+               .toList();
+
 				Set<Equipage> newEquipages =
 					model.model.equipages.values
 						.where(widget.predicate)
 						.toSet();
-
 				
 				Set<Equipage> oldEquipages = equipages.toSet();
 
