@@ -17,7 +17,7 @@ class ConnectionIndicator extends StatelessWidget {
 					: IconButton(
 						color: Colors.amber,
 						onPressed: (){},
-						icon: const Icon(Icons.warning),
+						icon: const Icon(Icons.sync_problem),
 					)
 			);
 
