@@ -2,8 +2,7 @@
 import 'package:common/util.dart';
 import 'package:esys_client/gates/timing_list_gate.dart';
 import 'package:flutter/material.dart';
-import 'package:common/AbstractEventModel.dart';
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 
 import '../LocalModel.dart';
@@ -21,7 +20,7 @@ class VetPage extends StatelessWidget {
 					.where((e) => e.status == EquipageStatus.COOLING)
 					.toSet(),
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
-				List<Event> evs = [];
+				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {
 					evs.add(VetEvent(LocalModel.instance.author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop!));
 				}

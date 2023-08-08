@@ -50,7 +50,18 @@ void main() {
 
 		await c2.syncRemote();
 		expect(c2.model.result, "AXBZY1");
+
+		await c2.appendAndSync([], [EvId(15)]);
+		expect(c2.model.result, "ABZY1");
+		expect(s.model.result, "ABZY1");
+
+		await c1.syncRemote();
+		expect(c1.model.result, "ABZY1");
 	});
+}
+
+class EvId extends EventId {
+	EvId(int time): super(time, "author");
 }
 
 class StrEv extends Event<Model> {
@@ -101,8 +112,8 @@ class ClientModel extends AbstractEventModelWithRemoteSync<Model> {
 	Model $reviveModel(JSON json) => Model.fromJSON(json);
 
 	@override
-	Future<SyncResult<Model>> $doRemoteSync(SyncRequest a) async =>
-		server.sync(a.events, a.lastSync, a.newGen);
+	Future<SyncResult<Model>> $doRemoteSync(SyncRequest<Model> a) async =>
+		server.syncFromRequest(a);
 
 	@override
 	String toString() => "$gen, $events, $model";

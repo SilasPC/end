@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 import 'dart:math';
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/util.dart';
 import 'package:http/http.dart' as http;
 import 'AbstractEventModel.dart';

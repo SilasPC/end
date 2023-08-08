@@ -18,14 +18,20 @@ void main() {
 		test("is correct", () {
 			int i = binarySearch(list, (n) => n >= 4);
 			expect(i, 4);
+			int j = binarySearchLast(list, (n) => n < 4);
+			expect(j, 3);
 		});
 		test("all false", () {
-			int i = binarySearch(list, (n) => n >= 9);
+			int i = binarySearch(list, (_) => false);
 			expect(i, -1);
+			int j = binarySearchLast(list, (_) => false);
+			expect(j, -1);
 		});
 		test("all true", () {
-			int i = binarySearch(list, (n) => n >= 0);
+			int i = binarySearch(list, (_) => true);
 			expect(i, 0);
+			int j = binarySearchLast(list, (_) => true);
+			expect(j, list.length - 1);
 		});
 	});
 	test("unix convertions", () {

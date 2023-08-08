@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 typedef JSON = Map<String, dynamic>;
-
+typedef Reviver<T> = T Function(JSON);
 typedef Predicate<T> = bool Function(T);
 
 abstract class IJSON {
@@ -102,14 +102,21 @@ int binarySearch<T>(List<T> list, bool Function(T) p) {
 }
 
 /**
- * Like `binarySearch`, but returns the index of the first element
- * not matching the predicate.
+ * Like `binarySearch`, but returns the index of the last element
+ * matching the predicate.
 */
-// todo: not tested, probably incorrect on all true
-int binarySearchInv<T>(List<T> list, bool Function(T) p) {
-	int i = binarySearch(list, p);
-	if (i == -1) return 0; // all false
-	return i - 1;
+int binarySearchLast<T>(List<T> list, bool Function(T) p) {
+	if (list.isEmpty) return -1;
+	int low = 0, hgh = list.length - 1;
+	while (low < hgh) {
+		int mid = ((low+hgh)/2).ceil();
+		if (p(list[mid])) {
+			low = mid;
+		} else {
+			hgh = mid - 1;
+		}
+	}
+	return p(list[low]) ? low : -1;
 }
 
 List<T> reorder<T>(int i, int j, List<T> lst) {

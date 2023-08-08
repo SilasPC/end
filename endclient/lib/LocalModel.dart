@@ -1,5 +1,7 @@
+
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:flutter/widgets.dart';
@@ -43,7 +45,7 @@ class LocalModel
 			return _instance!;
 		}
 		
-		List<Event> evs = [];
+		List<EnduranceEvent> evs = [];
 		LocalModel model = LocalModel._(Model(), evs);
 		model._initSocket();
 		
@@ -73,7 +75,7 @@ class LocalModel
 
 		socket.on("push", (json) {
 			// print("push $json");
-			acceptPush(SyncPush.fromJSON(json));
+			acceptPush(SyncPush.fromJson(json));
 		});
 		
 	}

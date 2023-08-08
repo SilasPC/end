@@ -9,7 +9,7 @@ import 'models/glob.dart';
 // MUST RUN REPLACE ON PART AFTER BUILD:
 // replace		<String, dynamic>\{\n(\s+)
 // with			$0'kind': instance.kind,\n$1
-part "Event.g.dart";
+part 'EnduranceEvent.g.dart';
 
 abstract class EnduranceEvent extends Event<Model> {
 	EnduranceEvent(super.time, super.kind, super.author);

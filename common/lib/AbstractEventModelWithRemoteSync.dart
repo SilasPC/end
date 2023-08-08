@@ -1,48 +1,52 @@
 
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 
 import 'AbstractEventModel.dart';
 import 'util.dart';
 
-class SyncRequest extends IJSON {
+class SyncRequest<M extends IJSON> extends IJSON {
+	/** Deletes to be pushed */
+	final List<EventId> deletes;
 	/** Events to be pushed */
-	final List<Event> events;
+	final List<Event<M>> events;
 	/** The current local generation */
 	final int newGen;
 	/** Info about last sync */
 	final SyncInfo lastSync;
-	SyncRequest(this.lastSync, this.newGen, this.events);
+	SyncRequest(this.lastSync, this.newGen, this.events, this.deletes);
 	
 	@override
-	Map<String, dynamic> toJson() => {
+	JSON toJson() => {
 		"events": listj(events),
+		"deletes": listj(deletes),
 		"newGen": newGen,
 		"lastSync": lastSync.toJson(),
 	};
 
-	SyncRequest.fromJSON(Map<String, dynamic> json) :
-		events = jlist_map(json["events"], eventFromJSON),
+	SyncRequest.fromJSON(JSON json) :
+		deletes = jlist_map(json["deletes"], EventId.fromJson),
+		events = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>),
 		newGen = json["newGen"],
-		lastSync = SyncInfo.fromJSON(json["lastSync"]);
+		lastSync = SyncInfo.fromJson(json["lastSync"]);
 		
 }
 
 // sync to a remote model
 abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends AbstractEventModel<M> {
 
-	AbstractEventModelWithRemoteSync(M model, List<Event> events) :
+	AbstractEventModelWithRemoteSync(M model, List<Event<M>> events) :
 		super(model, events);
 
-	AbstractEventModelWithRemoteSync._withBase(super.model) : super.withBase();
+	Future<SyncResult<M>> $doRemoteSync(SyncRequest<M> req);
 
-	Future<SyncResult<M>> $doRemoteSync(SyncRequest req);
-
-	SyncInfo lastSync = SyncInfo(0, 0);
-	List<Event> _unsyncedEvents = [];
+	SyncInfo lastSync = SyncInfo.zero();
+	List<Event<M>> _unsyncedEvents = [];
+	List<EventId> _unsyncedDeletes = [];
 
 	Future<void> syncRemote() async {
-		SyncRequest ra = SyncRequest(lastSync, gen, _unsyncedEvents);
+		SyncRequest<M> ra = SyncRequest(lastSync, gen, _unsyncedEvents, _unsyncedDeletes);
 		_unsyncedEvents = [];
+		_unsyncedDeletes = [];
 		try {
 			SyncResult<M> res = await $doRemoteSync(ra);
 			model = res.model ?? model;
@@ -53,10 +57,11 @@ abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends Abstrac
 			if (gen < res.newGen) {
 				gen = res.newGen;
 			}
-			lastSync = SyncInfo(gen, events.length);
+			lastSync = SyncInfo(gen, events.length, deletes.length);
 			$onUpdate();
 		} catch (e) {
 			_unsyncedEvents = ra.events..addAll(_unsyncedEvents);
+			_unsyncedDeletes = ra.deletes..addAll(_unsyncedDeletes);
 			restoreFromLatestSavepoint(); // in case of corruption
 			rethrow;
 		}
@@ -71,7 +76,7 @@ abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends Abstrac
 	 * 	`events`	= ABCDEFGH
 	 * The index of D is returned.
 	 */
-	int _replaceEvents(List<Event> evs) {
+	int _replaceEvents(List<Event<M>> evs) {
 		// replace all elements after evs.first
 		int i = binarySearch(events, (e) => e.time >= evs.first.time);
 		if (i != -1) {
@@ -81,12 +86,19 @@ abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends Abstrac
 		return i;
 	}
 
-	void addNoSync(List<Event> evs) {
+	void addNoSync(List<Event<M>> evs) {
 		_unsyncedEvents.addAll(evs);
 		addEvents(evs);
 	}
 
-	Future<void> addAndSync(List<Event> evs) async {
+	Future<void> appendAndSync(List<Event<M>> evs, List<EventId> dlts) async {
+		_unsyncedEvents.addAll(evs);
+		_unsyncedDeletes.addAll(dlts);
+		append(evs, dlts);
+		return syncRemote();
+	}
+
+	Future<void> addAndSync(List<Event<M>> evs) async {
 		_unsyncedEvents.addAll(evs);
 		addEvents(evs);
 		return syncRemote();
@@ -96,7 +108,7 @@ abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends Abstrac
 		_unsyncedEvents.clear();
 		events.clear();
 		gen = 0;
-		lastSync = SyncInfo(0, 0);
+		lastSync = SyncInfo.zero();
 		savepoints.removeRange(1, savepoints.length);
 		restoreFromLatestSavepoint();
 		return syncRemote();

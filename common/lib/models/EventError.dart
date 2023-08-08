@@ -2,7 +2,7 @@
 // todo: not unique id
 import 'package:json_annotation/json_annotation.dart';
 
-import '../Event.dart';
+import '../EnduranceEvent.dart';
 import '../util.dart';
 
 part "EventError.g.dart";

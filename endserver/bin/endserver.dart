@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
 import 'package:common/AbstractEventModel.dart';
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
@@ -43,7 +43,7 @@ Future<void> main() async {
 			var json = dataList.first;
 			var ack = dataList.last;
 			print('\nsync $json');
-			SyncRequest sr = SyncRequest.fromJSON(jsonDecode(json));
+			SyncRequest<Model> sr = SyncRequest.fromJSON(jsonDecode(json));
 			SyncResult<Model> res = em.syncFromRequest(sr);
 			ack(res.toJsonString());
 			client.broadcast.emit('push', SyncPush(em.gen, sr.events).toJson());

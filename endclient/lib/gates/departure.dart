@@ -1,6 +1,5 @@
 
-import 'package:common/AbstractEventModel.dart';
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/gates/generic_gate.dart';
@@ -26,7 +25,7 @@ class _DeparturePageState extends State<DeparturePage> {
 
 	Future<void> submit(BuildContext ctx) async {
 		LocalModel m = Provider.of(ctx, listen: false);
-		List<Event> evs = timers.entries
+		List<EnduranceEvent> evs = timers.entries
 			.map((kv) => DepartureEvent(LocalModel.instance.author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]!.currentLoop!))
 			.toList();
 		await m.addAndSync(evs);

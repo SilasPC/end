@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 
-import 'package:common/Event.dart';
+import 'package:common/EnduranceEvent.dart';
 import 'package:common/util.dart';
 
 List<EnduranceEvent> demoInitEvent(int startTime) =>
