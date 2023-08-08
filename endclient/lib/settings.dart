@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'LocalModel.dart';
+
 class SettingsPage extends StatelessWidget {
 
    const SettingsPage({super.key});
@@ -12,13 +14,21 @@ class SettingsPage extends StatelessWidget {
             title: const Text("Settings"),
          ),
          body: ListView(
-            children: const [
+            children: [
                ListTile(
-                  title: Text("Reset model"),
+                  title: const Text("Reset local model"),
+						onTap: () => LocalModel.instance.resetAndSync(),
+               ),
+					ListTile(
+                  title: const Text("Reset remote model"),
+						onTap: () {}
                ),
                ListTile(
                   title: TextField(
-                     
+							decoration: const InputDecoration(
+								label: Text("Server address"),
+							),
+                     controller: TextEditingController(text: "kastanie.ddns.net:3000"),
                   )
                ),
             ],

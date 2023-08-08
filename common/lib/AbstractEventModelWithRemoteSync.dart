@@ -92,4 +92,14 @@ abstract class AbstractEventModelWithRemoteSync<M extends IJSON> extends Abstrac
 		return syncRemote();
 	}
 
+	Future<void> resetAndSync() async {
+		_unsyncedEvents.clear();
+		events.clear();
+		gen = 0;
+		lastSync = SyncInfo(0, 0);
+		savepoints.removeRange(1, savepoints.length);
+		restoreFromLatestSavepoint();
+		return syncRemote();
+	}
+
 }

@@ -17,6 +17,7 @@ class EquipageTile extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) => 
 		GestureDetector(
+			behavior: HitTestBehavior.opaque,
 			onTap: onTap,
 			onLongPress: onLongPress,
 			child: Container(

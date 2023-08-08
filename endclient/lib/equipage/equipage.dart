@@ -79,7 +79,7 @@ class EquipagePageState extends State<EquipagePage> {
 						aspectRatio: 3,
 						child: Row(
 							children: [
-								txtCol([maybe(ld.departure, unixHMS) ?? "-","Departure"]),
+								txtCol([maybe(ld.expDeparture, unixHMS) ?? "-","Departure"]),
 								txtCol([maybe(ld.arrival, unixHMS) ?? "-","Arrival"]),
 								txtCol([maybe(ld.vet, unixHMS) ?? "-","Vet"]),
 							].map(wrapTxtCol).toList(),
