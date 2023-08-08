@@ -9,6 +9,7 @@ class TimerList {
 	
 	void addNow() {
 		DateTime now = DateTime.now();
+		now = now.subtract(Duration(milliseconds: now.millisecond));
 		if (times.isNotEmpty) {
 			int milliMin = times.last.millisecondsSinceEpoch + 1000;
 			if (now.millisecondsSinceEpoch < milliMin) {

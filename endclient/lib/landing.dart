@@ -1,7 +1,6 @@
 
 import 'package:esys_client/settings.dart';
 
-import 'admin.dart';
 import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ class LandingPage extends StatefulWidget {
 class LandingPageState extends State<LandingPage> {
 
 	static const List<Text> buttons = [
-		Text("Admin"),
 		Text("Secretary"),
 		Text("Departure"),
 		Text("Exam"),
@@ -30,7 +28,6 @@ class LandingPageState extends State<LandingPage> {
 		Text("Settings"),
 	];
 	static const List<Widget> pages = [
-		AdminPage(),
 		SecretaryPage(),
 		DeparturePage(),
 		ExamPage(),

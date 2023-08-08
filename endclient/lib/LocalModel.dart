@@ -9,13 +9,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-const String serverUri = "http://localhost:3000";
 const bool clientModelOnly = false;
 
 class LocalModel
 	extends AbstractEventModelWithRemoteSync<Model>
 	with ChangeNotifier
 {
+
+	String _socketAddress = "http://localhost:3000";
+
+	String get socketAddress => _socketAddress;
+	set socketAddress(val) {
+		if (val == _socketAddress) return;
+		_socketAddress = val;
+		_initSocket();
+	}
 
    String _author = "default";
    String get author => _author;
@@ -35,52 +43,49 @@ class LocalModel
 			return _instance!;
 		}
 		
-		io.Socket socket = io.io(
-			serverUri,
-			io.OptionBuilder()
-				.setTransports(["websocket"])
-				//.disableAutoConnect()
-				.build()
-		);
-
 		List<Event> evs = [];
-		LocalModel model = LocalModel._(socket, Model(), evs);
-
-		socket.onConnectError((data) => print(data));
-		socket.onConnectTimeout((data) => print(data));
-		socket.onConnecting((data) => print(data));
-
-		socket.onDisconnect((_) {
-			print("disconnected");
-			model.connection.value = false;
-		});
-
-		socket.on("push", (json) {
-			print("push $json");
-			model.acceptPush(SyncPush.fromJSON(json));
-		});
-
-		socket.onConnect((_) {
-			print("connected");
-			model.connection.value = true;
-			model.syncRemote();
-		});
-		
-		/* if (!clientModelOnly)
-			socket.connect(); */
+		LocalModel model = LocalModel._(Model(), evs);
+		model._initSocket();
 		
 		_instance = model;
 		return model;
 	}
 
-	final io.Socket _socket;
+	void _initSocket() {
+		_socket?.close();
+		io.Socket socket = _socket = io.io(
+			_socketAddress,
+			io.OptionBuilder()
+				.setTransports(["websocket"])
+				.build()
+		);
+		/* socket.onConnectError((data) => print(data));
+		socket.onConnectTimeout((data) => print(data));
+		socket.onConnecting((data) => print(data)); */
 
-	LocalModel._(this._socket, super.model, super.events);
+		socket.onConnect((_) {
+			connection.value = true;
+			syncRemote();
+		});
+		socket.onDisconnect((_) {
+			connection.value = false;
+		});
+
+		socket.on("push", (json) {
+			// print("push $json");
+			acceptPush(SyncPush.fromJSON(json));
+		});
+		
+	}
+
+	io.Socket? _socket;
+
+	LocalModel._(super.model, super.events);
 
 	@override
 	Future<SyncResult<Model>> $doRemoteSync(SyncRequest req) {
 		Completer<SyncResult<Model>> c = Completer();
-		_socket.emitWithAck("sync", req.toJsonString(), ack: (json) {
+		_socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
 			c.complete(SyncResult.fromJSON(jsonDecode(json), Model.fromJson));
 		});
 		return c.future;

@@ -109,7 +109,7 @@ class Equipage extends IJSON {
 			return eid - eq.eid;
 		var l = loops[currentLoop!];
 		var eql = eq.loops[currentLoop!];
-		if (l.vet != eql.vet && currentLoop! != eq.loops.length)
+		if (l.vet != eql.vet && currentLoop! != eq.loops.length-1)
 			// first vet time, unless final loop
 			return (l.vet ?? UNIX_FUTURE) - (eql.vet ?? UNIX_FUTURE);
 		if (l.arrival != eql.arrival)

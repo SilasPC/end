@@ -80,7 +80,7 @@ class _TimingListGateState extends State<TimingListGate> {
 						children: [
 							for (Equipage eq in equipages)
 							Padding(
-								key: ValueKey(eq.eid),
+								key: ValueKey("EID${eq.eid}"),
 								padding: const EdgeInsets.only(right: 24),
 								child: EquipageTile(
 									eq,
