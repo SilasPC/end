@@ -33,11 +33,10 @@ class CategoryViewState extends State<CategoryView> {
 					child: Column(
 						children: [
 							Card(
-								color: const Color.fromARGB(255, 228, 190, 53),
 								child: Column(
 									children: [
-										cardHeader("${widget.cat.name} ${widget.cat.distance()}km"),
-										const Divider(),
+										cardHeader(context, "${widget.cat.name} ${widget.cat.distance()}km", color: const Color.fromARGB(255, 98, 85, 115)),
+										const SizedBox(height: 7,),
 										Text("Loops: ${widget.cat.loops.map((l) => l.distance).join(", ")}"),
 										const SizedBox(height: 7,)
 									],

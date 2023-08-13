@@ -37,8 +37,8 @@ class SecretaryPageState extends State<SecretaryPage> {
 			child: Card(
 				child: Column(
 					children: [
-						cardHeader("${cat.name} ${cat.distance()}km"),
-						const Divider(),
+						cardHeader(context, "${cat.name} ${cat.distance()}km", color: const Color.fromARGB(255, 146, 119, 68)),
+						
 						Container(
 							padding: const EdgeInsets.all(10),
 							child: Row(
@@ -57,11 +57,10 @@ class SecretaryPageState extends State<SecretaryPage> {
 
 	Widget headerCard(String rideName) =>
 		Card(
-			//color: const Color.fromARGB(255, 228, 190, 53),
+			color: const Color.fromARGB(255, 98, 85, 115),
 			child: Column(
 				children: [
-					cardHeader(rideName),
-					const Divider(),
+					cardHeader(context, rideName),
 					/*Row(
 						mainAxisAlignment: MainAxisAlignment.end,
 						children: [

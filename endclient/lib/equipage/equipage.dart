@@ -1,4 +1,5 @@
 
+import 'package:esys_client/util/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:common/models/glob.dart';
@@ -21,18 +22,29 @@ class EquipagePageState extends State<EquipagePage> {
 			appBar: AppBar(
 				title: const Text("Equipage"),
 			),
+			bottomNavigationBar: bottomBar(),
 			body: Container(
 				padding: const EdgeInsets.all(10),
 				child: ListView(
 					children: [
 						Card(
-							child: EquipageTile(widget.equipage),
+							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 228, 190, 53)),
 						),
 						...loopCards(),
 					],
 				)
 			)
 		);
+
+	Widget? bottomBar() {
+		if (widget.equipage.status != EquipageStatus.COOLING) {
+			return null;
+		}
+		int target = widget.equipage.currentLoopData!.arrival! + 20*60; // todo: may change?
+		return BottomAppBar(
+			child: CountingTimer(target: fromUNIX(target)),
+		);
+	}
 	
 	List<Widget> loopCards() {
 		var lps = widget.equipage.loops;
@@ -51,6 +63,7 @@ class EquipagePageState extends State<EquipagePage> {
 					Container(
 						padding: const EdgeInsets.symmetric(horizontal: 10),
 						decoration: BoxDecoration(
+							color: const Color.fromARGB(255, 98, 85, 115),
 							border: Border.all(
 								color: Colors.black54,
 								width: 0.3,

@@ -2,6 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "client windows",
+			"cwd": "endclient",
+			"request": "launch",
+			"type": "dart",
+			"args": ["-d", "win"]
+		},
+		{
 			"name": "client",
 			"cwd": "endclient",
 			"request": "launch",

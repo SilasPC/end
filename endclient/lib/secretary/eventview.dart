@@ -17,7 +17,7 @@ class EventView extends StatefulWidget {
 class _EventViewState extends State<EventView> {
 
 	String filterType = "all";
-	bool Function(EnduranceEvent)? filterFn;
+	bool Function(Event<Model>)? filterFn;
 
 	Widget header() =>
 		Card(
@@ -32,10 +32,10 @@ class _EventViewState extends State<EventView> {
 						value: "admin",
 						child: Text("Administration"),
 					),
-					for (var eid in LocalModel.instance.model.equipages.values)
+					for (var eq in LocalModel.instance.model.equipages.values)
 					DropdownMenuItem(
-						value: "$eid",
-						child: Text("$eid"),
+						value: "${eq.eid}",
+						child: Text("${eq.eid} ${eq.rider}", overflow: TextOverflow.fade,),
 					),
 				],
 				onChanged: (value) =>
@@ -50,8 +50,9 @@ class _EventViewState extends State<EventView> {
 								filterFn = adminOnly;
 								break;
 							default:
+
 								int eid = int.parse(value!);
-								filterFn = (e) => e.affectsEquipage(eid);
+								filterFn = (e) => (e as EnduranceEvent).affectsEquipage(eid);
 						}
 					}),
 			),
@@ -67,19 +68,20 @@ class _EventViewState extends State<EventView> {
 					errs[err.causedBy] = err;
 				}
 
+				var evs = filterFn != null ? value.events.where(filterFn!).toList() : value.events;
+
 				return Container(
 					padding: const EdgeInsets.all(10),
 					child: Column(
 						children: [
-							// header(), // todo: filtering requires iterated builder
+							header(),
 							Expanded(
 								child: Card(
-									child: ListView.builder(
-										itemCount: value.events.length * 2,
+									child: ListView.separated(
+										itemCount: evs.length,
+										separatorBuilder: (context, _) => const Divider(),
 										itemBuilder: (context, i) {
-											if (i % 2 == 1) return const Divider();
-											List<Event> evs = LocalModel.instance.events;
-											Event e = evs[evs.length-1-(i/2).floor()];
+											Event e = evs[evs.length - 1 - i];
 											EventId id = e.id();
 											var err = errs[id];
 											bool deleted = value.deletes.contains(id);

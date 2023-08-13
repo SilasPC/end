@@ -35,12 +35,13 @@ class _ExamPageState extends State<ExamPage> {
 						CountingTimer(target: fromUNIX(vet), countUp: true),
 						IconButton(
 							icon: const Icon(Icons.send, color: Colors.deepOrange),
-							onPressed: () =>
-								Navigator.push(
+							onPressed: () async {
+								await Navigator.push(
 									context,
-									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq),
-                              maintainState: false) // todo: should work differently
-								),
+									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq))
+								);
+								setState(() {});
+							}
 						)
 					]
 				);

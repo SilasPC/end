@@ -22,6 +22,7 @@ dependencies:
   provider: ^6.0.4
   numberpicker: ^2.1.2
   bottom_drawer: ^0.0.5
+  locally: ^1.0.5
 
 dev_dependencies:
   flutter_test:

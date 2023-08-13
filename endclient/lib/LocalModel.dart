@@ -15,7 +15,7 @@ class LocalModel
 	with ChangeNotifier
 {
 
-	String _socketAddress = "http://localhost:3000";
+	String _socketAddress = "http://192.168.8.101:3000";
 
 	String get socketAddress => _socketAddress;
 	set socketAddress(val) {

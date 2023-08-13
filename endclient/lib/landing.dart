@@ -1,5 +1,6 @@
 
 import 'package:esys_client/settings.dart';
+import 'package:locally/locally.dart';
 
 import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
@@ -64,12 +65,12 @@ class LandingPageState extends State<LandingPage> {
 						),
 						ElevatedButton(
 							onPressed: () {
-								/* Locally(
+								Locally(
 									context: context,
 									pageRoute: MaterialPageRoute(builder: (_) => const LandingPage(),),
 									payload: "wutisdis",
-									appIcon: "",
-								).show(title: "I am a title", message: "I am a message"); */
+									appIcon: "mipmap/ic_launcher",
+								).show(title: "I am a title", message: "I am a message");
 							},
 							child: const Text("Notification"),
 						),

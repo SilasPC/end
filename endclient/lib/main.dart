@@ -7,7 +7,7 @@ import 'LocalModel.dart';
 
 Future<void> main() async {
 	var m = LocalModel.instance;
-   SharedPreferences.getInstance()
+   SharedPreferences.getInstance() // todo: move inside runApp
       .then((sp) {
          m.author = sp.getString("author") ?? m.author;
       });
@@ -38,4 +38,3 @@ class MyApp extends StatelessWidget {
 		);
 	}
 }
-

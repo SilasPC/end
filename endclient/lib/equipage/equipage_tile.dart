@@ -11,8 +11,9 @@ class EquipageTile extends StatelessWidget {
 	final Equipage equipage;
 	final Widget? leading;
 	final List<Widget> trailing;
+	final Color? color;
 
-	const EquipageTile(this.equipage, {super.key, this.onTap, this.onLongPress, this.leading, this.trailing = const []});
+	const EquipageTile(this.equipage, {super.key, this.onTap, this.onLongPress, this.leading, this.trailing = const [], this.color});
 
 	@override
 	Widget build(BuildContext context) => 
@@ -21,6 +22,7 @@ class EquipageTile extends StatelessWidget {
 			onTap: onTap,
 			onLongPress: onLongPress,
 			child: Container(
+				color: color,
 				padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
 				height: EquipageTile.height,
 				child: Row(
