@@ -54,7 +54,7 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 			try {
 				var id = cl["class_sections"][0]["id"];
 				var catStartTime = UNIX_FUTURE;
-				var cat = Category(name, [], catStartTime);  // todo: assummed 40 min breaks
+				var cat = Category(name, [], catStartTime);
 				List<Event<Model>> evs = [];
 
 				dynamic cls = await _loadJSON("api/v1/class_sections/$id");

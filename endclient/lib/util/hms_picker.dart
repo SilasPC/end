@@ -12,19 +12,19 @@ class HmsPicker extends StatefulWidget {
 	const HmsPicker({super.key, required this.dateTime, required this.onAccept});
 
 	@override
-	HmsPickerState createState() => HmsPickerState(dateTime, onAccept);
+	HmsPickerState createState() => HmsPickerState();
 
 }
 
 class HmsPickerState extends State<HmsPicker> {
 
-	int h,m,s;
-	void Function(DateTime) onAccept;
+	late int h,m,s;
 
-	HmsPickerState(DateTime dt, this.onAccept):
-		h = dt.hour,
-		m = dt.minute,
-		s = dt.second;
+	HmsPickerState() {
+		h = widget.dateTime.hour;
+		m = widget.dateTime.minute;
+		s = widget.dateTime.second;
+	}
 
 	@override
 	Widget build(BuildContext context) =>
@@ -59,8 +59,8 @@ class HmsPickerState extends State<HmsPicker> {
 					mainAxisAlignment: MainAxisAlignment.center,
 					children: [
 						ElevatedButton(
-							child: Text("OK"),
-							onPressed: () => onAccept(fromHMS(h,m,s)),
+							child: const Text("OK"),
+							onPressed: () => widget.onAccept(fromHMS(h,m,s)),
 						)
 					],
 				)

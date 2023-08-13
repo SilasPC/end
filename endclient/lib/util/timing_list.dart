@@ -51,7 +51,6 @@ class TimingList extends StatelessWidget {
 												}
 											);
 										},
-										// key: ValueKey(timers[i].millisecondsSinceEpoch), // todo: needs key?
 										title: i == 0
 											? Text(toHMS(timers[i]))
 											: Text("${toHMS(timers[i])}\n(${unixDifToMS((timers[i].millisecondsSinceEpoch-timers[i-1].millisecondsSinceEpoch)~/1000, true)})")

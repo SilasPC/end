@@ -178,13 +178,8 @@ abstract class AbstractEventModel<M extends IJSON> {
 	}
 
 	void killSavepointsAfter(int t) {
-		for (int i = savepoints.length - 1; i >= 0; i--) {
-			// todo: binary search
-			if (savepoints[i].newestEventTime < t) {
-				savepoints.removeRange(i + 1, savepoints.length);
-				break;
-			}
-		}
+		int i = binarySearchLast(savepoints, (sp) => sp.newestEventTime < t);
+		savepoints.removeRange(i + 1, savepoints.length);
 	}
 
 	void restoreFromLatestSavepoint() {
