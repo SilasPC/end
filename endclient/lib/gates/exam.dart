@@ -24,8 +24,7 @@ class _ExamPageState extends State<ExamPage> {
          title: TextClock.withPrefix("Exam gate | "),
          comparator: Equipage.byClassAndEid,
          predicate: (eq) => eq.status == EquipageStatus.VET,
-         onSubmit: () async {}, // todo: make this unnescessary
-         submitDisabled: true,
+         onSubmit: null,
          builder: (eq, ok) { // todo: use ok
 				int? vet = eq.currentLoopData?.vet;
 

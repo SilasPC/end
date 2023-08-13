@@ -43,15 +43,10 @@ class SubmitButtonState extends State<SubmitButton> {
 				child: const Icon(Icons.update),
 			);
 		}
-		if (widget.disabled) {
-			return Container(
-				padding: const EdgeInsets.all(8),
-				child: const Icon(Icons.clear),
-			);
-		}
 		return IconButton(
-			onPressed: onPressed,
+			onPressed: widget.disabled ? null : onPressed,
 			icon: const Icon(Icons.send),
+			color: Colors.green,
 		);
 	}
 }

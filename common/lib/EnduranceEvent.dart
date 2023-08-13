@@ -67,7 +67,7 @@ class InitEvent extends EnduranceEvent {
 	@override
 	bool safeBuild(AbstractEventModel<Model> m) {
 		if (m.events.first == this) {
-			m.model = model;
+			m.model = model.clone();
 			return true;
 		}
 		return false;
@@ -346,6 +346,9 @@ class DepartureEvent extends EnduranceEvent {
 			return false;
 		}
 		var l = eq.loops[loop];
+		if (time - l.expDeparture! > 15 * 60) {
+			m.model.warnings.add(EventError.of("$eid late departure", this));
+		}
 		l.departure = time;
 		eq.updateStatus();
 		return true;

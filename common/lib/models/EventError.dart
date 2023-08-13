@@ -3,28 +3,10 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../EnduranceEvent.dart';
+import '../event_model/Event.dart';
 import '../util.dart';
 
 part "EventError.g.dart";
-
-@JsonSerializable()
-class EventId extends IJSON {
-
-	EventId(this.time, this.author);
-	EventId.of(EnduranceEvent ev):
-		time = ev.time,
-		author = ev.author;
-
-	final int time;
-	final String author;
-
-	String toString() => "$author:$time";
-
-	JSON toJson() => _$EventIdToJson(this);
-	factory EventId.fromJson(JSON json) =>
-		_$EventIdFromJson(json);
-
-}
 
 // todo: make enum of errors
 @JsonSerializable()

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/EnduranceEvent.dart';
+import 'package:common/Equipe.dart' as equipe;
 import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
@@ -13,22 +14,20 @@ late EventModel em;
 late Server io;
 File backupFile = File("../backup.events.json");
 
-Future<List<Event>> readCachedEvents() async {
+Future<List<Event<Model>>> readCachedEvents() async {
 	var json = jsonDecode(await backupFile.readAsString());
 	return jlist_map(json, eventFromJSON);
 }
 
 Future<void> main() async {
 
-	List<EnduranceEvent> evs =
-		demoInitEvent(nowUNIX() + 300);
-		// await loadModelEvents(44178);
+	List<Event<Model>> evs =
+		await readCachedEvents();
+		//demoInitEvent(nowUNIX() + 300);
+		//await equipe.loadModelEvents(44178);
 		//await loadEventsFromFile("roddingeritten");
+	
 	//evs.removeRange((evs.length / 2).floor(), evs.length);
-
-	//List<Event> evs = await readCachedEvents();
-	//await loadEventsFromFile("roddingeritten");
-	//evs = evs.reversed.toList();
 
 	em = EventModel.withBase(Model());
 	em.addEvents(evs);

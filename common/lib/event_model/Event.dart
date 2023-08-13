@@ -1,5 +1,4 @@
 
-import 'package:common/EnduranceEvent.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../util.dart';
 import 'AbstractEventModel.dart';
@@ -10,9 +9,12 @@ abstract class Event<M extends IJSON> extends IJSON implements Comparable<Event<
 	final String kind;
 	final int time;
 	final String author;
+
 	Event(this.time, this.kind, this.author);
+
 	bool build(AbstractEventModel<M> m);
 
+	EventId id() => EventId.of(this);
 	int compareTo(Event<M> rhs) {
 		int i = time - rhs.time;
 		if (i == 0) i = kind.compareTo(rhs.kind);

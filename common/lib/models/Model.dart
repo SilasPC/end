@@ -1,6 +1,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'dart:convert';
 import '../util.dart';
 import 'glob.dart';
 
@@ -57,6 +58,8 @@ class Model extends IJSON {
 		}
 		return m;
 	}
+
+	Model clone() => Model.fromJson(jsonDecode(jsonEncode(toJson())));
 
 	String toResultCSV() {
 		List<String> lines = [];

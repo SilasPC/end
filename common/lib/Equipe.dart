@@ -31,24 +31,37 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 	Model m = Model();
 	List<Event<Model>> mevs = [InitEvent("equipe", m)];
 	m.rideName = schd["display_name"];
+
+	var days = [schd];
+	if ((schd as JSON).containsKey("days")) {
+		days = schd["days"];
+	}
 	
-	for (var day in schd["days"]) {
+	for (var day in days) {
 		for (var cl in day["meeting_classes"]) {
-			String? dist = rgx.firstMatch(cl["name"])?[1];
+			String? distStr = rgx.firstMatch(cl["name"])?[1];
+			if (distStr == null) continue;
+			int dist = int.parse(distStr);
 			String name = rgx2.firstMatch(cl["name"])?[0] ?? cl["name"];
-			if (dist == null)
-				continue;
+
+			if (m.categories.containsKey(name)) {
+				int i = 1;
+				while (m.categories.containsKey("$name $i")) {
+					i++;
+				}
+				name = "$name $i";
+			}
 			try {
 				var id = cl["class_sections"][0]["id"];
 				var catStartTime = UNIX_FUTURE;
-				var cat = Category(name, [Loop(int.parse(dist), 40)], catStartTime);  // todo: assummed 40 min breaks
+				var cat = Category(name, [], catStartTime);  // todo: assummed 40 min breaks
 				List<Event<Model>> evs = [];
 
 				dynamic cls = await _loadJSON("api/v1/class_sections/$id");
 				for (var eq in cls["starts"]) {
 					var eid = int.parse(eq["start_no"]);
 					Equipage e = Equipage(
-						int.parse(eq["start_no"]),
+						eid,
 						eq["rider_name"],
 						eq["horse_name"],
 						cat
@@ -58,45 +71,70 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 					try {
 						int loop = 0;
 						List<int>? loopDists = [];
-						for (var res in eq["results"]) {
-							if (res["type"] != "Endurance") break;
+						List results = eq["results"] as List;
+						bool dsqPreExam = true;
+						bool retirePreExam = results[0]["reason"] == "RET";
+						if (!retirePreExam) {
+							for (int i = 0; i < results.length; i++) {
+								var res = results[i];
+								if (res["type"] != "Endurance") break;
+								bool passed = results[i]["reason"] == null;
+								bool retire = results[i+1]["reason"] == "RET";
 
-							loopDists?.add(double.parse(res["distance"]).floor());
-							if (res["start_time"] == null) break;
-							var expDep = hmsToUNIX(res["start_time"]);
-							catStartTime = min(catStartTime, expDep);
-							evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
+								loopDists?.add(double.parse(res["distance"]).floor());
+								if (res["start_time"] == null) break;
+								var expDep = hmsToUNIX(res["start_time"]);
+								catStartTime = min(catStartTime, expDep);
 
-							if (res["arrival"] == null) continue;
-							evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
+								if (res["arrival"] == null) break;
+								dsqPreExam = false;
+								evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
+								evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
 
-							if (res["pulse_time"] == null) continue;
-							var vetTime = hmsToUNIX(res["pulse_time"]);
-							evs.add(VetEvent("equipe", vetTime, eid, loop));
-							var vetdata = VetData(
-								!res.containsKey("reason")
-							)..hr1 = res["pulse"];
+								if (res["pulse_time"] == null) break;
+								var vetTime = hmsToUNIX(res["pulse_time"]);
+								evs.add(VetEvent("equipe", vetTime, eid, loop));
+								var vetdata = VetData(
+									passed
+								)..hr1 = res["pulse"];
 
-							if (!vetdata.passed)
-								loopDists = null;
-							evs.add(ExamEvent("equipe", vetTime + 60, eid, vetdata, loop));
-							loop++;
+								evs.add(ExamEvent("equipe", vetTime + 60, eid, vetdata, loop));
+								if (retire)
+									evs.add(RetireEvent("equipe", vetTime + 61, eid));
+								loop++;
+								if (!vetdata.passed || retire) {
+									loopDists = null;
+									break;
+								}
+							}
 						}
+						
+						evs.add(ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
+						if (retirePreExam)
+							evs.add(RetireEvent("equipe", hmsToUNIX("00:00:03"), eid));
 
-						if (loopDists != null && loopDists.isNotEmpty)
-							cat.loops = loopDists.map((d) => Loop(d, 40)).toList(); // todo: assummed 40 min breaks
-						if (cat.distance() != int.parse(dist))
-							throw Exception("distance loop sum mismatch");
+						if (loopDists != null && loopDists.isNotEmpty) {
+							int sum = loopDists.reduce((a,b) => a+b);
+							if (sum > cat.distance())
+								cat.loops = loopDists.map((d) => Loop(d, 40)).toList(); // todo: assummed 40 min breaks
+						}
 						
 					} catch (e) {
 						print("$eq exception:");
 						print(e);
 					}
 
-				}				
+				}
+
+				if (cat.distance() == 0) {
+					throw Exception("distance not found");
+				}
+				if (cat.distance() != dist) {
+					print("$name distance mismatch (needed $dist, found ${cat.distance()})");
+				}
+
 				List<int> eids = cat.equipages.map((e) => e.eid).toList();
 				evs.add(StartClearanceEvent("equipe", hmsToUNIX("00:00:01"), eids));
-				evs.addAll(eids.map((eid) => ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData.passed(), null)));
 
 				cat.startTime = catStartTime;
 

@@ -1,7 +1,6 @@
 
 import 'package:common/AbstractEventModel.dart';
 import 'package:common/AbstractEventModelWithRemoteSync.dart';
-import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:flutter/widgets.dart';
@@ -10,8 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-
-const bool clientModelOnly = false;
 
 class LocalModel
 	extends AbstractEventModelWithRemoteSync<Model>
@@ -45,8 +42,7 @@ class LocalModel
 			return _instance!;
 		}
 		
-		List<EnduranceEvent> evs = [];
-		LocalModel model = LocalModel._(Model(), evs);
+		LocalModel model = LocalModel._();
 		model._initSocket();
 		
 		_instance = model;
@@ -82,7 +78,7 @@ class LocalModel
 
 	io.Socket? _socket;
 
-	LocalModel._(super.model, super.events);
+	LocalModel._(): super(Model(), []);
 
 	@override
 	Future<SyncResult<Model>> $doRemoteSync(SyncRequest req) {

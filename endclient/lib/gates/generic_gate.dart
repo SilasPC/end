@@ -11,7 +11,7 @@ import '../LocalModel.dart';
 class GenericGate extends StatefulWidget {
 
    final Widget title;
-	final Future<void> Function() onSubmit;
+	final Future<void> Function()? onSubmit;
 	final bool submitDisabled;
 	final Comparator<Equipage> comparator;
 	final Predicate<Equipage> predicate;
@@ -28,7 +28,7 @@ class _GenericGateState extends State<GenericGate> {
 	List<Equipage> equipages = [];
 
 	Future<void> submit(BuildContext ctx) async {
-		await widget.onSubmit();
+		await widget.onSubmit!();
 		if (mounted) {
          setState(() {
             equipages
@@ -80,6 +80,7 @@ class _GenericGateState extends State<GenericGate> {
 						}),
 						icon: const Icon(Icons.sort),
 					),
+					if (widget.onSubmit != null)
 					SubmitButton(
 						onPressed: () => submit(ctx),
 						disabled: widget.submitDisabled,
