@@ -15,10 +15,7 @@ class ArrivalPage extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		TimingListGate(
 			title: TextClock.withPrefix("Arrival gate | "),
-			getEquipages: (m) =>
-				m.equipages.values
-					.where((e) => e.status == EquipageStatus.RIDING)
-					.toSet(),
+			predicate: (e) => e.status == EquipageStatus.RIDING,
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
 				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {

@@ -18,9 +18,8 @@ class TimingListGate extends StatefulWidget {
 
 	final Widget title;
 	final Future<void> Function(List<Equipage> equipages, List<DateTime> times) submit;
-	final Set<Equipage> Function(Model m) getEquipages;
-
-	const TimingListGate({required this.title, required this.getEquipages, required this.submit, super.key});
+	final Predicate<Equipage> predicate;
+	const TimingListGate({required this.title, required this.predicate, required this.submit, super.key});
 
 	@override
 	State<TimingListGate> createState() => _TimingListGateState();
@@ -36,8 +35,8 @@ class _TimingListGateState extends State<TimingListGate> {
 	Widget build(BuildContext ctx) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
-
-				Set<Equipage> newEquipages = widget.getEquipages(model.model);
+				
+				Set<Equipage> newEquipages = model.model.equipages.values.where(widget.predicate).toSet();
 				Set<Equipage> oldEquipages = equipages.toSet();
 				equipages.addAll(newEquipages.difference(oldEquipages));
 

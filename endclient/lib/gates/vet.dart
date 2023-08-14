@@ -15,10 +15,7 @@ class VetPage extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		TimingListGate(
 			title: TextClock.withPrefix("Vet gate | "),
-			getEquipages: (m) =>
-				m.equipages.values
-					.where((e) => e.status == EquipageStatus.COOLING)
-					.toSet(),
+			predicate: (e) => e.status == EquipageStatus.COOLING,
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
 				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {
