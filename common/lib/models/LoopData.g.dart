@@ -15,10 +15,19 @@ LoopData _$LoopDataFromJson(Map<String, dynamic> json) => LoopData.raw()
       ? null
       : VetData.fromJson(json['data'] as Map<String, dynamic>);
 
-Map<String, dynamic> _$LoopDataToJson(LoopData instance) => <String, dynamic>{
-      'expDeparture': instance.expDeparture,
-      'departure': instance.departure,
-      'arrival': instance.arrival,
-      'vet': instance.vet,
-      'data': instance.data,
-    };
+Map<String, dynamic> _$LoopDataToJson(LoopData instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('expDeparture', instance.expDeparture);
+  writeNotNull('departure', instance.departure);
+  writeNotNull('arrival', instance.arrival);
+  writeNotNull('vet', instance.vet);
+  writeNotNull('data', instance.data);
+  return val;
+}

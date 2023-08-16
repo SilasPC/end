@@ -21,13 +21,23 @@ Equipage _$EquipageFromJson(Map<String, dynamic> json) => Equipage.raw(
       ..currentLoop = json['currentLoop'] as int?
       ..dsqReason = json['dsqReason'] as String?;
 
-Map<String, dynamic> _$EquipageToJson(Equipage instance) => <String, dynamic>{
-      'status': instance.status,
-      'eid': instance.eid,
-      'rider': instance.rider,
-      'horse': instance.horse,
-      'preExam': instance.preExam,
-      'loops': instance.loops,
-      'currentLoop': instance.currentLoop,
-      'dsqReason': instance.dsqReason,
-    };
+Map<String, dynamic> _$EquipageToJson(Equipage instance) {
+  final val = <String, dynamic>{
+    'status': instance.status,
+    'eid': instance.eid,
+    'rider': instance.rider,
+    'horse': instance.horse,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('preExam', instance.preExam);
+  val['loops'] = instance.loops;
+  writeNotNull('currentLoop', instance.currentLoop);
+  writeNotNull('dsqReason', instance.dsqReason);
+  return val;
+}

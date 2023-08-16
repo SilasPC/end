@@ -22,18 +22,28 @@ VetData _$VetDataFromJson(Map<String, dynamic> json) => VetData(
       ..gait = json['gait'] as int?
       ..attitude = json['attitude'] as int?;
 
-Map<String, dynamic> _$VetDataToJson(VetData instance) => <String, dynamic>{
-      'passed': instance.passed,
-      'hr1': instance.hr1,
-      'hr2': instance.hr2,
-      'resp': instance.resp,
-      'mucMem': instance.mucMem,
-      'cap': instance.cap,
-      'jug': instance.jug,
-      'hydr': instance.hydr,
-      'gut': instance.gut,
-      'sore': instance.sore,
-      'wounds': instance.wounds,
-      'gait': instance.gait,
-      'attitude': instance.attitude,
-    };
+Map<String, dynamic> _$VetDataToJson(VetData instance) {
+  final val = <String, dynamic>{
+    'passed': instance.passed,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('hr1', instance.hr1);
+  writeNotNull('hr2', instance.hr2);
+  writeNotNull('resp', instance.resp);
+  writeNotNull('mucMem', instance.mucMem);
+  writeNotNull('cap', instance.cap);
+  writeNotNull('jug', instance.jug);
+  writeNotNull('hydr', instance.hydr);
+  writeNotNull('gut', instance.gut);
+  writeNotNull('sore', instance.sore);
+  writeNotNull('wounds', instance.wounds);
+  writeNotNull('gait', instance.gait);
+  writeNotNull('attitude', instance.attitude);
+  return val;
+}

@@ -74,14 +74,24 @@ ExamEvent _$ExamEventFromJson(Map<String, dynamic> json) => ExamEvent(
       json['loop'] as int?,
     );
 
-Map<String, dynamic> _$ExamEventToJson(ExamEvent instance) => <String, dynamic>{
-      'kind': instance.kind,
-      'time': instance.time,
-      'author': instance.author,
-      'eid': instance.eid,
-      'loop': instance.loop,
-      'data': instance.data,
-    };
+Map<String, dynamic> _$ExamEventToJson(ExamEvent instance) {
+  final val = <String, dynamic>{
+    'kind': instance.kind,
+    'time': instance.time,
+    'author': instance.author,
+    'eid': instance.eid,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('loop', instance.loop);
+  val['data'] = instance.data;
+  return val;
+}
 
 VetEvent _$VetEventFromJson(Map<String, dynamic> json) => VetEvent(
       json['author'] as String,
