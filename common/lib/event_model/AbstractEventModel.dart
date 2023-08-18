@@ -126,7 +126,7 @@ abstract class AbstractEventModel<M extends IJSON> {
 		return SyncResult(null, [], [], gen);
 	}
 
-	void append(List<Event<M>> es, List<EventId> dlts) {
+	void append(List<Event<M>> es, [List<EventId> dlts = const []]) {
 
 		if (es.isEmpty && dlts.isEmpty) return;
 		

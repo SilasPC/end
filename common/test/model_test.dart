@@ -58,6 +58,37 @@ void main() {
 		await c1.syncRemote();
 		expect(c1.model.result, "ABZY1");
 	});
+	test("savepoints", () {
+		var m = ServerModel.withBase(Model());
+		m.append([StrEv("0",0), StrEv("2",2)]);
+		m.createSavepoint();
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "02");
+
+		m.append([StrEv("4",4)]);
+		m.createSavepoint();
+		expect(m.savepoints.length, 3);
+		expect(m.model.result, "024");
+
+		m.append([StrEv("3",3)]);
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "0234");
+		
+		m.append([StrEv("1",1)]);
+		expect(m.savepoints.length, 1);
+		expect(m.model.result, "01234");
+
+		m.append([StrEv("6",6)]);
+		m.createSavepoint();
+		m.append([StrEv("7",7)]);
+		m.createSavepoint();
+		expect(m.savepoints.length, 3);
+		expect(m.model.result, "0123467");
+
+		m.append([StrEv("5",5)]);
+		expect(m.savepoints.length, 1);
+		expect(m.model.result, "01234567");
+	});
 }
 
 class EvId extends EventId {
