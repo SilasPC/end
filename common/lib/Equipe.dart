@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/util.dart';
 import 'package:http/http.dart' as http;
-import 'AbstractEventModel.dart';
+import 'EventModel.dart';
 import 'models/glob.dart';
 
 class EquipeMeeting {

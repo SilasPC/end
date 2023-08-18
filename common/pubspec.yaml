@@ -10,6 +10,7 @@ dependencies:
   json_annotation: ^4.7.0
   http: ^0.13.5
   crypto_keys: ^0.3.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   json_serializable: ^6.5.3

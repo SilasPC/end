@@ -63,6 +63,9 @@ List<T> jlist_cast<T>(List<dynamic> json) => jlist_map(json, (e) => e as T);
 /** Convert list to JSON */
 List<dynamic> listj(List<IJSON> l) => l.map((e) => e.toJson()).toList();
 
+/** Convert iterable to JSON */
+List<dynamic> iterj(Iterable<IJSON> l) => l.map((e) => e.toJson()).toList();
+
 T jsonClone<T extends IJSON>(T t, Reviver<T> f) => f(jsonDecode(jsonEncode(json)));
 
 class Tuple<A,B> {

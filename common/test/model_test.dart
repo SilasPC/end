@@ -1,4 +1,5 @@
 
+import 'package:common/EventModel.dart';
 import 'package:common/event_model/EventModel.dart';
 import 'package:common/event_model/SyncedEventModel.dart';
 import 'package:common/util.dart';
@@ -97,26 +98,23 @@ class StrEv extends Event<Model> {
 	final String str;
 	StrEv(this.str, int time): super(time, "kind", "author");
 
-  @override
-  JSON toJson() => {
-	  "time": time,
-	  "char": str
-  };
+	@override
+	JSON toJson() => {
+		"time": time,
+		"char": str
+	};
 
-  @override
-  String toString() => "[$time;$str]";
+	@override
+	String toString() => "[$time;$str]";
 
-  @override
-  bool build(EventModel<Model> m) {
-	  m.model.result += str;
-	  return true;
-  }
-
-	int get hashCode => str.hashCode + time;
-	bool operator ==(rhs) {
-		if (rhs is StrEv) return time == rhs.time && str == rhs.str;
-		return false;
+	@override
+	bool build(EventModel<Model> m) {
+		m.model.result += str;
+		return true;
 	}
+
+	@override
+	List get props => [time, str];
 
 }
 

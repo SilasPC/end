@@ -1,9 +1,9 @@
 library common;
 
 import 'package:common/util.dart';
-import 'AbstractEventModel.dart';
+import 'package:equatable/equatable.dart';
+import 'EventModel.dart';
 import 'package:json_annotation/json_annotation.dart';
-
 import 'models/glob.dart';
 
 // MUST RUN REPLACE ON PART AFTER BUILD:
@@ -11,11 +11,11 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part 'EnduranceEvent.g.dart';
 
-abstract class EnduranceEvent extends Event<Model> {
+abstract class EnduranceEvent extends Event<Model> with EquatableMixin {
 	EnduranceEvent(super.time, super.kind, super.author);
 
 	@override
-	bool build(AbstractEventModel<Model> m) {
+	bool build(EventModel<Model> m) {
 		try {
 			return safeBuild(m);
 		} catch (e, t) {
@@ -24,9 +24,13 @@ abstract class EnduranceEvent extends Event<Model> {
 		}
 	}
 
-	bool safeBuild(AbstractEventModel<Model> m);
+	bool safeBuild(EventModel<Model> m);
 
 	bool affectsEquipage(int eid);
+
+	@override
+	List get props => [time, kind, author];
+
 }
 
 EnduranceEvent eventFromJSON(JSON json) {
@@ -65,8 +69,8 @@ class InitEvent extends EnduranceEvent {
 		_$InitEventFromJson(json);
 
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
-		if (m.events.first == this) {
+	bool safeBuild(EventModel<Model> m) {
+		if (m.model.rideName == "") {
 			m.model = model.clone();
 			return true;
 		}
@@ -77,6 +81,9 @@ class InitEvent extends EnduranceEvent {
 
 	@override
 	String toString() => "Initializes model";
+	
+	@override
+	List get props => super.props;
 
 }
 
@@ -92,7 +99,7 @@ class DisqualifyEvent extends EnduranceEvent {
 		_$DisqualifyEventFromJson(json);
 	
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.dsqReason != null) {
 			m.model.errors.add(EventError.of("${eid} double dsq: ${reason}", this));
@@ -108,6 +115,9 @@ class DisqualifyEvent extends EnduranceEvent {
 	@override
 	String toString() => "Disqualifies $eid for '$reason'";
 	
+	@override
+	List get props => super.props..addAll([eid, reason]);
+
 }
 
 @JsonSerializable()
@@ -122,7 +132,7 @@ class ChangeCategoryEvent extends EnduranceEvent {
 		_$ChangeCategoryEventFromJson(json);
 	
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.WAITING) {
 			m.model.errors.add(EventError.of("${eid} category change, status ${eq.status}", this));
@@ -140,6 +150,9 @@ class ChangeCategoryEvent extends EnduranceEvent {
 
 	@override
 	String toString() => "Moves $eid to $category";
+	
+	@override
+	List get props => super.props..addAll([eid, category]);
 
 }
 
@@ -155,7 +168,7 @@ class RetireEvent extends EnduranceEvent {
 		_$RetireEventFromJson(json);
 
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.RESTING) {
 			m.model.warnings.add(EventError.of("Retire ${eq.eid} when status is ${eq.status.toString()}", this));
@@ -168,6 +181,9 @@ class RetireEvent extends EnduranceEvent {
 
 	@override
 	String toString() => "Retires $eid";
+	
+	@override
+	List get props => super.props..addAll([eid]);
 
 }
 
@@ -184,7 +200,7 @@ class ExamEvent extends EnduranceEvent {
 		_$ExamEventFromJson(json);
 		
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		int cl = eq.currentLoop ?? -1;
 		if (eq.status != EquipageStatus.VET) {
@@ -223,6 +239,9 @@ class ExamEvent extends EnduranceEvent {
 	String toString() =>
 		"${data.passed ? "Approves " : "Rejects "} $eid's loop ${(loop ?? -1) + 1} exam";
 
+	@override
+	List get props => super.props..addAll([eid, loop]);
+
 }
 
 @JsonSerializable()
@@ -237,7 +256,7 @@ class VetEvent extends EnduranceEvent {
 		_$VetEventFromJson(json);
 	
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.COOLING) {
 			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
@@ -257,6 +276,9 @@ class VetEvent extends EnduranceEvent {
 	@override
 	String toString() => "Registers vet for $eid loop ${loop+1}";
 
+	@override
+	List get props => super.props..addAll([eid, loop]);
+
 }
 
 @JsonSerializable()
@@ -271,7 +293,7 @@ class ArrivalEvent extends EnduranceEvent {
 		_$ArrivalEventFromJson(json);
 
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
 			m.model.warnings.add(EventError.of("${eid} arrival out of order loop ${loop}", this));
@@ -291,6 +313,9 @@ class ArrivalEvent extends EnduranceEvent {
 	@override
 	String toString() => "Registers arrival for $eid loop ${loop+1}";
 
+	@override
+	List get props => super.props..addAll([eid, loop]);
+
 }
 
 @JsonSerializable()
@@ -304,7 +329,7 @@ class StartClearanceEvent extends EnduranceEvent {
 		_$StartClearanceEventFromJson(json);
 
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		bool fail = false;
 		for (int eid in eids) {
 			var eq = m.model.equipages[eid]!;
@@ -323,6 +348,9 @@ class StartClearanceEvent extends EnduranceEvent {
 	@override
 	String toString() => "Clears $eids for start";
 
+	@override
+	List get props => super.props..addAll([eids]);
+	
 }
 
 @JsonSerializable()
@@ -336,7 +364,7 @@ class DepartureEvent extends EnduranceEvent {
 	factory DepartureEvent.fromJson(JSON json) =>
 		_$DepartureEventFromJson(json);
 	@override
-	bool safeBuild(AbstractEventModel<Model> m) {
+	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
 			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
@@ -359,4 +387,7 @@ class DepartureEvent extends EnduranceEvent {
 	@override
 	String toString() => "Registers departure for $eid loop ${loop+1}";
 
+	@override
+	List get props => super.props..addAll([eid, loop]);
+	
 }

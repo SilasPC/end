@@ -1,26 +1,27 @@
 
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../util.dart';
-import 'AbstractEventModel.dart';
+import 'EventModel.dart';
 
 part "Event.g.dart";
 
-abstract class Event<M extends IJSON> extends IJSON implements Comparable<Event<M>> {
+abstract class Event<M extends IJSON> extends IJSON with EquatableMixin implements Comparable<Event<M>> {
 	final String kind;
 	final int time;
 	final String author;
 
 	Event(this.time, this.kind, this.author);
 
-	bool build(AbstractEventModel<M> m);
+	bool build(EventModel<M> m);
 
-	EventId id() => EventId.of(this);
 	int compareTo(Event<M> rhs) {
 		int i = time - rhs.time;
 		if (i == 0) i = kind.compareTo(rhs.kind);
 		if (i == 0) i = author.compareTo(rhs.author);
 		return i;
 	}
+
 }
 
 @JsonSerializable()

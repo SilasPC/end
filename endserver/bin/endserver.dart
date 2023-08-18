@@ -1,16 +1,15 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:common/AbstractEventModelWithRemoteSync.dart';
-import 'package:common/AbstractEventModel.dart';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/Equipe.dart' as equipe;
+import 'package:common/EventModel.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 
-late EventModel em;
+late EventModel<Model> em;
 late Server io;
 File backupFile = File("../backup.events.json");
 
@@ -29,8 +28,10 @@ Future<void> main() async {
 	
 	//evs.removeRange((evs.length / 2).floor(), evs.length);
 
-	em = EventModel.withBase(Model());
-	em.addEvents(evs);
+	var handle = Handle();
+	em = EventModel(handle);
+	handle.model = em;
+	em.add(evs);
 
 	// await saveCSV();
 
@@ -42,28 +43,30 @@ Future<void> main() async {
 			var json = dataList.first;
 			var ack = dataList.last;
 			print('\nsync $json');
-			SyncRequest<Model> sr = SyncRequest.fromJSON(jsonDecode(json));
-			SyncResult<Model> res = em.syncFromRequest(sr);
+			var sr = SyncRequest<Model>.fromJSON(jsonDecode(json));
+			var res = sr.applyTo(em);
 			ack(res.toJsonString());
-			client.broadcast.emit('push', SyncPush(em.gen, sr.events).toJson());
+			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 		});
 		client.on("disconnect", (_) => print("disconnect"));
 	});
 	io.listen(3000);
 }
 
-class EventModel extends AbstractEventModel<Model> {
+class Handle extends EventModelHandle<Model> {
 
-	EventModel.withBase(Model model) : super.withBase(model);
-
-	@override
-	Model $reviveModel(JSON json) =>
-		Model.fromJson(json);
+	late EventModel<Model> model;
 
 	@override
-	Future<void> $onUpdate() async {
+	Model createModel() => Model();
+
+	@override
+	Model revive(JSON json) => Model.fromJson(json);
+
+	@override
+	Future<void> didUpdate() async {
 		await backupFile.writeAsString(
-			jsonEncode(listj(this.events)),
+			jsonEncode(iterj(model.events.iteratorInsertion)),
 			flush: true
 		);
 		print("saved");

@@ -10,9 +10,9 @@ class ConnectionIndicator extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) =>
 		AnimatedBuilder(
-			animation: LocalModel.instance.connection,
+			animation: LocalModel.instance.connection.status,
 			builder: (context, _) =>
-				LocalModel.instance.connection.value
+				LocalModel.instance.connection.status.value
 					? Container()
 					: IconButton(
 						color: Colors.amber,

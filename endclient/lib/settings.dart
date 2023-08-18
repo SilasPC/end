@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
 					ListTile(
 						leading: const Icon(Icons.sync),
                   title: const Text("Resync"),
-						onTap: () => LocalModel.instance.resetAndSync(),
+						onTap: () => LocalModel.instance.resetSync(),
                ),
 					const ListTile(
 						title: Text("Administration"),

@@ -1,6 +1,6 @@
 
-import 'package:common/AbstractEventModel.dart';
 import 'package:common/EnduranceEvent.dart';
+import 'package:common/EventModel.dart';
 import 'package:common/models/EventError.dart';
 import 'package:flutter/material.dart';
 

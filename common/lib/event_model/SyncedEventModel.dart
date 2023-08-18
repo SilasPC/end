@@ -1,7 +1,7 @@
 
 import '../EnduranceEvent.dart';
+import '../EventModel.dart';
 import '../util.dart';
-import 'EventModel.dart';
 
 class SyncedEventModel<M extends IJSON> extends EventModel<M> {
 
@@ -24,6 +24,12 @@ class SyncedEventModel<M extends IJSON> extends EventModel<M> {
 
 	Future<void> addSync(List<Event<M>> newEvents, [List<Event<M>> newDeletes = const []]) {
 		add(newEvents, newDeletes);
+		return sync();
+	}
+
+	Future<void> resetSync() async {
+		_lastSyncLocal = _lastSyncRemote = SyncInfo.zero();
+		reset();
 		return sync();
 	}
 
@@ -53,4 +59,17 @@ class SyncRequest<M extends IJSON> extends IJSON {
 		events = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>),
 		lastSync = SyncInfo.fromJson(json["lastSync"]);
 		
+}
+
+class SyncPush<M extends IJSON> extends IJSON {
+	final List<Event<M>> events;
+	final List<Event<M>> deletes;
+	SyncPush(this.events, this.deletes);
+	JSON toJson() => {
+		"events": listj(events),
+		"deletes": listj(deletes),
+	};
+	SyncPush.fromJson(JSON json) :
+		events = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>),
+		deletes = jlist_map(json["deletes"], eventFromJSON as Reviver<Event<M>>);
 }

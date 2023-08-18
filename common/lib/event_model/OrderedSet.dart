@@ -16,6 +16,12 @@ class OrderedSet<T> {
 
 	OrderedSet.withComparator(this._cmp);
 
+	void clear() {
+		_els.clear();
+		_byIns.clear();
+		_byOrd.clear();
+	}
+
 	bool add(T t) {
 		if (!_els.add(t)) return false;
 		_byOrd

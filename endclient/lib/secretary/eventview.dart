@@ -1,6 +1,6 @@
 
-import 'package:common/AbstractEventModel.dart';
 import 'package:common/EnduranceEvent.dart';
+import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:flutter/material.dart';
@@ -63,12 +63,12 @@ class _EventViewState extends State<EventView> {
 		Consumer<LocalModel>(
 			builder: (context, value, child) {
 
-				Map<EventId, EventError> errs = {};
-				for (var err in value.model.errors) {
+				Map<Event, EventError> errs = {};
+				/* for (var err in value.model.errors) {
 					errs[err.causedBy] = err;
-				}
+				} */
 
-				var evs = filterFn != null ? value.events.where(filterFn!).toList() : value.events;
+				var evs = filterFn != null ? value.events.iteratorOrdered.where(filterFn!).toList() : value.events.iteratorOrdered.toList();
 
 				return Container(
 					padding: const EdgeInsets.all(10),
@@ -81,13 +81,12 @@ class _EventViewState extends State<EventView> {
 										itemCount: evs.length,
 										separatorBuilder: (context, _) => const Divider(),
 										itemBuilder: (context, i) {
-											Event e = evs[evs.length - 1 - i];
-											EventId id = e.id();
-											var err = errs[id];
-											bool deleted = value.deletes.contains(id);
+											var e = evs[evs.length - 1 - i];
+											var err = null; // todo
+											bool deleted = value.deletes.contains(e);
 											return ListTile(
 												onLongPress: () {
-													value.appendAndSync([], [id]);
+													value.addSync([], [e]);
 												},
 												leading: Text(unixHMS(e.time)),
 												title: Text(e.runtimeType.toString()),

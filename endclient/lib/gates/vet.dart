@@ -21,7 +21,7 @@ class VetPage extends StatelessWidget {
 				for (int i = 0; i < times.length; i++) {
 					evs.add(VetEvent(LocalModel.instance.author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop!));
 				}
-				await LocalModel.instance.addAndSync(evs);
+				await LocalModel.instance.addSync(evs);
 			}
 		);
 

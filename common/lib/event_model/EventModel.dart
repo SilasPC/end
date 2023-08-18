@@ -5,27 +5,7 @@ import 'dart:math';
 import 'package:common/event_model/OrderedSet.dart';
 import '../EnduranceEvent.dart';
 import '../util.dart';
-
-abstract class Event<M extends IJSON> extends IJSON implements Comparable<Event<M>> {
-	final String kind;
-	final int time;
-	final String author;
-
-	Event(this.time, this.kind, this.author);
-
-	bool build(EventModel<M> m);
-
-	int compareTo(Event<M> rhs) {
-		int i = time - rhs.time;
-		if (i == 0) i = kind.compareTo(rhs.kind);
-		if (i == 0) i = author.compareTo(rhs.author);
-		return i;
-	}
-
-	int get hashCode => unimpl("hashCode must be overriden");
-	bool operator ==(_) => unimpl("operator.== must be overriden");
-
-}
+import 'Event.dart';
 
 class SyncInfo extends IJSON {
 
@@ -72,10 +52,10 @@ class SyncResult<M extends IJSON> extends IJSON {
 		"syncInfo": syncInfo,
 	};
 
-	SyncResult.fromJSON(JSON json, Reviver<M> reviver) :
+	SyncResult.fromJSON(JSON json) :
 		syncInfo = SyncInfo.fromJson(json["syncInfo"]),
 		events = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>),
-		deletes = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>);
+		deletes = jlist_map(json["deletes"], eventFromJSON as Reviver<Event<M>>);
 
 }
 
@@ -107,6 +87,14 @@ class EventModel<M extends IJSON> {
 		));
 	}
 
+	void reset() {
+		model = _handle.createModel();
+		events.clear();
+		deletes.clear();
+		savepoints.clear();
+		createSavepoint();
+	}
+
 	void add(List<Event<M>> newEvents, [List<Event<M>> newDeletes = const []]) {
 
 		if (newEvents.isEmpty && newDeletes.isEmpty) return;
@@ -128,10 +116,11 @@ class EventModel<M extends IJSON> {
 			int? i = events.findOrdIndex(newEvents.first);
 			buildFrom = min(i ?? buildFrom, buildFrom);
 		}
+		
+		print("$buildFrom, $oldLength");
 
 		if (buildFrom < oldLength) {
 			// restore from before buildFrom
-			print("$buildFrom");
 			_killSavepointsAfter(buildFrom);
 			_restoreFromLatestSavepoint();
 		} else {
@@ -160,15 +149,23 @@ class EventModel<M extends IJSON> {
 
 	void _restoreFromLatestSavepoint() {
 		Savepoint<M> sp = savepoints.last;
+		int i = 0;
+		if (sp.si.evLen > 0) {
+			i = events.findOrdIndex(events.byInsertionIndex(sp.si.evLen - 1))!;
+		}
+		print("restore ${i}");
 		model = _handle.revive(jsonDecode(sp.json));
-		_buildFromIndex(sp.si.evLen);
+		_buildFromIndex(i);
 	}
 
 	void _buildFromIndex(int i) {
 		var it = events.iteratorOrdered.skip(i);
 		for (var ev in it) {
-			if (deletes.contains(ev)) continue;
-			!ev.build(this);
+			if (deletes.contains(ev)) {
+				print("deleted: $ev");
+				continue;
+			}
+			ev.build(this);
 		}
 	}
 

@@ -75,7 +75,7 @@ class CategoryViewState extends State<CategoryView> {
 			onSelected: (value) {
 				switch (value) {
 					case 'start-clearance':
-						LocalModel.instance.addAndSync([
+						LocalModel.instance.addSync([
 							StartClearanceEvent(LocalModel.instance.author, nowUNIX(), [eq.eid])
 						]);
 						break;
@@ -84,14 +84,14 @@ class CategoryViewState extends State<CategoryView> {
 							context,
 							'Enter disqualification reason',
 							(reason) {
-								LocalModel.instance.addAndSync([
+								LocalModel.instance.addSync([
 									DisqualifyEvent(LocalModel.instance.author, nowUNIX(), eq.eid, reason),
 								]);
 							}
 						);
 						break;
 					case "retire":
-						LocalModel.instance.addAndSync([
+						LocalModel.instance.addSync([
 							RetireEvent(LocalModel.instance.author, nowUNIX(), eq.eid)
 						]);
 						break;
@@ -100,7 +100,7 @@ class CategoryViewState extends State<CategoryView> {
 							context,
 							LocalModel.instance.model.categories.keys.toList(),
 							(cat) {
-								LocalModel.instance.addAndSync([
+								LocalModel.instance.addSync([
 									ChangeCategoryEvent(LocalModel.instance.author, nowUNIX(), eq.eid, cat)
 								]);
 							}

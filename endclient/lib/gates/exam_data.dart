@@ -24,7 +24,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	Future<void> submit(bool passed, {bool retire = false}) async {
 		data.passed = passed;
 		int now = nowUNIX();
-		LocalModel.instance.addAndSync([
+		LocalModel.instance.addSync([
 			ExamEvent(LocalModel.instance.author, now, widget.equipage.eid, data, widget.equipage.currentLoop),
 			if (retire)
 				RetireEvent(LocalModel.instance.author, now + 1, widget.equipage.eid)

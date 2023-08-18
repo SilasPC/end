@@ -28,7 +28,7 @@ class _DeparturePageState extends State<DeparturePage> {
 		List<EnduranceEvent> evs = timers.entries
 			.map((kv) => DepartureEvent(LocalModel.instance.author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]!.currentLoop!))
 			.toList();
-		await m.addAndSync(evs);
+		await m.addSync(evs);
 		timers.clear();
 	}
 
