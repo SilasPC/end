@@ -5,13 +5,16 @@ import 'package:common/util.dart';
 
 class OrderedSet<T> {
 
-	final Comparator<T> _cmp = (a, b) => (a as Comparable<T>).compareTo(b);
+	final Comparator<T> _cmp;
 
 	HashSet<T> _els = HashSet();
 	List<Tuple<T,int>> _byOrd = [];
 	List<T> _byIns = [];
 
-	OrderedSet();
+	OrderedSet():
+		_cmp = ((a, b) => (a as Comparable<T>).compareTo(b));
+
+	OrderedSet.withComparator(this._cmp);
 
 	bool add(T t) {
 		if (!_els.add(t)) return false;
@@ -27,7 +30,9 @@ class OrderedSet<T> {
 	}
 
 	int? findOrdIndex(T t) {
-		int i = binarySearch(_byOrd, (t0) => _cmp(t0.a,t) < 0);
+		int i = _byOrd.indexWhere((e) => _cmp(e.a, t) == 0);
+		// todo: fix
+		//int i = binarySearch(_byOrd, (t0) => _cmp(t0.a,t) < 0);
 		if (i == -1) return null;
 		if (_cmp(_byOrd[i].a,t) == 0) return i;
 		return null;

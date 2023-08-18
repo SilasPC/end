@@ -21,6 +21,10 @@ abstract class Event<M extends IJSON> extends IJSON implements Comparable<Event<
 		if (i == 0) i = author.compareTo(rhs.author);
 		return i;
 	}
+
+	int get hashCode => unimpl("hashCode must be overriden");
+	bool operator ==(_) => unimpl("operator.== must be overriden");
+
 }
 
 class SyncInfo extends IJSON {
@@ -37,6 +41,14 @@ class SyncInfo extends IJSON {
 	};
 	factory SyncInfo.fromJson(JSON json)
 		=> SyncInfo(json["evLen"], json["delLen"]);
+
+	bool operator ==(rhs) {
+		if (rhs is SyncInfo) {
+			return delLen == rhs.delLen && evLen == rhs.evLen;
+		}
+		return false;
+	}
+
 }
 
 class Savepoint<M extends IJSON> {
@@ -119,6 +131,7 @@ class EventModel<M extends IJSON> {
 
 		if (buildFrom < oldLength) {
 			// restore from before buildFrom
+			print("$buildFrom");
 			_killSavepointsAfter(buildFrom);
 			_restoreFromLatestSavepoint();
 		} else {
@@ -130,15 +143,17 @@ class EventModel<M extends IJSON> {
 
 	}
 
-	/* SyncResult<M> backSync(SyncInfo lastSync) {
+	SyncResult<M> getNewerData(SyncInfo lastSync) {
 		var evs = events.iteratorInsertion.skip(lastSync.evLen).toList();
 		var dls = deletes.skip(lastSync.delLen).toList();
-		return SyncResult(evs, dls, SyncInfo(0, events.length, deletes.length));
-	} */
+		return SyncResult(evs, dls, syncState);
+	}
+
+	SyncInfo get syncState => SyncInfo(events.length, deletes.length);
 
 	void _killSavepointsAfter(int evLen) {
-		// todo: binary search
-		int i = savepoints.lastIndexWhere((sp) => sp.si.evLen < evLen);
+		// todo: binary search, correct <= ?
+		int i = savepoints.lastIndexWhere((sp) => sp.si.evLen <= evLen);
 		//int i = binarySearchLast(savepoints, (sp) => sp.si.evLen < evLen);
 		savepoints.removeRange(i + 1, savepoints.length);
 	}
