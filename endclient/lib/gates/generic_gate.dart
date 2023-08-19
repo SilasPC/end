@@ -1,6 +1,7 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/util/equipage_selector_drawer.dart';
 import 'package:esys_client/util/submit_button.dart';
 import 'package:flutter/material.dart';
 import 'package:common/models/glob.dart';
@@ -30,24 +31,24 @@ class _GenericGateState extends State<GenericGate> {
 	Future<void> submit(BuildContext ctx) async {
 		await widget.onSubmit!();
 		if (mounted) {
-         setState(() {
-            equipages
-               ..retainWhere(widget.predicate)
-               ..sort(widget.comparator);
-         });
-      }
+			setState(() {
+				equipages
+					..retainWhere(widget.predicate)
+					..sort(widget.comparator);
+			});
+		}
 	}
 
 	Widget buildList(BuildContext ctx) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 
-            // no custom hash impl, refresh to point to new objects
-            // representing the equipages for ptr hash/eq
-            // maybe use id instead (but what about widget.predicate /.comparator?)
-            equipages = equipages
-               .map((e) => model.model.equipages[e.eid]!) // todo: assummes no eid disappears
-               .toList();
+				// no custom hash impl, refresh to point to new objects
+				// representing the equipages for ptr hash/eq
+				// maybe use id instead (but what about widget.predicate /.comparator?)
+				equipages = equipages
+					.map((e) => model.model.equipages[e.eid]!) // todo: assummes no eid disappears
+					.toList();
 
 				Set<Equipage> newEquipages =
 					model.model.equipages.values
@@ -89,6 +90,13 @@ class _GenericGateState extends State<GenericGate> {
 				title: widget.title,
 			),
 			body: buildList(ctx),
+			bottomNavigationBar: EquipageSelectorDrawer(
+				onTab: (eq) {
+					if (!equipages.contains(eq)) {
+						setState(() => equipages.add(eq));
+					}
+				}
+			),
 		);
 
 }

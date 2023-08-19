@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/util/equipage_selector_drawer.dart';
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,9 +42,6 @@ class _TimingListGateState extends State<TimingListGate> {
 				equipages.addAll(newEquipages.difference(oldEquipages));
 
 				oldEquipages.difference(newEquipages); // todo: invalidate these
-
-				var winHeight = MediaQuery.of(context).size.height;
-				var maxBottomBarHeight = winHeight * 0.7;
 				
 				return Scaffold(
 					appBar: AppBar(
@@ -95,36 +93,14 @@ class _TimingListGateState extends State<TimingListGate> {
 							)
 						]
 					),
-					bottomNavigationBar: BottomAppBar(
-						// shape: const CircularNotchedRectangle(),
-						child: ConstrainedBox(
-							constraints: BoxConstraints(maxHeight: maxBottomBarHeight),
-							child: ListView(
-								shrinkWrap: true,
-								children: [
-									ElevatedButton(
-										child: const Text("More"),
-										onPressed: () => setState(() {
-											bottomBarShown ^= true;
-										}),
-									),
-									if (bottomBarShown)
-									for (var eq in model.model.equipages.values)
-									EquipageTile(eq, trailing: [
-										IconButton(
-											icon: const Icon(Icons.add),
-											onPressed: () {
-												if (!equipages.contains(eq))
-													setState(() {
-													  equipages.add(eq);
-													});
-											},
-										)
-									],)
-								],
-							),
-						)
-					),
+					bottomNavigationBar: EquipageSelectorDrawer(
+						onTab: (eq) {
+							if (!equipages.contains(eq)) {
+								setState(() {
+									equipages.add(eq);
+								});
+							}
+					}),
 					// floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
 					floatingActionButton: FloatingActionButton.large(
 						child: const Icon(Icons.timer),

@@ -8,8 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-class LocalModel extends SyncedEventModel<Model> with ChangeNotifier
-{
+class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 
    String _author = "default";
    String get author => _author;
