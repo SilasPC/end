@@ -1,5 +1,6 @@
 
 import 'package:common/EventModel.dart';
+import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:flutter/widgets.dart';
@@ -20,33 +21,40 @@ class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
          });
    }
 
-	late final Connection connection;
-
 	static LocalModel? _instance;
 	static LocalModel get instance {
 		if (_instance != null) {
 			return _instance!;
 		}
+
+		var conn = SocketServer(
+			onPush: (push) {
+				_instance!.add(push.events, push.deletes);
+			}
+		);
 		
-		LocalModel model = LocalModel._(Connection(), Handle());
-		
-		_instance = model;
-		return model;
+		_instance = LocalModel._(conn, Handle());
+		return _instance!;
 	}
 
-	LocalModel._(Connection conn, Handle handle): super(handle, (SyncRequest<Model> req) {
-		Completer<SyncResult<Model>> c = Completer();
-		conn._socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
-			c.complete(SyncResult.fromJSON(jsonDecode(json)));
-		});
-		return c.future;
-	}) { handle.m = this; connection = conn; conn.lm = this; }
+	late final ServerConnection connection;
+
+	LocalModel.__(Handle handle, Future<SyncResult<Model>> Function(SyncRequest<Model>) syncFunc): super(handle, syncFunc);
+	factory LocalModel._(ServerConnection conn, Handle handle) {
+
+		var h = Handle();
+		var lm = LocalModel.__(h, conn.sendSync);
+		h.m = lm;
+		lm.connection = conn;
+
+		return lm;
+	}
 
 }
 
 class Handle extends EventModelHandle<Model> {
 
-	late LocalModel m;
+	LocalModel? m;
 
 	Handle();
 
@@ -56,31 +64,59 @@ class Handle extends EventModelHandle<Model> {
 	Model revive(JSON json) => Model.fromJson(json);
 	@override
 	void didUpdate() {
-		m.notifyListeners();
+		m?.notifyListeners();
 	}
 }
 
-class Connection with ChangeNotifier {
-	
-	final ValueNotifier status = ValueNotifier(false);
+abstract class ServerConnection {
+	ServerConnection({
+		VoidCallback? onConnect, onDisconnect,
+		void Function(SyncPush<Model>)? onPush,
+	});
+	final ValueNotifier<bool> status = ValueNotifier(false);
+	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req);
+}
 
-	String _socketAddress = "http://192.168.8.101:3000";
+class MockServer extends ServerConnection {
 
-	String get socketAddress => _socketAddress;
-	set socketAddress(val) {
-		if (val == _socketAddress) return;
-		_socketAddress = val;
-		_initSocket();
+	late final EventModel<Model> model;
+
+	MockServer() {
+		model = EventModel(Handle());
+		model.add(demoInitEvent(nowUNIX() + 300));
+		status.value = true;
 	}
 
-	io.Socket? _socket;
-	late LocalModel lm;
+	@override
+	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req)
+		=> Future.value(req.applyTo(model));
 
-	Connection() {
+}
+
+class SocketServer extends ServerConnection {
+
+	final String _socketAddress = "http://192.168.8.101:3000";
+
+	io.Socket? _socket;
+
+	VoidCallback? onConnect, onDisconnect;
+	void Function(SyncPush<Model> push)? onPush;
+
+	@override
+	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req) {
+		Completer<SyncResult<Model>> c = Completer();
+		_socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
+			c.complete(SyncResult.fromJSON(jsonDecode(json)));
+		});
+		return c.future;
+	}
+
+	SocketServer({this.onConnect, this.onDisconnect, this.onPush}) {
 		_initSocket();
 	}
 
 	void _initSocket() {
+
 		_socket?.close();
 		io.Socket socket = _socket = io.io(
 			_socketAddress,
@@ -88,24 +124,20 @@ class Connection with ChangeNotifier {
 				.setTransports(["websocket"])
 				.build()
 		);
-		/* socket.onConnectError((data) => print(data));
-		socket.onConnectTimeout((data) => print(data));
-		socket.onConnecting((data) => print(data)); */
 
 		socket.onConnect((_) {
 			status.value = true;
-			lm.sync();
+			onConnect?.call();
 		});
 		socket.onDisconnect((_) {
 			status.value = false;
+			onDisconnect?.call();
 		});
 
 		socket.on("push", (json) {
-			// print("push $json");
 			var push = SyncPush<Model>.fromJson(json);
-			lm.add(push.events, push.deletes);
+			onPush?.call(push);
 		});
 		
 	}
-
 }
