@@ -21,8 +21,8 @@ Future<List<Event<Model>>> readCachedEvents() async {
 Future<void> main() async {
 
 	List<Event<Model>> evs =
-		await readCachedEvents();
-		//demoInitEvent(nowUNIX() + 300);
+		//await readCachedEvents();
+		demoInitEvent(nowUNIX() + 300);
 		//await equipe.loadModelEvents(44178);
 		//await loadEventsFromFile("roddingeritten");
 	

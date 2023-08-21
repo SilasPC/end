@@ -1,7 +1,6 @@
 library common;
 
 import 'package:common/util.dart';
-import 'package:equatable/equatable.dart';
 import 'EventModel.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'models/glob.dart';
@@ -19,7 +18,7 @@ abstract class EnduranceEvent extends Event<Model> {
 		try {
 			return safeBuild(m);
 		} catch (e, t) {
-			m.model.errors.add(EventError.of("$e $t", this));
+			m.model.errors.add(EventError(m.buildIndex, "$e $t"));
 			return false;
 		}
 	}
@@ -102,7 +101,7 @@ class DisqualifyEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.dsqReason != null) {
-			m.model.errors.add(EventError.of("${eid} double dsq: ${reason}", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} double dsq: ${reason}"));
 			return false;
 		}
 		eq.dsqReason = reason;
@@ -135,7 +134,7 @@ class ChangeCategoryEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.WAITING) {
-			m.model.errors.add(EventError.of("${eid} category change, status ${eq.status}", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} category change, status ${eq.status}"));
 			return false;
 		}
 		var cat = m.model.categories[category]!;
@@ -171,7 +170,7 @@ class RetireEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.RESTING) {
-			m.model.warnings.add(EventError.of("Retire ${eq.eid} when status is ${eq.status.toString()}", this));
+			m.model.warnings.add(EventError(m.buildIndex, "Retire ${eq.eid} when status is ${eq.status.toString()}"));
 		}
 		eq.status = EquipageStatus.RETIRED;
 		return true;
@@ -204,11 +203,11 @@ class ExamEvent extends EnduranceEvent {
 		var eq = m.model.equipages[eid]!;
 		int cl = eq.currentLoop ?? -1;
 		if (eq.status != EquipageStatus.VET) {
-			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} not ready for gate"));
 			return false;
 		}
 		if ((loop ?? -1) != cl) {
-			m.model.warnings.add(EventError.of("${eid} exam out of order loop ${loop}, current $cl", this));
+			m.model.warnings.add(EventError(m.buildIndex, "${eid} exam out of order loop ${loop}, current $cl"));
 		}
 		bool p = data.passed;
 		if (eq.currentLoop == null) {
@@ -259,11 +258,11 @@ class VetEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.COOLING) {
-			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} not ready for gate"));
 			return false;
 		}
 		if (loop != eq.currentLoop) {
-			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
+			m.model.warnings.add(EventError(m.buildIndex, "${eid} departure out of order loop ${loop}"));
 		}
 		var l = eq.loops[loop];
 		l.vet = time;
@@ -296,10 +295,10 @@ class ArrivalEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
-			m.model.warnings.add(EventError.of("${eid} arrival out of order loop ${loop}", this));
+			m.model.warnings.add(EventError(m.buildIndex, "${eid} arrival out of order loop ${loop}"));
 		}
 		if (eq.status != EquipageStatus.RIDING) {
-			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} not ready for gate"));
 			return false;
 		}
 		var l = eq.loops[loop];
@@ -334,7 +333,7 @@ class StartClearanceEvent extends EnduranceEvent {
 		for (int eid in eids) {
 			var eq = m.model.equipages[eid]!;
 			if (eq.status != EquipageStatus.WAITING) {
-				m.model.errors.add(EventError.of("Cannot clear $eid for start", this));
+				m.model.errors.add(EventError(m.buildIndex, "Cannot clear $eid for start"));
 				fail = true;
 			} else {
 				eq.status = EquipageStatus.VET;
@@ -367,15 +366,15 @@ class DepartureEvent extends EnduranceEvent {
 	bool safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (loop != eq.currentLoop) {
-			m.model.warnings.add(EventError.of("${eid} departure out of order loop ${loop}", this));
+			m.model.warnings.add(EventError(m.buildIndex, "${eid} departure out of order loop ${loop}"));
 		}
 		if (eq.status != EquipageStatus.RESTING) {
-			m.model.errors.add(EventError.of("${eid} not ready for gate", this));
+			m.model.errors.add(EventError(m.buildIndex, "${eid} not ready for gate"));
 			return false;
 		}
 		var l = eq.loops[loop];
 		if (time - l.expDeparture! > 15 * 60) {
-			m.model.warnings.add(EventError.of("$eid late departure", this));
+			m.model.warnings.add(EventError(m.buildIndex, "$eid late departure"));
 		}
 		l.departure = time;
 		eq.updateStatus();

@@ -63,10 +63,13 @@ class _EventViewState extends State<EventView> {
 		Consumer<LocalModel>(
 			builder: (context, value, child) {
 
-				Map<Event, EventError> errs = {};
-				/* for (var err in value.model.errors) {
+				Map<int, EventError> errs = {};
+				for (var err in value.model.errors) {
 					errs[err.causedBy] = err;
-				} */
+				}
+				for (var err in value.model.warnings) {
+					errs[err.causedBy] = err;
+				}
 
 				var evs = filterFn != null ? value.events.iteratorOrdered.where(filterFn!).toList() : value.events.iteratorOrdered.toList();
 
@@ -81,8 +84,9 @@ class _EventViewState extends State<EventView> {
 										itemCount: evs.length,
 										separatorBuilder: (context, _) => const Divider(),
 										itemBuilder: (context, i) {
-											var e = evs[evs.length - 1 - i];
-											var err = null; // todo
+                                 var evIdx = evs.length - 1 - i;
+											var e = evs[evIdx];
+											var err = errs[evIdx];
 											bool deleted = value.deletes.contains(e);
 											return ListTile(
 												onLongPress: () {

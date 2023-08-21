@@ -7,8 +7,8 @@ part of 'EventError.dart';
 // **************************************************************************
 
 EventError _$EventErrorFromJson(Map<String, dynamic> json) => EventError(
+      json['causedBy'] as int,
       json['description'] as String,
-      EventId.fromJson(json['causedBy'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$EventErrorToJson(EventError instance) =>

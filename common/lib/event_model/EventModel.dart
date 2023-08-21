@@ -75,6 +75,9 @@ class EventModel<M extends IJSON> {
 	final LinkedHashSet<Event<M>> deletes = LinkedHashSet();
 	final List<Savepoint<M>> savepoints = [];
 
+   int _buildIndex = -1;
+   int get buildIndex => _buildIndex;
+
 	EventModel(this._handle) {
 		model = _handle.createModel();
 		createSavepoint();
@@ -157,12 +160,14 @@ class EventModel<M extends IJSON> {
 
 	void _buildFromIndex(int i) {
 		var it = events.iteratorOrdered.skip(i);
+      _buildIndex = i;
 		for (var ev in it) {
-			if (deletes.contains(ev)) {
-				continue;
+			if (!deletes.contains(ev)) {
+            ev.build(this);
 			}
-			ev.build(this);
+         _buildIndex++;
 		}
+      _buildIndex = -1;
 	}
 
 }

@@ -30,7 +30,6 @@ class _TimingListGateState extends State<TimingListGate> {
 
 	List<Equipage> equipages = [];
 	TimerList timerList = TimerList();
-	bool bottomBarShown = false;
 
 	@override
 	Widget build(BuildContext ctx) =>
