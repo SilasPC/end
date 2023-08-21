@@ -40,7 +40,7 @@ class _ExamPageState extends State<ExamPage> {
 									context,
 									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq))
 								);
-								setState(() {});
+								// todo: trigger gate to reset (?)
 							}
 						)
 					]

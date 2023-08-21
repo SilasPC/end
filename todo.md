@@ -1,3 +1,5 @@
+ - warnings in error view
+
 # First prototype
  - no client state saving
 

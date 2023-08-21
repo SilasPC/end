@@ -27,25 +27,23 @@ class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 			return _instance!;
 		}
 
-		var conn = SocketServer(
-			onPush: (push) {
-				_instance!.add(push.events, push.deletes);
-			}
-		);
+		var conn = SocketServer();
 		
 		_instance = LocalModel._(conn, Handle());
 		return _instance!;
 	}
 
-	late final ServerConnection connection;
+	late final SocketServer connection;
 
 	LocalModel.__(Handle handle, Future<SyncResult<Model>> Function(SyncRequest<Model>) syncFunc): super(handle, syncFunc);
-	factory LocalModel._(ServerConnection conn, Handle handle) {
+	factory LocalModel._(SocketServer conn, Handle handle) {
 
 		var h = Handle();
 		var lm = LocalModel.__(h, conn.sendSync);
 		h.m = lm;
 		lm.connection = conn;
+      conn.onConnect = () => lm.sync();
+      conn.onPush = (push) => lm.add(push.events, push.deletes);
 
 		return lm;
 	}
@@ -95,7 +93,14 @@ class MockServer extends ServerConnection {
 
 class SocketServer extends ServerConnection {
 
-	final String _socketAddress = "http://192.168.8.101:3000";
+	String _socketAddress = "http://192.168.8.101:3000";
+
+	String get socketAddress => _socketAddress;
+	set socketAddress(String value) {
+		if (value == _socketAddress) return;
+		_socketAddress = value;
+		_initSocket();
+	}
 
 	io.Socket? _socket;
 
@@ -118,6 +123,7 @@ class SocketServer extends ServerConnection {
 	void _initSocket() {
 
 		_socket?.close();
+		status.value = false;
 		io.Socket socket = _socket = io.io(
 			_socketAddress,
 			io.OptionBuilder()

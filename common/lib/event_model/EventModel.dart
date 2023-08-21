@@ -117,8 +117,6 @@ class EventModel<M extends IJSON> {
 			buildFrom = min(i ?? buildFrom, buildFrom);
 		}
 		
-		print("$buildFrom, $oldLength");
-
 		if (buildFrom < oldLength) {
 			// restore from before buildFrom
 			_killSavepointsAfter(buildFrom);
@@ -153,7 +151,6 @@ class EventModel<M extends IJSON> {
 		if (sp.si.evLen > 0) {
 			i = events.findOrdIndex(events.byInsertionIndex(sp.si.evLen - 1))!;
 		}
-		print("restore ${i}");
 		model = _handle.revive(jsonDecode(sp.json));
 		_buildFromIndex(i);
 	}
@@ -162,7 +159,6 @@ class EventModel<M extends IJSON> {
 		var it = events.iteratorOrdered.skip(i);
 		for (var ev in it) {
 			if (deletes.contains(ev)) {
-				print("deleted: $ev");
 				continue;
 			}
 			ev.build(this);
