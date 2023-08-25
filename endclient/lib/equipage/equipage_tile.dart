@@ -51,6 +51,7 @@ class EquipageTile extends StatelessWidget {
 								Text("Loop ${equipage.currentLoop! + 1}")
 							],
 						),
+						const SizedBox(width: 10),
 						...trailing
 					],
 				)

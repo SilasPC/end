@@ -1,5 +1,7 @@
 
 import 'package:common/Equipe.dart';
+import 'package:common/models/demo.dart';
+import 'package:common/util.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						onTap: () {}
 					),
 					ListTile(
-						title: const Text("Load remote model..."),
+						title: const Text("Load model..."),
 						onTap: () => loadModel(context),
 					),
 
@@ -66,14 +68,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
 		Future<void> loadModel(BuildContext context) async {
 			var meets = await loadRecentMeetings();
+			var m = LocalModel.instance;
+			// ignore: use_build_context_synchronously
 			showChoicesModal(
 				context,
 				["DEMO"]..addAll(meets.map((e) => e.name)),
 				(name) async {
+					m.reset();
 					if (name == "DEMO") {
+						m.add(demoInitEvent(nowUNIX()+300));
 						return;
 					}
-					int id = meets.firstWhere((e) => e.name == name).id;
+					var meet = meets.firstWhere((e) => e.name == name);
+					var evs = await loadModelEvents(meet.id);
+					m.add(evs);
 					return;
 				}
 			);

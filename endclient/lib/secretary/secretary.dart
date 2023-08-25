@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../LocalModel.dart';
 import 'category.dart';
-import 'errorview.dart';
 import 'eventview.dart';
 import 'modelview.dart';
 import 'util.dart';
@@ -37,7 +36,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 			child: Card(
 				child: Column(
 					children: [
-						cardHeader(context, "${cat.name} ${cat.distance()}km", color: const Color.fromARGB(255, 146, 119, 68)),
+						cardHeader(context, cat.name, color: const Color.fromARGB(255, 146, 119, 68)),
 						
 						Container(
 							padding: const EdgeInsets.all(10),
@@ -79,7 +78,6 @@ class SecretaryPageState extends State<SecretaryPage> {
 		for (Category cat in cats.values)
 			Tab(icon: const Icon(Icons.group), text: "${cat.name} ${cat.distance()}km"),
 		const Tab(icon: Icon(Icons.list), text: "Events"),
-		const Tab(icon: Icon(Icons.error), text: "Errors"),
 		const Tab(icon: Icon(Icons.account_tree), text: "Model"),
 	];
 	Widget tabView(Model model) => TabBarView(
@@ -102,7 +100,6 @@ class SecretaryPageState extends State<SecretaryPage> {
 			for (Category cat in model.categories.values)
 				CategoryView(cat),
 			const EventView(),
-			const ErrorView(),
 			const ModelView(),
 		],
 	);
@@ -112,7 +109,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 				return DefaultTabController(
-					length: 4 + model.model.categories.length,
+					length: 3 + model.model.categories.length,
 					child: Scaffold(
 							appBar: AppBar(
 								actions: const [ConnectionIndicator()],

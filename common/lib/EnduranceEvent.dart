@@ -60,7 +60,7 @@ EnduranceEvent eventFromJSON(JSON json) {
 
 @JsonSerializable()
 class InitEvent extends EnduranceEvent {
-	Model model;
+	final Model model;
 	InitEvent(String author, this.model) : super(0, "init", author);
 
 	JSON toJson() => _$InitEventToJson(this);
@@ -88,8 +88,8 @@ class InitEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class DisqualifyEvent extends EnduranceEvent {
-	int eid;
-	String reason;
+	final int eid;
+	final String reason;
 	DisqualifyEvent(String author, int time, this.eid, this.reason):
 		super(time, "disqualify", author);
 
@@ -121,8 +121,8 @@ class DisqualifyEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class ChangeCategoryEvent extends EnduranceEvent {
-	int eid;
-	String category;
+	final int eid;
+	final String category;
 	ChangeCategoryEvent(String author, int time, this.eid, this.category):
 		super(time, "change-category", author);
 
@@ -158,7 +158,7 @@ class ChangeCategoryEvent extends EnduranceEvent {
 @JsonSerializable()
 class RetireEvent extends EnduranceEvent {
 
-	int eid;
+	final int eid;
 	RetireEvent(String author, int time, this.eid):
 		super(time, "retire", author);
 
@@ -188,9 +188,9 @@ class RetireEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class ExamEvent extends EnduranceEvent {
-	int eid;
-	int? loop;
-	VetData data;
+	final int eid;
+	final int? loop;
+	final VetData data;
 	ExamEvent(String author, int time,this.eid,this.data,this.loop):
 		super(time, "exam", author);
 
@@ -245,8 +245,8 @@ class ExamEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class VetEvent extends EnduranceEvent {
-	int eid;
-	int loop;
+	final int eid;
+	final int loop;
 	VetEvent(String author, int time,this.eid,this.loop):
 		super(time, "vet", author);
 	
@@ -282,8 +282,8 @@ class VetEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class ArrivalEvent extends EnduranceEvent {
-	int loop;
-	int eid;
+	final int loop;
+	final int eid;
 	ArrivalEvent(String author, int time,this.eid,this.loop):
 		super(time, "arrival", author);
 	
@@ -319,7 +319,7 @@ class ArrivalEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class StartClearanceEvent extends EnduranceEvent {
-	List<int> eids;
+	final List<int> eids;
 	StartClearanceEvent(String author, int time, this.eids):
 		super(time, "start-clearance", author);
 
@@ -354,8 +354,8 @@ class StartClearanceEvent extends EnduranceEvent {
 
 @JsonSerializable()
 class DepartureEvent extends EnduranceEvent {
-	int eid;
-	int loop;
+	final int eid;
+	final int loop;
 	DepartureEvent(String author, int time,this.eid,this.loop):
 		super(time, "departure", author);
 	

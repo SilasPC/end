@@ -153,8 +153,10 @@ class EventModel<M extends IJSON> {
 		int i = 0;
 		if (sp.si.evLen > 0) {
 			i = events.findOrdIndex(events.byInsertionIndex(sp.si.evLen - 1))!;
+			model = _handle.revive(jsonDecode(sp.json));
+		} else {
+			model = _handle.createModel();
 		}
-		model = _handle.revive(jsonDecode(sp.json));
 		_buildFromIndex(i);
 	}
 

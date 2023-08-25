@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
@@ -36,21 +37,27 @@ Future<void> main() async {
 	// await saveCSV();
 
 	io = Server();
-	io.on('connection', (client) {
-		print('connection');
-		client.on('sync', (data) {
-			List dataList = data as List;
-			var json = dataList.first;
-			var ack = dataList.last;
-			print('\nsync $json');
-			var sr = SyncRequest<Model>.fromJSON(jsonDecode(json));
+	io.on("connection", (client) {
+		setJsonAck(client, "sync", (json) {
+			var sr = SyncRequest<Model>.fromJSON(json);
 			var res = sr.applyTo(em);
-			ack(res.toJsonString());
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
+			return res;
 		});
-		client.on("disconnect", (_) => print("disconnect"));
 	});
 	io.listen(3000);
+}
+
+void setJsonAck<T extends IJSON>(dynamic client, String msg, FutureOr<T?>? Function(JSON data) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var json = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(jsonDecode(json));
+		if (res != null) {
+			ack(res.toJsonString());
+		}
+	});
 }
 
 class Handle extends EventModelHandle<Model> {

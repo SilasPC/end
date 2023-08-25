@@ -10,8 +10,10 @@ Widget cardHeader(BuildContext context, String text, {Color? color}) =>
 			color: color,
 			border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 		),
-		child: Row(
+		child: Flex(
+			direction: Axis.horizontal,
 			mainAxisAlignment: MainAxisAlignment.center,
-			children: [Text(text, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold))],
-		)
+			// todo: overflow is ignored?
+			children: [Text(text, textAlign: TextAlign.center, maxLines: 1, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold), overflow: TextOverflow.fade,)]
+		),
 	);

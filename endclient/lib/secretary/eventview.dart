@@ -61,6 +61,7 @@ class _EventViewState extends State<EventView> {
 	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
+			// todo: use Selector
 			builder: (context, value, child) {
 
 				Map<int, EventError> errs = {};

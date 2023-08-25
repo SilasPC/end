@@ -1,13 +1,12 @@
 
 import 'package:common/util.dart';
-import 'package:esys_client/util/numpad.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class HmsPicker extends StatefulWidget {
 
 	final DateTime dateTime;
-	final Function(DateTime) onAccept;
+	final void Function(DateTime) onAccept;
 
 	const HmsPicker({super.key, required this.dateTime, required this.onAccept});
 
@@ -19,8 +18,10 @@ class HmsPicker extends StatefulWidget {
 class HmsPickerState extends State<HmsPicker> {
 
 	late int h,m,s;
-
-	HmsPickerState() {
+	
+	@override
+	void initState() {
+		super.initState();
 		h = widget.dateTime.hour;
 		m = widget.dateTime.minute;
 		s = widget.dateTime.second;
