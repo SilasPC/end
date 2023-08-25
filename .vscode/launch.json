@@ -2,11 +2,18 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "client windows",
+			"name": "windows",
 			"cwd": "endclient",
 			"request": "launch",
 			"type": "dart",
 			"args": ["-d", "win"]
+		},
+		{
+			"name": "android",
+			"cwd": "endclient",
+			"request": "launch",
+			"type": "dart",
+			"args": ["-d", "m200"]
 		},
 		{
 			"name": "client",

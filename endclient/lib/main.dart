@@ -6,11 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'LocalModel.dart';
 
 Future<void> main() async {
-	var m = LocalModel.instance;
-   SharedPreferences.getInstance() // todo: move inside runApp
-      .then((sp) {
-         m.author = sp.getString("author") ?? m.author;
-      });
 	runApp(
 		ChangeNotifierProvider<LocalModel>(
 			create: (_) => LocalModel.instance,
@@ -24,6 +19,11 @@ class MyApp extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
+		var m = LocalModel.instance;
+			SharedPreferences.getInstance()
+				.then((sp) {
+					m.author = sp.getString("author") ?? m.author;
+				});
 		return MaterialApp(
 			theme: ThemeData(
 				colorScheme: ColorScheme.fromSwatch().copyWith(
