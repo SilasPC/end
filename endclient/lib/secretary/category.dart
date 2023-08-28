@@ -27,7 +27,7 @@ class CategoryViewState extends State<CategoryView> {
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
-				var equipages = model.model.categories[widget.cat.name]!.equipages.toList()..sort(Equipage.byRank);
+				var equipages = widget.cat.equipages.toList()..sort(Equipage.byRank);
 				return Container(
 					padding: const EdgeInsets.all(10),
 					child: Column(

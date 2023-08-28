@@ -1,4 +1,5 @@
 
+import 'package:common/consts.dart';
 import 'package:esys_client/util/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
@@ -40,7 +41,7 @@ class EquipagePageState extends State<EquipagePage> {
 		if (widget.equipage.status != EquipageStatus.COOLING) {
 			return null;
 		}
-		int target = widget.equipage.currentLoopData!.arrival! + 20*60; // todo: may change?
+		int target = widget.equipage.currentLoopData!.arrival! + COOL_TIME;
 		return BottomAppBar(
 			child: CountingTimer(target: fromUNIX(target)),
 		);

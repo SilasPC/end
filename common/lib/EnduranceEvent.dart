@@ -1,5 +1,6 @@
 library common;
 
+import 'package:common/consts.dart';
 import 'package:common/util.dart';
 import 'EventModel.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -220,12 +221,15 @@ class ExamEvent extends EnduranceEvent {
 			// regular gate
 			var l = eq.currentLoopData!;
 			l.data = data;
-			// todo: check < 20min if passed
 			if (p && eq.currentLoop! != eq.loops.length - 1) {
 				// next loop
 				var next = eq.currentLoop = eq.currentLoop! + 1;
-				if (l.vet != null)
+				if (l.vet != null) {
 					eq.loops[next].expDeparture = l.vet! + l.loop.restTime * 60;
+				}
+			}
+			if (p && l.vet != null && time > l.vet! + COOL_TIME) {
+				m.model.warnings.add(EventError(m.buildIndex, "${eid} too late to pass exam"));
 			}
 		}
 		eq.updateStatus();
@@ -373,7 +377,7 @@ class DepartureEvent extends EnduranceEvent {
 			return false;
 		}
 		var l = eq.loops[loop];
-		if (time - l.expDeparture! > 15 * 60) {
+		if (time - l.expDeparture! > MAX_DEPART_DELAY) {
 			m.model.warnings.add(EventError(m.buildIndex, "$eid late departure"));
 		}
 		l.departure = time;
