@@ -10,7 +10,7 @@ abstract class Event<M extends IJSON> extends IJSON with EquatableMixin implemen
 
 	Event(this.time, this.kind, this.author);
 
-	bool build(EventModel<M> m);
+	void build(EventModel<M> m);
 
 	int compareTo(Event<M> rhs) {
 		int i = time - rhs.time;

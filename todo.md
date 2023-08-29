@@ -1,5 +1,11 @@
  - warnings in error view
 
+# Production concerns
+ - data integrity
+ - security
+ - performance
+ - uncaught exceptions
+
 # First prototype
  - no client state saving
 

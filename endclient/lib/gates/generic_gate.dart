@@ -26,16 +26,20 @@ class GenericGate extends StatefulWidget {
 
 class _GenericGateState extends State<GenericGate> {
 
+	void doSort() {
+		setState(() {
+			equipages
+				..retainWhere(widget.predicate)
+				..sort(widget.comparator);
+		});
+	}
+
 	List<Equipage> equipages = [];
 
 	Future<void> submit(BuildContext ctx) async {
-		await widget.onSubmit!();
+		await widget.onSubmit?.call();
 		if (mounted) {
-			setState(() {
-				equipages
-					..retainWhere(widget.predicate)
-					..sort(widget.comparator);
-			});
+			doSort();
 		}
 	}
 
@@ -47,7 +51,7 @@ class _GenericGateState extends State<GenericGate> {
 				// representing the equipages for ptr hash/eq
 				// maybe use id instead (but what about widget.predicate /.comparator?)
 				equipages = equipages
-					.map((e) => model.model.equipages[e.eid]!) // todo: assummes no eid disappears
+					.map((e) => model.model.equipages[e.eid]!) // TODO: assummes no eid disappears
 					.toList();
 
 				Set<Equipage> newEquipages =
@@ -74,11 +78,7 @@ class _GenericGateState extends State<GenericGate> {
 				actions: [
 					const ConnectionIndicator(),
 					IconButton(
-						onPressed: () => setState(() {
-							equipages
-								..retainWhere(widget.predicate)
-								..sort(widget.comparator);
-						}),
+						onPressed: doSort,
 						icon: const Icon(Icons.sort),
 					),
 					if (widget.onSubmit != null)

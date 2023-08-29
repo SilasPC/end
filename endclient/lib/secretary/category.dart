@@ -42,7 +42,7 @@ class CategoryViewState extends State<CategoryView> {
 									],
 								)
 							),
-							// todo: make list not automatically reorder on update
+							// TODO: make list not automatically reorder on update
 							Expanded(
 								child: ListView.builder(
 									itemCount: equipages.length,

@@ -36,7 +36,7 @@ class SubmitButtonState extends State<SubmitButton> {
 	
 	@override
 	Widget build(BuildContext context) {
-		// todo: fix icons
+		// TODO: fix icons
 		if (loading) {
 			return Container(
 				padding: const EdgeInsets.all(8),

@@ -51,7 +51,7 @@ void main() {
 			expect(reorder(3, 3, lst()), lst());
 		});
 		test("forwards", () {
-			// todo: not sure how this is supposed to work anyways
+			// TODO: not sure how this is supposed to work anyways
 			//expect(reorder(0, 1, lst()), [1,0,2,3]);
 			//expect(reorder(0, 4, lst()), [1,2,3,0]);
 		});

@@ -40,7 +40,7 @@ class _TimingListGateState extends State<TimingListGate> {
 				Set<Equipage> oldEquipages = equipages.toSet();
 				equipages.addAll(newEquipages.difference(oldEquipages));
 
-				oldEquipages.difference(newEquipages); // todo: invalidate these
+				// oldEquipages.difference(newEquipages); // TODO: invalidate these
 				
 				return Scaffold(
 					appBar: AppBar(

@@ -31,7 +31,6 @@ Future<void> main() async {
 
 	var handle = Handle();
 	em = EventModel(handle);
-	handle.model = em;
 	em.add(evs);
 
 	// await saveCSV();
@@ -62,8 +61,6 @@ void setJsonAck<T extends IJSON>(dynamic client, String msg, FutureOr<T?>? Funct
 
 class Handle extends EventModelHandle<Model> {
 
-	late EventModel<Model> model;
-
 	@override
 	Model createModel() => Model();
 
@@ -86,7 +83,7 @@ Future<List<EnduranceEvent>> loadEventsFromFile(String fileName) async {
 	return jlist_map(json, eventFromJSON);
 }
 
-// todo: complete this
+// TODO: complete this
 Future<void> saveCSV() async {
 	await File("../results.csv").writeAsString(em.model.toResultCSV(), flush: true);
 }

@@ -40,7 +40,6 @@ class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 
 		var h = Handle();
 		var lm = LocalModel.__(h, conn.sendSync);
-		h.m = lm;
 		lm.connection = conn;
       conn.onConnect = () => lm.sync();
       conn.onPush = (push) => lm.add(push.events, push.deletes);
@@ -52,8 +51,6 @@ class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 
 class Handle extends EventModelHandle<Model> {
 
-	LocalModel? m;
-
 	Handle();
 
 	@override
@@ -62,7 +59,7 @@ class Handle extends EventModelHandle<Model> {
 	Model revive(JSON json) => Model.fromJson(json);
 	@override
 	void didUpdate() {
-		m?.notifyListeners();
+		(model as LocalModel).notifyListeners();
 	}
 }
 

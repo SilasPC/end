@@ -3,4 +3,7 @@
 	"editor.tabSize": 3,
 	"editor.detectIndentation": false,
 	"editor.insertSpaces": false,
+	"todo-list.enableTelemetry": false,
+	"todo-list.expression": "(?:/{2,}\\s+)([A-Z]+):\\s+(.+)$",
+	"todo-list.exclude": "{**/dist/**,**/build/**,**/.vscode/**,**/_output/**,**/vendor/**,**/*.min.*,**/*.map,**/.dart_tool/**}",
 }

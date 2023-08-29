@@ -25,7 +25,7 @@ class _ExamPageState extends State<ExamPage> {
          comparator: Equipage.byClassAndEid,
          predicate: (eq) => eq.status == EquipageStatus.VET,
          onSubmit: null,
-         builder: (eq, ok) { // todo: use ok
+         builder: (eq, ok) { // TODO: use ok
 				int? vet = eq.currentLoopData?.vet;
 
 				return EquipageTile(
@@ -40,7 +40,7 @@ class _ExamPageState extends State<ExamPage> {
 									context,
 									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq))
 								);
-								// todo: trigger gate to reset (?)
+								// TODO: trigger gate to reset (?)
 							}
 						)
 					]

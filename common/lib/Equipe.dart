@@ -116,7 +116,7 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 						if (loopDists != null && loopDists.isNotEmpty) {
 							int sum = loopDists.reduce((a,b) => a+b);
 							if (sum > cat.distance())
-								cat.loops = loopDists.map((d) => Loop(d, 40)).toList(); // todo: assummed 40 min breaks
+								cat.loops = loopDists.map((d) => Loop(d, 40)).toList(); // TODO: assummed 40 min breaks
 						}
 						
 					} catch (e) {

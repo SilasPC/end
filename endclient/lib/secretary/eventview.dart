@@ -61,9 +61,10 @@ class _EventViewState extends State<EventView> {
 	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
-			// todo: use Selector
+			// TODO: use Selector
 			builder: (context, value, child) {
 
+				// TODO: index here does not correspond to filtered index
 				Map<int, EventError> errs = {};
 				for (var err in value.model.errors) {
 					errs[err.causedBy] = err;

@@ -60,6 +60,7 @@ class SyncResult<M extends IJSON> extends IJSON {
 }
 
 abstract class EventModelHandle<M extends IJSON> {
+	late EventModel<M> model;
 	M revive(JSON json);
 	M createModel();
 	void willUpdate() {}
@@ -79,6 +80,7 @@ class EventModel<M extends IJSON> {
    int get buildIndex => _buildIndex;
 
 	EventModel(this._handle) {
+		_handle.model = this;
 		model = _handle.createModel();
 		createSavepoint();
 	}
@@ -142,7 +144,7 @@ class EventModel<M extends IJSON> {
 	SyncInfo get syncState => SyncInfo(events.length, deletes.length);
 
 	void _killSavepointsAfter(int evLen) {
-		// todo: binary search, correct <= ?
+		// TODO: binary search, correct <= ?
 		int i = savepoints.lastIndexWhere((sp) => sp.si.evLen <= evLen);
 		//int i = binarySearchLast(savepoints, (sp) => sp.si.evLen < evLen);
 		savepoints.removeRange(i + 1, savepoints.length);

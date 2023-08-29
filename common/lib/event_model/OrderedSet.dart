@@ -37,7 +37,7 @@ class OrderedSet<T> {
 
 	int? findOrdIndex(T t) {
 		int i = _byOrd.indexWhere((e) => _cmp(e.a, t) == 0);
-		// todo: fix
+		// TODO: fix
 		//int i = binarySearch(_byOrd, (t0) => _cmp(t0.a,t) < 0);
 		if (i == -1) return null;
 		if (_cmp(_byOrd[i].a,t) == 0) return i;

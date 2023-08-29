@@ -83,7 +83,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 	Widget tabView(Model model) => TabBarView(
 		children: [
 			Container(
-				padding: const EdgeInsets.all(10), // todo fix
+				padding: const EdgeInsets.all(10),
 				child: Column(
 					children: [
 						headerCard(model.rideName),

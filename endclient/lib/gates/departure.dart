@@ -36,17 +36,17 @@ class _DeparturePageState extends State<DeparturePage> {
 	Widget build(BuildContext ctx) =>
       GenericGate(
          title: TextClock.withPrefix("Departure gate | "),
-         comparator: Equipage.byEid, // todo: by departure
+         comparator: Equipage.byEid, // TODO: by departure
          predicate: (e) => e.status == EquipageStatus.RESTING,
          onSubmit: () => submit(ctx),
          submitDisabled: timers.isEmpty,
-         builder: (eq, ok) => // todo: use ok
+         builder: (eq, ok) => // TODO: use ok
             EquipageTile(
                eq,
                trailing: [
-                  if (!timers.containsKey(eq.eid))
+                  if (!timers.containsKey(eq.eid) && ok)
                   CountingTimer(
-                     target: fromUNIX(eq.loops[eq.currentLoop!].expDeparture!)
+                     target: fromUNIX(eq.currentLoopData!.expDeparture!)
                   ),
                   TimeLock(
                      time: timers[eq.eid],

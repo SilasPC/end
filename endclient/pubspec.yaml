@@ -23,6 +23,7 @@ dependencies:
   numberpicker: ^2.1.2
   bottom_drawer: ^0.0.5
   locally: ^1.0.5
+  marquee: ^2.2.3
 
 dev_dependencies:
   flutter_test:

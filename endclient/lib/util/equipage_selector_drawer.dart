@@ -24,10 +24,18 @@ class _EquipageSelectorDrawerState extends State<EquipageSelectorDrawer> {
 	@override
 	Widget build(BuildContext context) =>
 		BottomAppBar(
-			child: ConstrainedBox(
+			child: !shown
+				? ElevatedButton(
+					child: Text(shown ? "Hide more" : "Show more"),
+					onPressed: () => setState(() {
+						shown ^= true;
+					}),
+				)
+				:
+			ConstrainedBox(
 				constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * widget.heightFactor),
-				child: ListView(
-					shrinkWrap: true,
+				child: Column(
+					crossAxisAlignment: CrossAxisAlignment.stretch,
 					children: [
 						ElevatedButton(
 							child: Text(shown ? "Hide more" : "Show more"),
@@ -35,16 +43,21 @@ class _EquipageSelectorDrawerState extends State<EquipageSelectorDrawer> {
 								shown ^= true;
 							}),
 						),
-						if (shown)
-						for (var eq in Provider.of<LocalModel>(context).model.equipages.values)
-						EquipageTile(eq, trailing: [
-							IconButton(
-								icon: const Icon(Icons.add),
-								onPressed: () => widget.onTab(eq),
-							)
-						],)
+						Expanded(
+							child: ListView(
+								children: [
+									for (var eq in Provider.of<LocalModel>(context).model.equipages.values)
+									EquipageTile(eq, trailing: [
+										IconButton(
+											icon: const Icon(Icons.add),
+											onPressed: () => widget.onTab(eq),
+										)
+									],)
+								],
+							),
+						),
 					],
-				),
+				)
 			)
 		);
 }
