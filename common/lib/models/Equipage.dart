@@ -16,6 +16,20 @@ enum EquipageStatus {
 	RESTING,
 	RETIRED;
 
+	/// indicates equipage failed to complete competition
+	bool get isOut =>
+		this == EquipageStatus.DNF || this == EquipageStatus.RETIRED;
+	
+	/// indicates equipage successfully completed competition
+	bool get isFinished =>
+		this == EquipageStatus.FINISHED;
+		
+	/// indicates equipage no longer competing
+	bool get isEnded =>
+		this == EquipageStatus.DNF ||
+		this == EquipageStatus.FINISHED ||
+		this == EquipageStatus.RETIRED;
+
 	String toJson() => name;
 	factory EquipageStatus.fromJson(dynamic status) =>
 		EquipageStatus.values.byName(status as String);
@@ -44,18 +58,11 @@ class Equipage extends IJSON {
 		currentLoop == null ? null : loops[currentLoop!];
 
 	/// indicates this equipage failed to complete competition
-	bool get isOut =>
-		status == EquipageStatus.DNF || status == EquipageStatus.RETIRED;
-	
+	bool get isOut => status.isOut;
 	/// indicates this equipage successfully completed competition
-	bool get isFinished =>
-		status == EquipageStatus.FINISHED;
-		
+	bool get isFinished => status.isFinished;
 	/// indicates this equipage no longer competing
-	bool get isEnded =>
-		status == EquipageStatus.DNF ||
-		status == EquipageStatus.FINISHED ||
-		status == EquipageStatus.RETIRED;
+	bool get isEnded => status.isEnded;
 
 	double? averageSpeed() {
 		if (loops.isEmpty)

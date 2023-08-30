@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';
@@ -20,9 +21,45 @@ class EquipagePage extends StatefulWidget {
 
 class EquipagePageState extends State<EquipagePage> {
 
+	late EquipageStatus _prevStatus;
+
+	@override
+	void initState() {
+		super.initState();
+		_prevStatus = widget.equipage.status;
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		Provider.of<LocalModel>(context);
+
+		if (_prevStatus != widget.equipage.status) {
+			_prevStatus = widget.equipage.status;
+			String? msg;
+			switch (_prevStatus) {
+				case EquipageStatus.COOLING:
+					var time = widget.equipage.currentLoopData?.arrival;
+					if (time == null) break;
+					msg = "Exam attendance before ${unixHMS(time + COOL_TIME)}";
+					break;
+				case EquipageStatus.RESTING:
+					var time = widget.equipage.currentLoopData?.expDeparture;
+					if (time == null) break;
+					msg = "Departure time ${unixHMS(time)}";
+					break;
+				default:
+			}
+			if (msg != null) {
+				int loop = widget.equipage.currentLoop! + 1;
+				Locally(
+					context: context,
+					pageRoute: MaterialPageRoute(builder: (_) => widget),
+					payload: "wutisdis",
+					appIcon: "mipmap/ic_launcher",
+				).show(title: "Status loop $loop", message: msg);
+			}
+		}
+
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Equipage"),
