@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:provider/provider.dart';
+
+import '../LocalModel.dart';
 
 class EquipagePage extends StatefulWidget {
 
@@ -18,8 +21,9 @@ class EquipagePage extends StatefulWidget {
 class EquipagePageState extends State<EquipagePage> {
 
 	@override
-	Widget build(BuildContext context) =>
-		Scaffold(
+	Widget build(BuildContext context) {
+		Provider.of<LocalModel>(context);
+		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Equipage"),
 			),
@@ -36,6 +40,7 @@ class EquipagePageState extends State<EquipagePage> {
 				)
 			)
 		);
+	}
 
 	Widget? bottomBar() {
 		if (widget.equipage.status != EquipageStatus.COOLING) {

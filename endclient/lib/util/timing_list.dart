@@ -20,6 +20,7 @@ class TimingList extends StatelessWidget {
 		Row(
 			children: [
 				Expanded(
+					// TODO: this scrolls seperately to below listview
 					child: ReorderableListView(
 						onReorder: onReorder,
 						children: children,
