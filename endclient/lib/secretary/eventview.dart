@@ -94,7 +94,13 @@ class _EventViewState extends State<EventView> {
 												onLongPress: () {
 													value.addSync([], [e]);
 												},
-												leading: Text(unixHMS(e.time)),
+												leading: Column(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                          Text(unixHMS(e.time)),
+                                          Text(e.author, style: const TextStyle(color: Colors.grey)),
+                                       ]
+                                    ),
 												title: Text(e.runtimeType.toString()),
 												subtitle: Text(e.toString(), overflow: TextOverflow.fade),
 												trailing: err != null

@@ -46,7 +46,10 @@ class Category extends IJSON {
 	}
 
 	JSON toJson() => _$CategoryToJson(this);
-	factory Category.fromJson(JSON json) =>
-		_$CategoryFromJson(json);
+	factory Category.fromJson(JSON json) {
+		var self = _$CategoryFromJson(json);
+      self.equipages.sort(Equipage.byEid);
+      return self;
+   }
 	
 }

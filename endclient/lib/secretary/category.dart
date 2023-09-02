@@ -27,7 +27,8 @@ class CategoryViewState extends State<CategoryView> {
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
-				var equipages = widget.cat.equipages.toList()..sort(Equipage.byRank);
+				var eqs = widget.cat.equipages;
+				var rankOf = sortIndexMap(eqs, Equipage.byRank);
 				return Container(
 					padding: const EdgeInsets.all(10),
 					child: Column(
@@ -45,9 +46,9 @@ class CategoryViewState extends State<CategoryView> {
 							// TODO: make list not automatically reorder on update
 							Expanded(
 								child: ListView.builder(
-									itemCount: equipages.length,
+									itemCount: eqs.length,
 									itemBuilder: (context, i) {
-										var eq = equipages[i];
+										var eq = eqs[i];
 										return Card(
 											child: EquipageTile(
 													eq,
@@ -56,7 +57,7 @@ class CategoryViewState extends State<CategoryView> {
 															builder: (_) => EquipagePage(eq)
 														)),
 													leading: CircleAvatar(
-														child: eq.isOut ? const Text("DNF") : Text(" ${i+1}."),
+														child: eq.isOut ? const Text("DNF") : Text(" ${rankOf[i]+1}."),
 													),
 													trailing: [createEquipagePopupMenu(eq, context)],
 												),

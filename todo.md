@@ -1,4 +1,8 @@
  - warnings in error view
+ - single starts for intro rides
+ - equipe upload
+ - client event storage
+ - confirm closing with unsaved data
 
 # Production concerns
  - data integrity
@@ -6,17 +10,16 @@
  - performance
  - uncaught exceptions
 
-# First prototype
- - no client state saving
-
 # Immediate todos
  - todo's
  - Fix overflows
  - Post ride results
+ - Previous vet data
 
 # Future
+ - Tablet layout
+ - Multiple gate interface choices
  - Isolate mutable model
- - Edit events (?)
  - Device auth
  - Security
  - Auto events

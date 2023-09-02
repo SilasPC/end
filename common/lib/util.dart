@@ -134,3 +134,17 @@ List<T> swap<T>(int i, int j, List<T> lst) {
 	lst[j] = e;
 	return lst;
 }
+
+/// Returns an index mapping `map`, such that the index of `list[i]`,
+/// where it to be sorted, would be `list[map[i]]`.
+/// 
+/// Thus the map provides the actual index the elements would recieve if sorted.
+List<int> sortIndexMap<T>(List<T> list, Comparator<T> cmp) {
+	var indices = List.generate(list.length, (index) => index)
+		..sort((a, b) => cmp(list[a], list[b]));
+	var map = List.filled(list.length, 0);
+	for (int i = 0; i < list.length; i++) {
+		map[indices[i]] = i;
+	}
+	return map;
+}
