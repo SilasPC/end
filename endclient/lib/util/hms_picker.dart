@@ -29,6 +29,7 @@ class HmsPickerState extends State<HmsPicker> {
 
 	@override
 	Widget build(BuildContext context) =>
+		// TODO: state updates act wierd
 		Row(
 			mainAxisAlignment: MainAxisAlignment.center,
 			children: [
