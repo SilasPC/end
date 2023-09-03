@@ -6,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'LocalModel.dart';
 
 Future<void> main() async {
+	FlutterError.onError = (details) {
+		FlutterError.presentError(details);
+		// TODO: do something with these
+	};
 	runApp(
 		ChangeNotifierProvider<LocalModel>(
 			create: (_) => LocalModel.instance,

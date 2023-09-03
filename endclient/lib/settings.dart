@@ -47,6 +47,11 @@ class _SettingsPageState extends State<SettingsPage> {
 						title: const Text("Resync"),
 						onTap: () => LocalModel.instance.resetSync(),
 					),
+					ListTile(
+						leading: const Icon(Icons.bluetooth),
+						title: const Text("Bluetooth sync"),
+						onTap: () {} // TODO: add bluetooth sync
+					),
 					const ListTile(
 						title: Text("Administration"),
 						dense: true,
