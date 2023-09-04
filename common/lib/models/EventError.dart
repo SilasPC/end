@@ -4,7 +4,6 @@ import '../util.dart';
 
 part "EventError.g.dart";
 
-// TODO: make enum of errors
 @JsonSerializable()
 class EventError extends IJSON {
 

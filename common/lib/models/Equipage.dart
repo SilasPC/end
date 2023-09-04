@@ -64,6 +64,9 @@ class Equipage extends IJSON {
 	/// indicates this equipage no longer competing
 	bool get isEnded => status.isEnded;
 
+	/// indicates whether the equipage is on their final loop
+	bool get isFinalLoop => currentLoop != null && currentLoop == category.loops.length - 1;
+
 	double? averageSpeed() {
 		if (loops.isEmpty)
 			return null;

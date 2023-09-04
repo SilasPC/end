@@ -1,9 +1,12 @@
 
+import 'dart:io';
+
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'LocalModel.dart';
 import 'util/input_modals.dart';
@@ -50,7 +53,12 @@ class _SettingsPageState extends State<SettingsPage> {
 					ListTile(
 						leading: const Icon(Icons.bluetooth),
 						title: const Text("Bluetooth sync"),
-						onTap: () {} // TODO: add bluetooth sync
+						onTap: () {}, // TODO: add bluetooth sync
+					),
+					ListTile(
+						leading: const Icon(Icons.data_array),
+						title: const Text("Save CSV"),
+						onTap: () => saveCSV(context),
 					),
 					const ListTile(
 						title: Text("Administration"),
@@ -64,14 +72,11 @@ class _SettingsPageState extends State<SettingsPage> {
 						title: const Text("Load model..."),
 						onTap: () => loadModel(context),
 					),
-
-
-
 				],
 			),
 		);
 
-		Future<void> loadModel(BuildContext context) async {
+		static Future<void> loadModel(BuildContext context) async {
 			var meets = await loadRecentMeetings();
 			var m = LocalModel.instance;
 			// ignore: use_build_context_synchronously
@@ -91,4 +96,15 @@ class _SettingsPageState extends State<SettingsPage> {
 				}
 			);
 		}
+
+	static Future<void> saveCSV(BuildContext context) async {
+		var sm = ScaffoldMessenger.of(context);
+		var dir = await getApplicationDocumentsDirectory();
+		var file = File("${dir.path}/endurance.csv");
+		var data = LocalModel.instance.model.toResultCSV();
+		await file.writeAsString(data);
+		sm.showSnackBar(const SnackBar(
+			content: Text("Saved CSV results"),
+		));
+	}
 }

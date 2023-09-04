@@ -1,6 +1,7 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/gates/exam_data.dart';
+import 'package:esys_client/gates/gate_controller.dart';
 import 'package:esys_client/gates/generic_gate.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/timer.dart';
@@ -18,13 +19,16 @@ class ExamPage extends StatefulWidget {
 
 class _ExamPageState extends State<ExamPage> {
 
+	final GateController _ctrl = GateController();
+
 	@override
 	Widget build(BuildContext context) =>
       GenericGate(
          title: TextClock.withPrefix("Exam gate | "),
-         comparator: Equipage.byClassAndEid,
+         comparator: comparator,
          predicate: (eq) => eq.status == EquipageStatus.VET,
          onSubmit: null,
+			controller: _ctrl,
          builder: (eq, ok) { // TODO: use ok
 				int? vet = eq.currentLoopData?.vet;
 
@@ -40,12 +44,20 @@ class _ExamPageState extends State<ExamPage> {
 									context,
 									MaterialPageRoute(builder: (context) => ExamDataPage(equipage: eq))
 								);
-								// TODO: trigger gate to reset (?)
+								_ctrl.refresh();
 							}
 						)
 					]
 				);
 			}
       );
+
+		static int comparator(Equipage a, Equipage b) {
+			bool af = a.isFinalLoop, bf = b.isFinalLoop;
+			if (af != bf) {
+				return af ? -1 : 1;
+			}
+			return a.compareClassAndEid(b);
+		}
 
 }

@@ -36,7 +36,7 @@ class _DeparturePageState extends State<DeparturePage> {
 	Widget build(BuildContext ctx) =>
       GenericGate(
          title: TextClock.withPrefix("Departure gate | "),
-         comparator: Equipage.byEid, // TODO: by departure
+         comparator: comparator,
          predicate: (e) => e.status == EquipageStatus.RESTING,
          onSubmit: () => submit(ctx),
          submitDisabled: timers.isEmpty,
@@ -57,5 +57,12 @@ class _DeparturePageState extends State<DeparturePage> {
                ],
             )
       );
+
+	static int comparator(Equipage a, Equipage b) {
+		int ad = a.currentLoopData?.expDeparture ?? UNIX_FUTURE;
+		int bd = b.currentLoopData?.expDeparture ?? UNIX_FUTURE;
+		int dif = ad - bd;
+		return dif == 0 ? a.eid - b.eid : dif;
+	}
 
 }

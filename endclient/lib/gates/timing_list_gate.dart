@@ -14,22 +14,50 @@ import 'package:common/models/glob.dart';
 import '../LocalModel.dart';
 import '../util/submit_button.dart';
 import '../util/timing_list.dart';
+import 'gate_controller.dart';
 
 class TimingListGate extends StatefulWidget {
 
 	final Widget title;
 	final Future<void> Function(List<Equipage> equipages, List<DateTime> times) submit;
 	final Predicate<Equipage> predicate;
-	const TimingListGate({required this.title, required this.predicate, required this.submit, super.key});
+	final GateController? controller;
+	const TimingListGate({
+		super.key,
+		required this.title,
+		required this.predicate,
+		required this.submit,
+		this.controller,
+	});
 
 	@override
 	State<TimingListGate> createState() => _TimingListGateState();
 }
 
-class _TimingListGateState extends State<TimingListGate> {
+class _TimingListGateState extends State<TimingListGate> implements GateState {
 
 	List<Equipage> equipages = [];
 	TimerList timerList = TimerList();
+
+	@override
+	void initState() {
+		super.initState();
+		widget.controller?.state = this;
+	}
+
+	@override
+	void refresh() {
+		if (!mounted) return;
+		setState(() {
+			for (int i = equipages.length; i >= 0; i--) {
+				if (widget.predicate(equipages[i])) continue;
+				equipages.removeAt(i);
+				if (i < timerList.length) {
+					timerList.times.removeAt(i);
+				}
+			}
+		});
+	}
 
 	@override
 	Widget build(BuildContext ctx) =>

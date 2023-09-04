@@ -1,12 +1,12 @@
 
-import 'package:common/util.dart';
-import 'package:esys_client/util/connection_indicator.dart';
-import 'package:esys_client/util/equipage_selector_drawer.dart';
-import 'package:esys_client/util/submit_button.dart';
 import 'package:flutter/material.dart';
-import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
-
+import 'package:common/models/glob.dart';
+import 'package:common/util.dart';
+import 'gate_controller.dart';
+import '../util/connection_indicator.dart';
+import '../util/equipage_selector_drawer.dart';
+import '../util/submit_button.dart';
 import '../LocalModel.dart';
 
 class GenericGate extends StatefulWidget {
@@ -17,16 +17,34 @@ class GenericGate extends StatefulWidget {
 	final Comparator<Equipage> comparator;
 	final Predicate<Equipage> predicate;
 	final Widget Function(Equipage, bool) builder;
+	final GateController? controller;
 
-	const GenericGate({super.key, required this.title, required this.comparator, required this.predicate, required this.onSubmit, this.submitDisabled = false, required this.builder});
+	GenericGate({
+		super.key,
+		required this.title,
+		required this.comparator,
+		required this.predicate,
+		required this.onSubmit,
+		this.submitDisabled = false,
+		this.controller,
+		required this.builder
+	});
 
 	@override
 	State<GenericGate> createState() => _GenericGateState();
 }
 
-class _GenericGateState extends State<GenericGate> {
+class _GenericGateState extends State<GenericGate> implements GateState {
 
-	void doSort() {
+	@override
+	void initState() {
+		super.initState();
+		widget.controller?.state = this;
+	}
+
+	@override
+	void refresh() {
+		if (!mounted) return;
 		setState(() {
 			equipages
 				..retainWhere(widget.predicate)
@@ -38,9 +56,7 @@ class _GenericGateState extends State<GenericGate> {
 
 	Future<void> submit(BuildContext ctx) async {
 		await widget.onSubmit?.call();
-		if (mounted) {
-			doSort();
-		}
+		refresh();
 	}
 
 	Widget buildList(BuildContext ctx) =>
@@ -51,7 +67,7 @@ class _GenericGateState extends State<GenericGate> {
 				// representing the equipages for ptr hash/eq
 				// maybe use id instead (but what about widget.predicate /.comparator?)
 				equipages = equipages
-					.map((e) => model.model.equipages[e.eid]!) // TODO: assummes no eid disappears
+					.map((e) => model.model.equipages[e.eid]!)
 					.toList();
 
 				Set<Equipage> newEquipages =
@@ -78,7 +94,7 @@ class _GenericGateState extends State<GenericGate> {
 				actions: [
 					const ConnectionIndicator(),
 					IconButton(
-						onPressed: doSort,
+						onPressed: refresh,
 						icon: const Icon(Icons.sort),
 					),
 					if (widget.onSubmit != null)
