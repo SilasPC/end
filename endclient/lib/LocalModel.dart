@@ -43,6 +43,7 @@ class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 		lm.connection = conn;
       conn.onConnect = () => lm.sync();
       conn.onPush = (push) => lm.add(push.events, push.deletes);
+		conn.onReset = () => lm.resetSync();
 
 		return lm;
 	}
@@ -67,9 +68,11 @@ abstract class ServerConnection {
 	ServerConnection({
 		VoidCallback? onConnect, onDisconnect,
 		void Function(SyncPush<Model>)? onPush,
+		VoidCallback? onReset,
 	});
 	final ValueNotifier<bool> status = ValueNotifier(false);
 	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req);
+	void sendReset();
 }
 
 class MockServer extends ServerConnection {
@@ -86,6 +89,9 @@ class MockServer extends ServerConnection {
 	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req)
 		=> Future.value(req.applyTo(model));
 
+	@override
+	void sendReset() async => model.reset();
+
 }
 
 class SocketServer extends ServerConnection {
@@ -101,7 +107,7 @@ class SocketServer extends ServerConnection {
 
 	io.Socket? _socket;
 
-	VoidCallback? onConnect, onDisconnect;
+	VoidCallback? onConnect, onDisconnect, onReset;
 	void Function(SyncPush<Model> push)? onPush;
 
 	@override
@@ -112,6 +118,9 @@ class SocketServer extends ServerConnection {
 		});
 		return c.future;
 	}
+
+	@override
+	void sendReset() async => _socket!.emit("reset");
 
 	SocketServer({this.onConnect, this.onDisconnect, this.onPush}) {
 		_initSocket();

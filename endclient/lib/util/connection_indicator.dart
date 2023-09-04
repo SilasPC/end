@@ -15,7 +15,7 @@ class ConnectionIndicator extends StatelessWidget {
 				LocalModel.instance.connection.status.value
 					? Container()
 					: IconButton(
-						color: Colors.amber,
+						color: Colors.red,
 						onPressed: (){},
 						icon: const Icon(Icons.sync_problem),
 					)

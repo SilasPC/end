@@ -65,8 +65,8 @@ class _SettingsPageState extends State<SettingsPage> {
 						dense: true,
 					),
 					ListTile(
-						title: const Text("Reset remote model"),
-						onTap: () {}
+						title: const Text("Reset remote"),
+						onTap: () => LocalModel.instance.connection.sendReset(),
 					),
 					ListTile(
 						title: const Text("Load model..."),
@@ -79,19 +79,18 @@ class _SettingsPageState extends State<SettingsPage> {
 		static Future<void> loadModel(BuildContext context) async {
 			var meets = await loadRecentMeetings();
 			var m = LocalModel.instance;
-			// ignore: use_build_context_synchronously
 			showChoicesModal(
 				context,
-				["DEMO"]..addAll(meets.map((e) => e.name)),
+				["DEMO", ...meets.map((e) => e.name)],
 				(name) async {
 					m.reset();
 					if (name == "DEMO") {
-						m.add(demoInitEvent(nowUNIX()+300));
+						m.addSync(demoInitEvent(nowUNIX()+300));
 						return;
 					}
 					var meet = meets.firstWhere((e) => e.name == name);
 					var evs = await loadModelEvents(meet.id);
-					m.add(evs);
+					m.addSync(evs);
 					return;
 				}
 			);

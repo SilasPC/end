@@ -61,7 +61,6 @@ class _EventViewState extends State<EventView> {
 	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
-			// TODO: use Selector
 			builder: (context, value, child) {
 
 				// TODO: index here does not correspond to filtered index

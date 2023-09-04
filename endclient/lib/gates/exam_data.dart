@@ -6,6 +6,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
 import '../LocalModel.dart';
+import '../equipage/equipage_tile.dart';
 
 class ExamDataPage extends StatefulWidget {
 
@@ -35,12 +36,12 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	@override
 	Widget build(BuildContext context) =>
 		Scaffold(
-			// TODO: make cooldown time available to see
 			appBar: AppBar(
 				title: Text("${widget.equipage.eid} ${widget.equipage.rider}"),
 			),
 			body:	Column(
 				children: [
+					// TODO: show cooldown time, previous data
 					Expanded(
 						child: GridView.count(
 							padding: const EdgeInsets.all(10),

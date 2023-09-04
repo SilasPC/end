@@ -33,8 +33,6 @@ Future<void> main() async {
 	em = EventModel(handle);
 	em.add(evs);
 
-	// await saveCSV();
-
 	io = Server();
 	io.on("connection", (client) {
 		setJsonAck(client, "sync", (json) {
@@ -42,6 +40,10 @@ Future<void> main() async {
 			var res = sr.applyTo(em);
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 			return res;
+		});
+		client.on("reset", () {
+			em.reset();
+			client.broadcast.emit("reset");
 		});
 	});
 	io.listen(3000);
@@ -81,9 +83,4 @@ class Handle extends EventModelHandle<Model> {
 Future<List<EnduranceEvent>> loadEventsFromFile(String fileName) async {
 	var json = jsonDecode(await File("../$fileName.events.json").readAsString());
 	return jlist_map(json, eventFromJSON);
-}
-
-// TODO: complete this
-Future<void> saveCSV() async {
-	await File("../results.csv").writeAsString(em.model.toResultCSV(), flush: true);
 }

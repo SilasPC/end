@@ -28,17 +28,19 @@ class MyApp extends StatelessWidget {
 				.then((sp) {
 					m.author = sp.getString("author") ?? m.author;
 				});
+
+		var cs = ColorScheme.fromSwatch().copyWith(
+			primary: const Color.fromARGB(255, 98, 85, 115),
+			secondary: const Color.fromARGB(255, 146, 119, 68),
+		);
+
 		return MaterialApp(
-			theme: ThemeData(
-				colorScheme: ColorScheme.fromSwatch().copyWith(
-					primary: const Color.fromARGB(255, 98, 85, 115),
-					secondary: const Color.fromARGB(255, 146, 119, 68),
-				)
-			),
+			theme: ThemeData(colorScheme: cs),
 			title: 'Endurance',
 			debugShowCheckedModeBanner: false,
 			darkTheme: ThemeData.dark(),
 			home: const LandingPage(),
 		);
 	}
+
 }
