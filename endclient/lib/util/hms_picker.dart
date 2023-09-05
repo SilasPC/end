@@ -29,44 +29,46 @@ class HmsPickerState extends State<HmsPicker> {
 
 	@override
 	Widget build(BuildContext context) =>
-		// TODO: state updates act wierd
-		Row(
-			mainAxisAlignment: MainAxisAlignment.center,
-			children: [
-				NumberPicker(
-					value: h,
-					minValue: 0,
-					maxValue: 23,
-					zeroPad: true,
-					infiniteLoop: true,
-					onChanged: (n) => setState(() { h = n; }),
-				),
-				NumberPicker(
-					value: m,
-					minValue: 0,
-					maxValue: 59,
-					zeroPad: true,
-					infiniteLoop: true,
-					onChanged: (n) => setState(() { m = n; }),
-				),
-				NumberPicker(
-					value: s,
-					minValue: 0,
-					maxValue: 59,
-					zeroPad: true,
-					infiniteLoop: true,
-					onChanged: (n) => setState(() { s = n; }),
-				),
-				Column(
-					mainAxisAlignment: MainAxisAlignment.center,
-					children: [
-						ElevatedButton(
-							child: const Text("OK"),
-							onPressed: () => widget.onAccept(fromHMS(h,m,s)),
-						)
-					],
-				)
-			]
+		SizedBox(
+			height: 200,
+			child: Row(
+				mainAxisAlignment: MainAxisAlignment.center,
+				children: [
+					NumberPicker(
+						value: h,
+						minValue: 0,
+						maxValue: 23,
+						zeroPad: true,
+						infiniteLoop: true,
+						onChanged: (n) => setState(() { h = n; }),
+					),
+					NumberPicker(
+						value: m,
+						minValue: 0,
+						maxValue: 59,
+						zeroPad: true,
+						infiniteLoop: true,
+						onChanged: (n) => setState(() { m = n; }),
+					),
+					NumberPicker(
+						value: s,
+						minValue: 0,
+						maxValue: 59,
+						zeroPad: true,
+						infiniteLoop: true,
+						onChanged: (n) => setState(() { s = n; }),
+					),
+					Column(
+						mainAxisAlignment: MainAxisAlignment.center,
+						children: [
+							ElevatedButton(
+								child: const Text("OK"),
+								onPressed: () => widget.onAccept(fromHMS(h,m,s)),
+							)
+						],
+					)
+				]
+			)
 		);
 
 }

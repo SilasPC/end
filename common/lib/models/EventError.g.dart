@@ -13,6 +13,6 @@ EventError _$EventErrorFromJson(Map<String, dynamic> json) => EventError(
 
 Map<String, dynamic> _$EventErrorToJson(EventError instance) =>
     <String, dynamic>{
-      'description': instance.description,
       'causedBy': instance.causedBy,
+      'description': instance.description,
     };

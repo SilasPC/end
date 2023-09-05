@@ -17,6 +17,7 @@ Map<String, dynamic> _$LoopToJson(Loop instance) => <String, dynamic>{
     };
 
 Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
+      json['equipeId'] as int?,
       json['name'] as String,
       (json['loops'] as List<dynamic>)
           .map((e) => Loop.fromJson(e as Map<String, dynamic>))
@@ -26,9 +27,19 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
         .map((e) => Equipage.fromJson(e as Map<String, dynamic>))
         .toList();
 
-Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
-      'name': instance.name,
-      'loops': instance.loops,
-      'equipages': instance.equipages,
-      'startTime': instance.startTime,
-    };
+Map<String, dynamic> _$CategoryToJson(Category instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('equipeId', instance.equipeId);
+  val['name'] = instance.name;
+  val['loops'] = instance.loops;
+  val['equipages'] = instance.equipages;
+  val['startTime'] = instance.startTime;
+  return val;
+}

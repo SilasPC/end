@@ -120,7 +120,10 @@ class SocketServer extends ServerConnection {
 	}
 
 	@override
-	void sendReset() async => _socket!.emit("reset");
+	void sendReset() {
+		if (!_socket!.connected) return;
+		_socket!.emit("reset");
+	}
 
 	SocketServer({this.onConnect, this.onDisconnect, this.onPush}) {
 		_initSocket();

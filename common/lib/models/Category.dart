@@ -20,11 +20,12 @@ class Loop extends IJSON {
 
 @JsonSerializable()
 class Category extends IJSON {
+	int? equipeId;
 	String name;
 	List<Loop> loops;
 	List<Equipage> equipages;
 	int startTime;
-	Category(this.name, this.loops, this.startTime) :
+	Category(this.equipeId, this.name, this.loops, this.startTime) :
 		equipages = [];
 
 	int numDNF() =>

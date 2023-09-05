@@ -2,9 +2,11 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/util/EquipeIcons.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../LocalModel.dart';
 import '../equipage/equipage.dart';
@@ -37,9 +39,27 @@ class CategoryViewState extends State<CategoryView> {
 								child: Column(
 									children: [
 										cardHeader(context, widget.cat.name, color: const Color.fromARGB(255, 98, 85, 115)),
-										const SizedBox(height: 7,),
-										Text("Loops: ${widget.cat.loops.map((l) => l.distance).join(", ")}"),
-										const SizedBox(height: 7,)
+										Padding(
+											padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+											child: Row(
+												mainAxisAlignment: MainAxisAlignment.spaceBetween,
+												children: [
+													Text("Loops: ${widget.cat.loops.map((l) => l.distance).join(", ")}"),
+													/* if (widget.cat.isEnded())
+													IconButton(
+														icon: const Icon(Icons.)
+													) */
+													if (widget.cat.equipeId != null)
+													IconButton(
+														icon: const Icon(EquipeIcons.logo),
+														onPressed: () {
+															var uri = Uri.parse("https://online.equipe.com/da/class_sections/${widget.cat.equipeId}");
+															launchUrl(uri);
+														},
+													),
+												],
+											),
+										)
 									],
 								)
 							),

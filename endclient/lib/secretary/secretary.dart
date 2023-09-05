@@ -2,6 +2,7 @@
 import 'package:common/models/glob.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
 import '../LocalModel.dart';
 import 'category.dart';
@@ -17,6 +18,8 @@ class SecretaryPage extends StatefulWidget {
 }
 
 class SecretaryPageState extends State<SecretaryPage> {
+
+	List<Category> _finishedCats = [];
 
 	Widget textCol(String title, String subtitle) =>
 		Column(
@@ -108,6 +111,22 @@ class SecretaryPageState extends State<SecretaryPage> {
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
+				
+				var newFin = model.model.categories
+					.values
+					.where((cat) => cat.isEnded() || !_finishedCats.contains(cat))
+					.toList();
+
+				_finishedCats.addAll(newFin);
+				for (var cat in newFin) {
+					Locally(
+						context: context,
+						pageRoute: MaterialPageRoute(builder: (_) => widget),
+						payload: "wutisdis",
+						appIcon: "mipmap/ic_launcher",
+					).show(title: "Category finished", message: cat.name);
+				}
+
 				return DefaultTabController(
 					length: 3 + model.model.categories.length,
 					child: Scaffold(
