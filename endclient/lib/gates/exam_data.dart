@@ -41,7 +41,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 			),
 			body:	Column(
 				children: [
-					// TODO: show cooldown time, previous data
+					// UI: show cooldown time, previous data
 					Expanded(
 						child: GridView.count(
 							padding: const EdgeInsets.all(10),

@@ -108,13 +108,22 @@ class SecretaryPageState extends State<SecretaryPage> {
 	);
 
 	@override
+	void initState() {
+		super.initState();
+		_finishedCats = LocalModel.instance.model.categories
+			.values
+			.where((cat) => cat.isEnded())
+			.toList();
+	}
+
+	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 				
 				var newFin = model.model.categories
 					.values
-					.where((cat) => cat.isEnded() || !_finishedCats.contains(cat))
+					.where((cat) => cat.isEnded() && !_finishedCats.contains(cat))
 					.toList();
 
 				_finishedCats.addAll(newFin);

@@ -63,7 +63,7 @@ class _EventViewState extends State<EventView> {
 		Consumer<LocalModel>(
 			builder: (context, value, child) {
 
-				// TODO: index here does not correspond to filtered index
+				// UI: index here does not correspond to filtered index
 				Map<int, EventError> errs = {};
 				for (var err in value.model.errors) {
 					errs[err.causedBy] = err;

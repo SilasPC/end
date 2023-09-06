@@ -22,11 +22,6 @@ class _ModelViewState extends State<ModelView> {
 	Widget build(BuildContext context) =>
 		Card(
 			child: TreeView(
-				onExpansionChanged: (key, state) {
-					Node? node = ctrl.getNode(key);
-					if (node == null) return;
-					// TODO: needed?
-				},
 				controller: ctrl
 			)
 		);

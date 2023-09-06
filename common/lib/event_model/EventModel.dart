@@ -32,10 +32,13 @@ class SyncInfo extends IJSON {
 }
 
 class Savepoint<M extends IJSON> {
+	final int? lastInsIndex;
 	final SyncInfo si;
 	final String json;
-	Savepoint(this.si, M model) :
+	Savepoint(this.si, M model, this.lastInsIndex) :
 		json = model.toJsonString();
+
+	String toString() => "SP ${si.toJsonString()} $json";
 }
 
 class SyncResult<M extends IJSON> extends IJSON {
@@ -88,7 +91,8 @@ class EventModel<M extends IJSON> {
 	void createSavepoint() {
 		savepoints.add(Savepoint(
 			SyncInfo(events.length, deletes.length),
-			model
+			model,
+			events.lastInsertionIndex,
 		));
 	}
 
@@ -144,7 +148,7 @@ class EventModel<M extends IJSON> {
 	SyncInfo get syncState => SyncInfo(events.length, deletes.length);
 
 	void _killSavepointsAfter(int evLen) {
-		// TODO: binary search, correct <= ?
+		// PERF: binary search
 		int i = savepoints.lastIndexWhere((sp) => sp.si.evLen <= evLen);
 		//int i = binarySearchLast(savepoints, (sp) => sp.si.evLen < evLen);
 		savepoints.removeRange(i + 1, savepoints.length);
@@ -154,7 +158,7 @@ class EventModel<M extends IJSON> {
 		Savepoint<M> sp = savepoints.last;
 		int i = 0;
 		if (sp.si.evLen > 0) {
-			i = events.findOrdIndex(events.byInsertionIndex(sp.si.evLen - 1))!;
+			i = events.toOrdIndex(sp.lastInsIndex!)! + 1;
 			model = _handle.revive(jsonDecode(sp.json));
 		} else {
 			model = _handle.createModel();

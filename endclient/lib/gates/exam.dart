@@ -29,7 +29,7 @@ class _ExamPageState extends State<ExamPage> {
          predicate: (eq) => eq.status == EquipageStatus.VET,
          onSubmit: null,
 			controller: _ctrl,
-         builder: (eq, ok) { // TODO: use ok
+         builder: (eq, ok) { // UI: use ok
 				int? vet = eq.currentLoopData?.vet;
 
 				return EquipageTile(

@@ -138,7 +138,7 @@ class ChangeCategoryEvent extends EnduranceEvent {
 		eq.category.equipages.remove(eq);
 		eq.category = cat;
 		cat.equipages.add(eq);
-		// TODO: change start no
+		// FEAT: change start no
 		// ^^^^ note that this may affect logic that
 		// expects eids to remain constant
 	}

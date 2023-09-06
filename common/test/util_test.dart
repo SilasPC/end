@@ -51,9 +51,13 @@ void main() {
 			expect(reorder(3, 3, lst()), lst());
 		});
 		test("forwards", () {
-			// TODO: not sure how this is supposed to work anyways
-			//expect(reorder(0, 1, lst()), [1,0,2,3]);
-			//expect(reorder(0, 4, lst()), [1,2,3,0]);
+			// not entirely sure about the reasoning
+			// here, but it works with the reordering
+			// for Flutter lists
+			expect(reorder(0, 0, lst()), [0,1,2,3]);
+			expect(reorder(0, 1, lst()), [0,1,2,3]);
+			expect(reorder(0, 2, lst()), [1,0,2,3]);
+			expect(reorder(0, 4, lst()), [1,2,3,0]);
 		});
 		test("backwards", () {
 			expect(reorder(1, 0, lst()), [1,0,2,3]);

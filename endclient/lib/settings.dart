@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
 					ListTile(
 						leading: const Icon(Icons.bluetooth),
 						title: const Text("Bluetooth sync"),
-						onTap: () {}, // TODO: add bluetooth sync
+						onTap: () {}, // FEAT: add bluetooth sync
 					),
 					ListTile(
 						leading: const Icon(Icons.data_array),

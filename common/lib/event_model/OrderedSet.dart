@@ -35,18 +35,25 @@ class OrderedSet<T> {
 		for (var t in ts) add(t);	
 	}
 
+	/// converts to insertion index into the corresponding ordered index
+	int? toOrdIndex(int insIdx) => findOrdIndex(byInsertionIndex(insIdx));
+
+	/// finds the ordered index given an element
 	int? findOrdIndex(T t) {
 		int i = _byOrd.indexWhere((e) => _cmp(e.a, t) == 0);
-		// TODO: fix
+		// PERF: binary search
 		//int i = binarySearch(_byOrd, (t0) => _cmp(t0.a,t) < 0);
 		if (i == -1) return null;
 		if (_cmp(_byOrd[i].a,t) == 0) return i;
 		return null;
 	}
 
+	/// find the element given the insertion index
 	T byInsertionIndex(int i) => _byIns[i];
 
 	int get length => _els.length;
+
+	int? get lastInsertionIndex => _byOrd.isEmpty ? null : _byOrd.last.b;
 
 	Iterable<T> get iteratorOrdered => _byOrd.map((e) => e.a);
 	Iterable<T> get iteratorInsertion => _byIns;

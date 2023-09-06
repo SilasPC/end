@@ -60,6 +60,30 @@ void main() {
 		await c1.sync();
 		expect(c1.model.result, "ABZY1");
 	});
+	test("deletes", () {
+		var m = ServerModel();
+
+		m.add([StrEv("0",0)]);
+		m.createSavepoint();
+
+		m.add([StrEv("1",1)]);
+		m.createSavepoint();
+
+		expect(m.savepoints.length, 3);
+		expect(m.model.result, "01");
+
+		m.add([], [StrEv("1",1)]);
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "0");
+		
+		m.add([], [StrEv("0",0)]);
+		expect(m.savepoints.length, 1);
+		expect(m.model.result, "");
+		
+		m.add([StrEv("2",0)], [StrEv("2",0)]);
+		expect(m.model.result, "");
+
+	});
 	test("savepoints", () {
 		var m = ServerModel();
 		m.add([StrEv("0",0), StrEv("2",2)]);
@@ -90,6 +114,25 @@ void main() {
 		m.add([StrEv("5",5)]);
 		expect(m.savepoints.length, 1);
 		expect(m.model.result, "01234567");
+
+		m.createSavepoint();
+		m.add([], [StrEv("3",3)]);
+		expect(m.savepoints.length, 1);
+		expect(m.model.result, "0124567");
+		
+		m.createSavepoint();
+		m.add([StrEv("8",8),StrEv("9",9)]);
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "012456789");
+		
+		m.add([], [StrEv("8",8)]);
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "01245679");
+		
+		m.add([], [StrEv("0",0)]);
+		expect(m.savepoints.length, 1);
+		expect(m.model.result, "1245679");
+
 	});
 }
 
