@@ -21,7 +21,8 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
-	final TextEditingController _txtCtrl = TextEditingController(text: LocalModel.instance.connection.socketAddress); 
+	final TextEditingController _servAddr = TextEditingController(text: LocalModel.instance.connection.socketAddress); 
+	final TextEditingController _author = TextEditingController(text: LocalModel.instance.author);
 
 	@override
 	Widget build(BuildContext context) =>
@@ -39,9 +40,20 @@ class _SettingsPageState extends State<SettingsPage> {
 							decoration: const InputDecoration(
 								label: Text("Server address"),
 							),
-							controller: _txtCtrl,
+							controller: _servAddr,
 							onSubmitted: (value) {
 								LocalModel.instance.connection.socketAddress = value;
+							},
+						)
+					),
+					ListTile(
+						title: TextField(
+							decoration: const InputDecoration(
+								label: Text("Author"),
+							),
+							controller: _servAddr,
+							onSubmitted: (value) {
+								LocalModel.instance.author = value;
 							},
 						)
 					),

@@ -1,10 +1,9 @@
 
-import 'package:esys_client/settings.dart';
-import 'package:locally/locally.dart';
+import 'package:flutter/material.dart';
 
+import 'settings.dart';
 import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
-import 'package:flutter/material.dart';
 import 'LocalModel.dart';
 import 'gates/arrival.dart';
 import 'gates/exam.dart';
@@ -57,23 +56,6 @@ class LandingPageState extends State<LandingPage> {
 					mainAxisAlignment: MainAxisAlignment.center,
 					crossAxisAlignment: CrossAxisAlignment.center,
 					children: [
-						TextField(
-							controller: txtCtrl,
-							onSubmitted: (val) {
-								LocalModel.instance.author = val;
-							},
-						),
-						ElevatedButton(
-							onPressed: () {
-								Locally(
-									context: context,
-									pageRoute: MaterialPageRoute(builder: (_) => const LandingPage(),),
-									payload: "wutisdis",
-									appIcon: "mipmap/ic_launcher",
-								).show(title: "I am a title", message: "I am a message");
-							},
-							child: const Text("Notification"),
-						),
 						for (int i = 0; i < buttons.length; i++)
 						buildLinkButton(i),
 					],

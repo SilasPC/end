@@ -7,6 +7,7 @@ void showInputModal(
 	String label,
 	Function(String s) onAccept
 ) {
+	// UI: these are hidden behind keyboard
 	showModalBottomSheet(
 		context: context,
 		builder: (context) => Padding(

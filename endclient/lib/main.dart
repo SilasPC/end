@@ -8,7 +8,7 @@ import 'LocalModel.dart';
 Future<void> main() async {
 	FlutterError.onError = (details) {
 		FlutterError.presentError(details);
-		// TODO: do something with these
+		// TODO: custom exception handler
 	};
 	runApp(
 		ChangeNotifierProvider<LocalModel>(
