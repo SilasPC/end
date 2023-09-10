@@ -86,7 +86,7 @@ class Model extends IJSON {
 					eq.horse.replaceAll(",", ""),
 					for (var ld in eq.loops) ... [
 						"",
-						hms(ld.expDeparture),
+						hms(ld.departure != null ? ld.expDeparture : null),
 						hms(ld.arrival),
 						hms(ld.vet),
 					],

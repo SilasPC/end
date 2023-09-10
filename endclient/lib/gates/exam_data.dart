@@ -49,7 +49,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 							crossAxisSpacing: 10,
 							crossAxisCount: 3,
 							children: [
-								// TODO: check what is letter vs. digit
+								// TODO: use VetField.values (?)
 								numField(context, data.hr1,"Pulse 1", (n) => setState(() => data.hr1 = n)),
 								numField(context, data.hr2,"Pulse 2", (n) => setState(() => data.hr2 = n)),
 								letField(data.resp,"Respiration", (n) => setState(() => data.resp = n)),

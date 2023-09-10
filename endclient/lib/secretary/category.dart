@@ -44,6 +44,8 @@ class CategoryViewState extends State<CategoryView> {
 											child: Row(
 												mainAxisAlignment: MainAxisAlignment.spaceBetween,
 												children: [
+													// UI: clear/free/ideal min/max time/speed status
+													// UI: loop cards (#riders / color?)
 													Text("Loops: ${widget.cat.loops.map((l) => l.distance).join(", ")}"),
 													/* if (widget.cat.isEnded())
 													IconButton(

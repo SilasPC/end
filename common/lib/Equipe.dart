@@ -27,6 +27,7 @@ Future<List<EquipeMeeting>> loadRecentMeetings() async {
 /// TODO: determine actual rest time?
 const TYPICAL_REST_TIME = 40;
 
+// TODO: refactor equipe loading code
 Future<List<Event<Model>>> loadModelEvents(int classId) async {
 	dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");
 	if (schd["discipline"] != "endurance")
@@ -86,20 +87,20 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 								for (int i = 0; i < results.length; i++) {
 									var res = results[i];
 									if (res["type"] != "Endurance") break;
-									bool passed = results[i]["reason"] == null;
+									bool passed = nullOrEmpty(res["reason"]);
 									bool retire = results[i+1]["reason"] == "RET";
 
 									loopDists?.add(double.parse(res["distance"]).floor());
-									if (res["start_time"] == null) break;
+									if (nullOrEmpty(res["start_time"])) break;
 									var expDep = hmsToUNIX(res["start_time"]);
 									catStartTime = min(catStartTime, expDep);
 
-									if (res["arrival"] == null) break;
+									if (nullOrEmpty(res["arrival"])) break;
 									dsqPreExam = false;
 									evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
 									evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
 
-									if (res["pulse_time"] == null) break;
+									if (nullOrEmpty(res["pulse_time"])) break;
 									var vetTime = hmsToUNIX(res["pulse_time"]);
 									evs.add(VetEvent("equipe", vetTime, eid, loop));
 									var vetdata = VetData(
@@ -175,7 +176,7 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 
 }
 
-RegExp rgx = RegExp(r"(\d+) ?km");
+RegExp rgx = RegExp(r"(\d+)(?:[.,]\d+)?\s?km");
 RegExp rgx2 = RegExp(r"[LMS][ABCDE]|CEI.*\d?\*+");
 
 Future<dynamic> _loadJSON(String loc) async {
@@ -184,3 +185,5 @@ Future<dynamic> _loadJSON(String loc) async {
 		throw Exception("Equipe $loc status ${res.statusCode}");
 	return jsonDecode(res.body);
 }
+
+bool nullOrEmpty(str) => str == null || str == "";

@@ -51,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
 							decoration: const InputDecoration(
 								label: Text("Author"),
 							),
-							controller: _servAddr,
+							controller: _author,
 							onSubmitted: (value) {
 								LocalModel.instance.author = value;
 							},
@@ -109,10 +109,12 @@ class _SettingsPageState extends State<SettingsPage> {
 		}
 
 	static Future<void> saveCSV(BuildContext context) async {
+		// FIXME: check saving works
 		var sm = ScaffoldMessenger.of(context);
 		var dir = await getApplicationDocumentsDirectory();
 		var file = File("${dir.path}/endurance.csv");
 		var data = LocalModel.instance.model.toResultCSV();
+		print(file);
 		await file.writeAsString(data);
 		sm.showSnackBar(const SnackBar(
 			content: Text("Saved CSV results"),

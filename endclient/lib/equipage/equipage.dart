@@ -141,6 +141,7 @@ class EquipagePageState extends State<EquipagePage> {
 							].map(wrapTxtCol).toList(),
 						),
 					)
+					// UI: show vet data remarks
 				],
 			)
 		);

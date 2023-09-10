@@ -4,6 +4,11 @@
  - client event storage
  - confirm closing with unsaved data
 
+ - shared rankings
+ - more icons (?)
+ - save events, settings
+ - EventModel manual maxTime/insIdx, reset, selection/slider?
+
 # Production concerns
  - data integrity
  - security
