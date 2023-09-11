@@ -50,7 +50,6 @@ class _EventViewState extends State<EventView> {
 								filterFn = adminOnly;
 								break;
 							default:
-
 								int eid = int.parse(value!);
 								filterFn = (e) => (e as EnduranceEvent).affectsEquipage(eid);
 						}
@@ -72,7 +71,7 @@ class _EventViewState extends State<EventView> {
 					errs[err.causedBy] = err;
 				}
 
-				var evs = filterFn != null ? value.events.iteratorOrdered.where(filterFn!).toList() : value.events.iteratorOrdered.toList();
+				var evs = filterFn != null ? value.events.iterator.where(filterFn!).toList() : value.events.iterator.toList();
 
 				return Container(
 					padding: const EdgeInsets.all(10),

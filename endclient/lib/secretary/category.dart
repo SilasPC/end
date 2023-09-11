@@ -46,7 +46,18 @@ class CategoryViewState extends State<CategoryView> {
 												children: [
 													// UI: clear/free/ideal min/max time/speed status
 													// UI: loop cards (#riders / color?)
-													Text("Loops: ${widget.cat.loops.map((l) => l.distance).join(", ")}"),
+													for (var loop in widget.cat.loops)
+													Container(
+														alignment: Alignment.center,
+														padding: const EdgeInsets.all(10),
+														margin: const EdgeInsets.symmetric(horizontal: 4),
+														decoration: const BoxDecoration(
+															borderRadius: BorderRadius.all(Radius.circular(10)),
+															color: Color.fromARGB(255, 146, 119, 68),
+														),
+														child: Text("${loop.distance}"),
+													),
+													const Spacer(),
 													/* if (widget.cat.isEnded())
 													IconButton(
 														icon: const Icon(Icons.)

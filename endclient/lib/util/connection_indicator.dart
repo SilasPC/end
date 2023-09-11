@@ -14,19 +14,22 @@ class ConnectionIndicator extends StatefulWidget {
 
 class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 
-	DateTime lastConn = DateTime.now();
+	static DateTime _lastConn = DateTime.now();
 
 	@override
 	Widget build(BuildContext context) =>
 		AnimatedBuilder(
 			animation: LocalModel.instance.connection.status,
-			builder: (context, _) =>
-				LocalModel.instance.connection.status.value
+			builder: (context, _) {
+				bool status = LocalModel.instance.connection.status.value;
+				var now = DateTime.now();
+				if (status) _lastConn = now;
+				return status
 					? Container()
 					: IconButton(
 						color: Colors.red,
 						onPressed: () {
-							var dif = DateTime.now().difference(lastConn);
+							var dif = now.difference(_lastConn);
 							var difStr = unixDifToMS(dif.inSeconds);
 							ScaffoldMessenger.of(context)
 								.showSnackBar(SnackBar(
@@ -34,6 +37,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 								));
 						},
 						icon: const Icon(Icons.sync_problem),
-					)
-			);
+					);
+			}
+		);
 }

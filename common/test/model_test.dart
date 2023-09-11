@@ -84,6 +84,42 @@ void main() {
 		expect(m.model.result, "");
 
 	});
+	test("set max time", () {
+		var m = ServerModel();
+		m.add([
+			for (int i = 0; i < 5; i++)
+			StrEv(i.toString(), i),
+		]);
+		m.createSavepoint();
+		m.add([
+			for (int i = 5; i < 10; i++)
+			StrEv(i.toString(), i),
+		]);
+		expect(m.savepoints.length, 2);
+		expect(m.model.result, "0123456789");
+
+		m.setMaxTime(9);
+		expect(m.model.result, "0123456789");
+		m.setMaxTime(7);
+		expect(m.model.result, "01234567");
+		m.setMaxTime(8);
+		expect(m.model.result, "012345678");
+		m.setMaxTime(3);
+		expect(m.model.result, "0123");
+		m.setMaxTime(null);
+		expect(m.model.result, "0123456789");
+		m.setMaxTime(3);
+		expect(m.model.result, "0123");
+		m.setMaxTime(4);
+		expect(m.model.result, "01234");
+		m.setMaxTime(6);
+		expect(m.model.result, "0123456");
+		m.setMaxTime(-1);
+		expect(m.model.result, "");
+		m.setMaxTime(20);
+		expect(m.model.result, "0123456789");
+
+	});
 	test("savepoints", () {
 		var m = ServerModel();
 		m.add([StrEv("0",0), StrEv("2",2)]);

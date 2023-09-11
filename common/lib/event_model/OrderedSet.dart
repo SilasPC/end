@@ -51,12 +51,22 @@ class OrderedSet<T> {
 	/// find the element given the insertion index
 	T byInsertionIndex(int i) => _byIns[i];
 
+	bool get isEmpty => _els.isEmpty;
+	bool get isNotEmpty => _els.isNotEmpty;
 	int get length => _els.length;
 
 	int? get lastInsertionIndex => _byOrd.isEmpty ? null : _byOrd.last.b;
 
-	Iterable<T> get iteratorOrdered => _byOrd.map((e) => e.a);
+	Iterable<T> get iterator => _byOrd.map((e) => e.a);
 	Iterable<T> get iteratorInsertion => _byIns;
+
+	T get last => _byOrd.last.a;
+	T get first => _byOrd.first.a;
+
+	int lastIndexWhere(Predicate<T> p) =>_byOrd.lastIndexWhere((e) => p(e.a));
+	int indexWhere(Predicate<T> p) =>_byOrd.indexWhere((e) => p(e.a));
+
+	T operator[] (int idx) => _byOrd[idx].a;
 
 }
 

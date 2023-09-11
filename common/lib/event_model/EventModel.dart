@@ -33,9 +33,10 @@ class SyncInfo extends IJSON {
 
 class Savepoint<M extends IJSON> {
 	final int? lastInsIndex;
+	final int? lastTime;
 	final SyncInfo si;
 	final String json;
-	Savepoint(this.si, M model, this.lastInsIndex) :
+	Savepoint(this.si, M model, this.lastInsIndex, this.lastTime) :
 		json = model.toJsonString();
 
 	String toString() => "SP ${si.toJsonString()} $json";
@@ -79,6 +80,7 @@ class EventModel<M extends IJSON> {
 	final LinkedHashSet<Event<M>> deletes = LinkedHashSet();
 	final List<Savepoint<M>> savepoints = [];
 	final int _savepointInterval;
+	int? _maxBuildTime;
 
    int _buildIndex = -1;
    int get buildIndex => _buildIndex;
@@ -90,11 +92,34 @@ class EventModel<M extends IJSON> {
 	}
 
 	void createSavepoint() {
+		int? lastEventTime = events.isEmpty ? null : events.last.time;
 		savepoints.add(Savepoint(
 			SyncInfo(events.length, deletes.length),
 			model,
 			events.lastInsertionIndex,
+			lastEventTime,
 		));
+	}
+
+	void setMaxTime(int? maxTime) {
+		if (maxTime == _maxBuildTime) return;
+		if (_maxBuildTime != null && (maxTime == null || maxTime > _maxBuildTime!)) {
+			// delete constraint
+			// PERF: binary search
+			int buildFrom = events.indexWhere((e) => e.time > _maxBuildTime!);
+			_maxBuildTime = maxTime;
+			if (buildFrom != -1) {
+				_handle.willUpdate();
+				_buildFromIndex(buildFrom);
+				_handle.didUpdate();
+			}
+		} else if (maxTime != null && (_maxBuildTime == null || _maxBuildTime! > maxTime)) {
+			// add constraint
+			_maxBuildTime = maxTime;
+			_handle.willUpdate();
+			_restoreFromSavepoint();
+			_handle.didUpdate();
+		}
 	}
 
 	void reset() {
@@ -130,7 +155,7 @@ class EventModel<M extends IJSON> {
 		if (buildFrom < oldLength) {
 			// restore from before buildFrom
 			_killSavepointsAfter(buildFrom);
-			_restoreFromLatestSavepoint();
+			_restoreFromSavepoint();
 		} else {
 			// append only
 			_buildFromIndex(buildFrom);
@@ -155,8 +180,13 @@ class EventModel<M extends IJSON> {
 		savepoints.removeRange(i + 1, savepoints.length);
 	}
 
-	void _restoreFromLatestSavepoint() {
-		Savepoint<M> sp = savepoints.last;
+	void _restoreFromSavepoint() {
+		Savepoint<M> sp;
+		if (_maxBuildTime != null) {
+			sp = savepoints.lastWhere((sp) => sp.lastTime == null || sp.lastTime! <= _maxBuildTime!);
+		} else {
+			sp = savepoints.last;
+		}
 		int i = 0;
 		if (sp.si.evLen > 0) {
 			i = events.toOrdIndex(sp.lastInsIndex!)! + 1;
@@ -168,7 +198,11 @@ class EventModel<M extends IJSON> {
 	}
 
 	void _buildFromIndex(int i) {
-		var it = events.iteratorOrdered.skip(i);
+		var it = events.iterator.skip(i);
+		if (_maxBuildTime != null) {
+			var max = _maxBuildTime!;
+			it = it.takeWhile((ev) => ev.time <= max);
+		}
       _buildIndex = i;
 		for (var ev in it) {
 			if (!deletes.contains(ev)) {
