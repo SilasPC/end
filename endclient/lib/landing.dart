@@ -36,9 +36,6 @@ class LandingPageState extends State<LandingPage> {
 		SettingsPage(),
 	];
 
-	TextEditingController txtCtrl =
-		TextEditingController(text: LocalModel.instance.author);
-
 	@override
 	void initState() {
 		super.initState();
@@ -48,7 +45,7 @@ class LandingPageState extends State<LandingPage> {
 	Widget build(BuildContext context) =>
 		Scaffold(
 			appBar: AppBar(
-				title: const Text("Endurance prototype"),
+				title: const Text("Endurance"),
 				actions: const [ConnectionIndicator()],
 			),
 			body: Center(

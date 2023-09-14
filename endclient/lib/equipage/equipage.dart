@@ -31,7 +31,7 @@ class EquipagePageState extends State<EquipagePage> {
 
 	@override
 	Widget build(BuildContext context) {
-		Provider.of<LocalModel>(context);
+		context.watch<LocalModel>();
 
 		if (_prevStatus != widget.equipage.status) {
 			_prevStatus = widget.equipage.status;
@@ -140,8 +140,24 @@ class EquipagePageState extends State<EquipagePage> {
 								txtCol([maybe(ld.vet, unixHMS) ?? "-","Vet"]),
 							].map(wrapTxtCol).toList(),
 						),
+					),
+					if (ld.data != null)
+					Row(
+						children: [
+							for (var remark in ld.data!.remarks()) // UI: make this better
+							Container(
+								padding: const EdgeInsets.symmetric(horizontal: 10),
+								margin: const EdgeInsets.only(right: 10),
+								decoration: BoxDecoration(
+									border: Border.all(
+										color: Colors.black54,
+										width: 0.3,
+									),
+								),
+								child: txtCol([remark.toString(), remark.field.name]),
+							),
+						],
 					)
-					// UI: show vet data remarks
 				],
 			)
 		);

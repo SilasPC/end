@@ -1,9 +1,11 @@
 
+import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';
 import '../equipage/equipage_tile.dart';
@@ -22,13 +24,15 @@ class _ExamDataPageState extends State<ExamDataPage> {
 
 	VetData data = VetData.empty();
 
-	Future<void> submit(bool passed, {bool retire = false}) async {
+	Future<void> submit(BuildContext context, bool passed, {bool retire = false}) async {
+		var author = context.read<Settings>().author;
+		var model = context.read<LocalModel>();
 		data.passed = passed;
 		int now = nowUNIX();
-		LocalModel.instance.addSync([
-			ExamEvent(LocalModel.instance.author, now, widget.equipage.eid, data, widget.equipage.currentLoop),
+		model.addSync([
+			ExamEvent(author, now, widget.equipage.eid, data, widget.equipage.currentLoop),
 			if (retire)
-				RetireEvent(LocalModel.instance.author, now + 1, widget.equipage.eid)
+				RetireEvent(author, now + 1, widget.equipage.eid)
 		]);
 		Navigator.pop(context);
 	}
@@ -78,7 +82,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 									margin: const EdgeInsets.all(10),
 									child: ElevatedButton(
 										style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-										onPressed: () => submit(false),
+										onPressed: () => submit(context, false),
 										child: const Text("FAIL", style: TextStyle(fontSize: 20)),
 									)
 									),
@@ -89,7 +93,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 									margin: const EdgeInsets.all(10),
 									child: ElevatedButton(
 										style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-										onPressed: () => submit(true),
+										onPressed: () => submit(context, true),
 										child: const Text("PASS", style: TextStyle(fontSize: 20)),
 									)
 									),
@@ -100,7 +104,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 									margin: const EdgeInsets.all(10),
 									child: ElevatedButton(
 										style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
-										onPressed: () => submit(true, retire: true),
+										onPressed: () => submit(context, true, retire: true),
 										child: const Text("RETIRE", style: TextStyle(fontSize: 20)),
 									)
 									),

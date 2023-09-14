@@ -1,9 +1,11 @@
 import 'package:esys_client/landing.dart';
+import 'package:esys_client/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'LocalModel.dart';
+import 'settings_provider.dart';
 
 Future<void> main() async {
 	FlutterError.onError = (details) {
@@ -11,9 +13,10 @@ Future<void> main() async {
 		// TODO: custom exception handler
 	};
 	runApp(
-		ChangeNotifierProvider<LocalModel>(
-			create: (_) => LocalModel.instance,
-			child: const MyApp(),
+		const SettingsProvider(
+			child: ModelProvider(
+				child: MyApp(),
+			)
 		)
 	);
 }
@@ -23,17 +26,10 @@ class MyApp extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
-		var m = LocalModel.instance;
-			SharedPreferences.getInstance()
-				.then((sp) {
-					m.author = sp.getString("author") ?? m.author;
-				});
-
 		var cs = ColorScheme.fromSwatch().copyWith(
 			primary: const Color.fromARGB(255, 98, 85, 115),
 			secondary: const Color.fromARGB(255, 146, 119, 68),
 		);
-
 		return MaterialApp(
 			theme: ThemeData(colorScheme: cs),
 			title: 'Endurance',

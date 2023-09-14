@@ -3,37 +3,45 @@ import 'package:common/EventModel.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/settings_provider.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+class ModelProvider extends StatefulWidget {
+	const ModelProvider({super.key, required this.child});
+
+	final Widget child;
+
+	@override
+	ModelProviderState createState() => ModelProviderState();
+}
+
+class ModelProviderState extends State<ModelProvider> {
+
+	@override
+	Widget build(BuildContext context) =>
+		ChangeNotifierProxyProvider<Settings, LocalModel>(
+			lazy: false,
+			create: (_) => LocalModel.create(),
+			update: (_, set, mod) {
+				mod!.connection.socketAddress = set.serverURI;
+				return mod;
+			},
+			child: widget.child,
+		);
+}
+
 class LocalModel extends SyncedEventModel<Model> with ChangeNotifier {
 
-   String _author = "default";
-   String get author => _author;
-   set author(val) {
-      _author = val;
-      SharedPreferences.getInstance()
-         .then((sp) {
-            sp.setString("author", _author);
-         });
-   }
-
-	static LocalModel? _instance;
-	static LocalModel get instance {
-		if (_instance != null) {
-			return _instance!;
-		}
-
-		var conn = SocketServer();
-		
-		_instance = LocalModel._(conn, Handle());
-		return _instance!;
-	}
-
 	late final SocketServer connection;
+
+	factory LocalModel.create() {
+		return LocalModel._(SocketServer(), Handle());
+	}
 
 	LocalModel.__(Handle handle, Future<SyncResult<Model>> Function(SyncRequest<Model>) syncFunc): super(handle, syncFunc);
 	factory LocalModel._(SocketServer conn, Handle handle) {
@@ -64,37 +72,10 @@ class Handle extends EventModelHandle<Model> {
 	}
 }
 
-abstract class ServerConnection {
-	ServerConnection({
-		VoidCallback? onConnect, onDisconnect,
-		void Function(SyncPush<Model>)? onPush,
-		VoidCallback? onReset,
-	});
+
+class SocketServer {
+
 	final ValueNotifier<bool> status = ValueNotifier(false);
-	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req);
-	void sendReset();
-}
-
-class MockServer extends ServerConnection {
-
-	late final EventModel<Model> model;
-
-	MockServer() {
-		model = EventModel(Handle());
-		model.add(demoInitEvent(nowUNIX() + 300));
-		status.value = true;
-	}
-
-	@override
-	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req)
-		=> Future.value(req.applyTo(model));
-
-	@override
-	void sendReset() async => model.reset();
-
-}
-
-class SocketServer extends ServerConnection {
 
 	String _socketAddress = "http://192.168.8.101:3000";
 
@@ -110,7 +91,6 @@ class SocketServer extends ServerConnection {
 	VoidCallback? onConnect, onDisconnect, onReset;
 	void Function(SyncPush<Model> push)? onPush;
 
-	@override
 	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req) {
 		Completer<SyncResult<Model>> c = Completer();
 		_socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
@@ -119,7 +99,6 @@ class SocketServer extends ServerConnection {
 		return c.future;
 	}
 
-	@override
 	void sendReset() {
 		if (!_socket!.connected) return;
 		_socket!.emit("reset");

@@ -19,7 +19,7 @@ class _EventViewState extends State<EventView> {
 	String filterType = "all";
 	bool Function(Event<Model>)? filterFn;
 
-	Widget header() =>
+	Widget header(LocalModel model) =>
 		Card(
 			child: DropdownButton<String>(
 				value: filterType,
@@ -32,7 +32,7 @@ class _EventViewState extends State<EventView> {
 						value: "admin",
 						child: Text("Administration"),
 					),
-					for (var eq in LocalModel.instance.model.equipages.values)
+					for (var eq in model.model.equipages.values)
 					DropdownMenuItem(
 						value: "${eq.eid}",
 						child: Text("${eq.eid} ${eq.rider}", overflow: TextOverflow.fade,),
@@ -77,7 +77,7 @@ class _EventViewState extends State<EventView> {
 					padding: const EdgeInsets.all(10),
 					child: Column(
 						children: [
-							header(),
+							header(value),
 							Expanded(
 								child: Card(
 									child: ListView.separated(

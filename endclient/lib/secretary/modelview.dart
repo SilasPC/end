@@ -2,6 +2,7 @@
 import 'package:common/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
+import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';
 
@@ -14,17 +15,16 @@ class ModelView extends StatefulWidget {
 
 class _ModelViewState extends State<ModelView> {
 
-	final TreeViewController ctrl = TreeViewController(
-		children: treeFromJson(LocalModel.instance.model.toJson(), "model")
-	);
-
 	@override
-	Widget build(BuildContext context) =>
-		Card(
+	Widget build(BuildContext context) {
+		var model = context.watch<LocalModel>();
+		var ctrl = TreeViewController(children: treeFromJson(model.model.toJson(), "model"));
+		return Card(
 			child: TreeView(
 				controller: ctrl
 			)
 		);
+	}
 }
 
 Node treeFromJsonEl(dynamic val, String path, String label) {

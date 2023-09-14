@@ -2,6 +2,7 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/EquipeIcons.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class CategoryViewState extends State<CategoryView> {
 								child: Column(
 									children: [
 										cardHeader(context, widget.cat.name, color: const Color.fromARGB(255, 98, 85, 115)),
+										// Text("8-16 km/h"),
 										Padding(
 											padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
 											child: Row(
@@ -106,10 +108,12 @@ class CategoryViewState extends State<CategoryView> {
 	Widget createEquipagePopupMenu(Equipage eq, BuildContext context) =>
 		PopupMenuButton<String>(
 			onSelected: (value) {
+				var model = context.read<LocalModel>();
+				var author = context.read<Settings>().author;
 				switch (value) {
 					case 'start-clearance':
-						LocalModel.instance.addSync([
-							StartClearanceEvent(LocalModel.instance.author, nowUNIX(), [eq.eid])
+						model.addSync([
+							StartClearanceEvent(author, nowUNIX(), [eq.eid])
 						]);
 						break;
 					case "disqualify":
@@ -117,24 +121,24 @@ class CategoryViewState extends State<CategoryView> {
 							context,
 							'Enter disqualification reason',
 							(reason) {
-								LocalModel.instance.addSync([
-									DisqualifyEvent(LocalModel.instance.author, nowUNIX(), eq.eid, reason),
+								model.addSync([
+									DisqualifyEvent(author, nowUNIX(), eq.eid, reason),
 								]);
 							}
 						);
 						break;
 					case "retire":
-						LocalModel.instance.addSync([
-							RetireEvent(LocalModel.instance.author, nowUNIX(), eq.eid)
+						model.addSync([
+							RetireEvent(author, nowUNIX(), eq.eid)
 						]);
 						break;
 					case "change-category":
 						showChoicesModal(
 							context,
-							LocalModel.instance.model.categories.keys.toList(),
+							model.model.categories.keys.toList(),
 							(cat) {
-								LocalModel.instance.addSync([
-									ChangeCategoryEvent(LocalModel.instance.author, nowUNIX(), eq.eid, cat)
+								model.addSync([
+									ChangeCategoryEvent(author, nowUNIX(), eq.eid, cat)
 								]);
 							}
 						);

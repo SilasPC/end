@@ -1,5 +1,8 @@
 
+import 'dart:io';
+
 import 'package:common/models/glob.dart';
+import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
@@ -76,14 +79,16 @@ class SecretaryPageState extends State<SecretaryPage> {
 			),
 		);
 
-	List<Widget> viewTabs(Map<String,Category> cats) => [
+	List<Widget> viewTabs(Map<String,Category> cats, bool showAdmin) => [
 		const Tab(icon: Icon(Icons.apps), text: "Overview"),
 		for (Category cat in cats.values)
 			Tab(icon: const Icon(Icons.group), text: "${cat.name} ${cat.distance()}km"),
-		const Tab(icon: Icon(Icons.list), text: "Events"),
-		const Tab(icon: Icon(Icons.account_tree), text: "Model"),
+		if (showAdmin)
+			const Tab(icon: Icon(Icons.list), text: "Events"),
+		if (showAdmin)
+			const Tab(icon: Icon(Icons.account_tree), text: "Model"),
 	];
-	Widget tabView(Model model) => TabBarView(
+	Widget tabView(Model model, bool showAdmin) => TabBarView(
 		children: [
 			Container(
 				padding: const EdgeInsets.all(10),
@@ -102,24 +107,21 @@ class SecretaryPageState extends State<SecretaryPage> {
 			),
 			for (Category cat in model.categories.values)
 				CategoryView(cat),
-			const EventView(),
-			const ModelView(),
+			if (showAdmin)
+				const EventView(),
+			if (showAdmin)
+				const ModelView(),
 		],
 	);
 
-	@override
-	void initState() {
-		super.initState();
-		_finishedCats = LocalModel.instance.model.categories
-			.values
-			.where((cat) => cat.isEnded())
-			.toList();
-	}
+	bool isInit = false;
 
 	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
+				
+				var showAdmin = context.watch<Settings>().showAdmin;
 				
 				var newFin = model.model.categories
 					.values
@@ -127,24 +129,27 @@ class SecretaryPageState extends State<SecretaryPage> {
 					.toList();
 
 				_finishedCats.addAll(newFin);
-				for (var cat in newFin) {
-					Locally(
-						context: context,
-						pageRoute: MaterialPageRoute(builder: (_) => widget),
-						payload: "wutisdis",
-						appIcon: "mipmap/ic_launcher",
-					).show(title: "Category finished", message: cat.name);
+				if (isInit && (Platform.isAndroid || Platform.isIOS)) {
+					for (var cat in newFin) {
+						Locally(
+							context: context,
+							pageRoute: MaterialPageRoute(builder: (_) => widget),
+							payload: "wutisdis",
+							appIcon: "mipmap/ic_launcher",
+						).show(title: "Category finished", message: cat.name);
+					}
 				}
+				isInit = true;
 
 				return DefaultTabController(
-					length: 3 + model.model.categories.length,
+					length: 1 + model.model.categories.length + (showAdmin ? 2 : 0),
 					child: Scaffold(
 							appBar: AppBar(
 								actions: const [ConnectionIndicator()],
 								title: const Text("Secretary"),
 								bottom: TabBar(
 									isScrollable: true,
-									tabs: viewTabs(model.model.categories),
+									tabs: viewTabs(model.model.categories, showAdmin),
 								),
 							),
 							body: Stack(
@@ -154,10 +159,10 @@ class SecretaryPageState extends State<SecretaryPage> {
 											image: DecorationImage(
 												image: AssetImage("assets/horse.jpg"),
 												fit: BoxFit.cover
-												),
+											),
 										),
 									),
-									tabView(model.model),
+									tabView(model.model, showAdmin),
 								],
 							)
 					)

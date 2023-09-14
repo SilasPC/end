@@ -46,7 +46,7 @@ class _EquipageSelectorDrawerState extends State<EquipageSelectorDrawer> {
 						Expanded(
 							child: ListView(
 								children: [
-									for (var eq in Provider.of<LocalModel>(context).model.equipages.values)
+									for (var eq in context.watch<LocalModel>().model.equipages.values)
 									EquipageTile(eq, trailing: [
 										IconButton(
 											icon: const Icon(Icons.add),

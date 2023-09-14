@@ -11,6 +11,7 @@ import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';
+import '../settings_provider.dart';
 
 class DeparturePage extends StatefulWidget {
 	const DeparturePage({super.key});
@@ -24,9 +25,10 @@ class _DeparturePageState extends State<DeparturePage> {
 	Map<int, DateTime> timers = {};
 
 	Future<void> submit(BuildContext ctx) async {
-		LocalModel m = Provider.of(ctx, listen: false);
+		LocalModel m = ctx.read<LocalModel>();
+		var author = ctx.read<Settings>().author;
 		List<EnduranceEvent> evs = timers.entries
-			.map((kv) => DepartureEvent(LocalModel.instance.author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]!.currentLoop!))
+			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]!.currentLoop!))
 			.toList();
 		await m.addSync(evs);
 		timers.clear();

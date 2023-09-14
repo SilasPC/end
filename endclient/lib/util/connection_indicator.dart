@@ -1,6 +1,7 @@
 
 import 'package:common/util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../LocalModel.dart';
 
@@ -17,11 +18,12 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	static DateTime _lastConn = DateTime.now();
 
 	@override
-	Widget build(BuildContext context) =>
-		AnimatedBuilder(
-			animation: LocalModel.instance.connection.status,
+	Widget build(BuildContext context) {
+		var model = context.read<LocalModel>();
+		return AnimatedBuilder(
+			animation: model.connection.status,
 			builder: (context, _) {
-				bool status = LocalModel.instance.connection.status.value;
+				bool status = model.connection.status.value;
 				var now = DateTime.now();
 				if (status) _lastConn = now;
 				return status
@@ -40,4 +42,5 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 					);
 			}
 		);
+	}
 }
