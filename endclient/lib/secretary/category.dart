@@ -57,7 +57,7 @@ class CategoryViewState extends State<CategoryView> {
 															borderRadius: BorderRadius.all(Radius.circular(10)),
 															color: Color.fromARGB(255, 146, 119, 68),
 														),
-														child: Text("${loop.distance}"),
+														child: Text("${loop.distance}km"),
 													),
 													const Spacer(),
 													/* if (widget.cat.isEnded())
@@ -117,7 +117,7 @@ class CategoryViewState extends State<CategoryView> {
 						]);
 						break;
 					case "disqualify":
-						showInputModal(
+						showInputDialog(
 							context,
 							'Enter disqualification reason',
 							(reason) {

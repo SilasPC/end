@@ -1,29 +1,47 @@
 
+import 'package:animations/animations.dart';
 import 'package:esys_client/util/int_picker.dart';
 import 'package:flutter/material.dart';
 
-void showInputModal(
+void showInputDialog(
 	BuildContext context,
 	String label,
-	Function(String s) onAccept
+	Function(String s) onAccept,
 ) {
-	// UI: these are hidden behind keyboard
-	showModalBottomSheet(
+	var ctrl = TextEditingController();
+	showModal(
 		context: context,
-		builder: (context) => Padding(
-			padding: const EdgeInsets.all(10),
-			child: TextField(
-				decoration: InputDecoration(
-					border: const OutlineInputBorder(),
-					hintText: label,
-				),
-				autofocus: true,
-				onSubmitted: (str) {
-					Navigator.pop(context);
-					onAccept(str);
-				},
-			),
-		),
+		builder: (context) => Dialog(
+			child: Padding(
+				padding: const EdgeInsets.all(10),
+				child: Row(
+					children: [
+						Expanded(
+							child: TextField(
+								maxLines: null,
+								controller: ctrl,
+								decoration: InputDecoration(
+									border: const OutlineInputBorder(),
+									hintText: label,
+								),
+								autofocus: true,
+								onSubmitted: (str) {
+									Navigator.pop(context);
+									onAccept(str);
+								},
+							),
+						),
+						IconButton(
+							icon: const Icon(Icons.send),
+							onPressed: () {
+								Navigator.pop(context);
+								onAccept(ctrl.text);
+							},
+						),
+					]
+				)
+			)
+		)
 	);
 }
 

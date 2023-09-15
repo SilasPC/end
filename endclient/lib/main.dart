@@ -1,9 +1,6 @@
-import 'package:esys_client/landing.dart';
-import 'package:esys_client/settings.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'landing.dart';
 import 'LocalModel.dart';
 import 'settings_provider.dart';
 
