@@ -72,7 +72,7 @@ class EquipagePageState extends State<EquipagePage> {
 						Card(
 							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 228, 190, 53)),
 						),
-						// UI: android only shows first card
+						// FIXME: android only shows first card
 						...loopCards(),
 					],
 				)
