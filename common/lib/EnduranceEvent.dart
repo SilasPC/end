@@ -217,12 +217,15 @@ class ExamEvent extends EnduranceEvent {
 			// regular gate
 			var l = eq.currentLoopData!;
 			l.data = data;
-			if (p && eq.currentLoop! != eq.loops.length - 1) {
-				// next loop
-				var next = eq.currentLoop = eq.currentLoop! + 1;
-				if (l.vet != null) {
-					eq.loops[next].expDeparture = l.vet! + l.loop.restTime * 60;
+			if (p) {
+				if (eq.currentLoop! != eq.loops.length - 1) {
+					// next loop
+					var next = eq.currentLoop = eq.currentLoop! + 1;
+					if (l.vet != null) {
+						eq.loops[next].expDeparture = l.vet! + l.loop.restTime * 60;
+					}
 				}
+				// TODO: warn about min/max
 			}
 			if (p && l.vet != null && time > l.vet! + COOL_TIME) {
 				m.model.warnings.add(EventError(m.buildIndex, "${eid} too late to pass exam"));

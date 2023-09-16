@@ -57,6 +57,9 @@ class Equipage extends IJSON {
 	LoopData? get currentLoopData =>
 		currentLoop == null ? null : loops[currentLoop!];
 
+	LoopData? get previousLoopData =>
+		currentLoop == null || currentLoop! - 1 < 0 ? null : loops[currentLoop! - 1];
+
 	/// indicates this equipage failed to complete competition
 	bool get isOut => status.isOut;
 	/// indicates this equipage successfully completed competition

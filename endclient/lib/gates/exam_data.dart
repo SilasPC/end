@@ -1,14 +1,14 @@
 
-import 'package:esys_client/settings_provider.dart';
-import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
-import 'package:provider/provider.dart';
 
+import '../settings_provider.dart';
+import '../util/input_modals.dart';
 import '../LocalModel.dart';
-import '../equipage/equipage_tile.dart';
 
 class ExamDataPage extends StatefulWidget {
 
@@ -37,6 +37,14 @@ class _ExamDataPageState extends State<ExamDataPage> {
 		Navigator.pop(context);
 	}
 
+	Widget textCol(String title, String subtitle) =>
+		Column(
+			children: [
+				Text(title, style: const TextStyle(fontSize: 20)),
+				Text(subtitle, style: const TextStyle()),
+			],
+		);
+
 	@override
 	Widget build(BuildContext context) =>
 		Scaffold(
@@ -45,7 +53,20 @@ class _ExamDataPageState extends State<ExamDataPage> {
 			),
 			body:	Column(
 				children: [
-					// UI: show cooldown time, previous data
+					// CHECK: cooldown time, prev data
+					Row(
+						children: [
+							textCol(
+								maybe(widget.equipage.currentLoopData?.recoveryTime, unixHMS) ?? "-",
+								"Recovery"
+							),
+							for (VetFieldValue remark in widget.equipage.previousLoopData?.data?.remarks() ?? const [])
+							textCol(
+								remark.toString(),
+								remark.field.name,
+							),
+						],
+					),
 					Expanded(
 						child: GridView.count(
 							padding: const EdgeInsets.all(10),

@@ -142,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
 		}
 
 	static Future<void> saveCSV(BuildContext context) async {
-		// FIXME: check saving works
+		// CHECK: android saving works
 		var m = context.read<LocalModel>();
 		var sm = ScaffoldMessenger.of(context);
 		var dir = await getApplicationDocumentsDirectory();

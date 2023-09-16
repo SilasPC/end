@@ -38,7 +38,7 @@ class _ExamPageState extends State<ExamPage> {
 						if (vet != null)
 						CountingTimer(target: fromUNIX(vet), countUp: true),
 						IconButton(
-							icon: const Icon(Icons.send, color: Colors.deepOrange),
+							icon: const Icon(Icons.navigate_next, color: Colors.green),
 							onPressed: () async {
 								await Navigator.push(
 									context,

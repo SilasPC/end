@@ -72,7 +72,6 @@ class EquipagePageState extends State<EquipagePage> {
 						Card(
 							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 228, 190, 53)),
 						),
-						// FIXME: android only shows first card
 						...loopCards(),
 					],
 				)
@@ -145,6 +144,7 @@ class EquipagePageState extends State<EquipagePage> {
 					if (ld.data != null)
 					Row(
 						children: [
+							// CHECK: ui look
 							for (var remark in ld.data!.remarks()) // UI: make this better
 							Container(
 								padding: const EdgeInsets.symmetric(horizontal: 10),

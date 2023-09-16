@@ -51,7 +51,7 @@ class VetData extends IJSON {
 
 }
 
-// TODO: check what is letter vs. digit
+// CHECK: what is letter vs. digit
 enum VetField {
 	
 	HR1		(VetFieldType.NUMBER, "Pulse 1"),

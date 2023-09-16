@@ -33,6 +33,7 @@ class HmsPickerState extends State<HmsPicker> {
 			height: 200,
 			child: Row(
 				mainAxisAlignment: MainAxisAlignment.center,
+				crossAxisAlignment: CrossAxisAlignment.center,
 				children: [
 					NumberPicker(
 						value: h,
@@ -58,15 +59,10 @@ class HmsPickerState extends State<HmsPicker> {
 						infiniteLoop: true,
 						onChanged: (n) => setState(() { s = n; }),
 					),
-					Column(
-						mainAxisAlignment: MainAxisAlignment.center,
-						children: [
-							ElevatedButton(
-								child: const Text("OK"),
-								onPressed: () => widget.onAccept(fromHMS(h,m,s)),
-							)
-						],
-					)
+					ElevatedButton(
+						child: const Text("OK"),
+						onPressed: () => widget.onAccept(fromHMS(h,m,s)),
+					),
 				]
 			)
 		);
