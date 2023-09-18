@@ -95,94 +95,113 @@ class EquipagePageState extends State<EquipagePage> {
 		if (cl == null) return [];
 		return [
 			for (int l = cl; l >= 0; l--)
-			loopCard(l + 1, lps[l], l == lps.length)
+			LoopCard(i: l + 1, ld: lps[l], finish: l == lps.length)
 		];
 	}
 
-	Widget loopCard(int i, LoopData ld, bool finish) =>
-		Card(
+}
+
+class LoopCard extends StatelessWidget {
+
+	const LoopCard({super.key, required this.i, required this.ld, required this.finish});
+
+	final int i;
+	final LoopData ld;
+	final bool finish;
+
+	@override
+	Widget build(BuildContext context) {
+		var remarks = ld.data?.remarks() ?? const [];
+		return Card(
 			child: Column(
 				children: [
+					header(),
+					grid(),
+					if (remarks.isNotEmpty)
 					Container(
-						padding: const EdgeInsets.symmetric(horizontal: 10),
+						height: 50,
+						padding: const EdgeInsets.only(right: 10),
 						decoration: BoxDecoration(
-							color: const Color.fromARGB(255, 98, 85, 115),
 							border: Border.all(
 								color: Colors.black54,
 								width: 0.3,
 							),
 						),
-						height: 30,
-						child: Row(
-							mainAxisAlignment: MainAxisAlignment.spaceBetween,
+						child: ListView( // alternative: Wrap
+							scrollDirection: Axis.horizontal,
 							children: [
-								Text("GATE $i"),
-								Text("${ld.loop.distance} km"),
+								for (var remark in remarks)
+								Padding(
+									padding: const EdgeInsets.only(left: 10),
+									child: Chip(
+										backgroundColor: Colors.amber,
+										label: Text("${remark.field.name} ${remark.toString()}")
+									),
+								)
 							],
 						)
 					),
-					AspectRatio(
-						aspectRatio: 3,
-						child: Row(
-							children: [
-								txtCol([maybe(ld.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
-								txtCol(["${ld.data?.hr1 ?? "-"}/${ld.data?.hr2 ?? "-"}","Heartrate"]),
-								txtCol([maybe(ld.speed(finish: finish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
-							].map(wrapTxtCol).toList(),
-						),
-					),
-					AspectRatio(
-						aspectRatio: 3,
-						child: Row(
-							children: [
-								txtCol([maybe(ld.expDeparture, unixHMS) ?? "-","Departure"]),
-								txtCol([maybe(ld.arrival, unixHMS) ?? "-","Arrival"]),
-								txtCol([maybe(ld.vet, unixHMS) ?? "-","Vet"]),
-							].map(wrapTxtCol).toList(),
-						),
-					),
-					if (ld.data != null)
-					Row(
-						children: [
-							// CHECK: ui look
-							for (var remark in ld.data!.remarks()) // UI: make this better
-							Container(
-								padding: const EdgeInsets.symmetric(horizontal: 10),
-								margin: const EdgeInsets.only(right: 10),
-								decoration: BoxDecoration(
-									border: Border.all(
-										color: Colors.black54,
-										width: 0.3,
-									),
-								),
-								child: txtCol([remark.toString(), remark.field.name]),
-							),
-						],
-					)
+				],
+			)
+		);
+	}
+
+	Widget header() =>
+		Container(
+			padding: const EdgeInsets.symmetric(horizontal: 10),
+			decoration: BoxDecoration(
+				color: const Color.fromARGB(255, 98, 85, 115),
+				border: Border.all(
+					color: Colors.black54,
+					width: 0.3,
+				),
+			),
+			height: 30,
+			child: Row(
+				mainAxisAlignment: MainAxisAlignment.spaceBetween,
+				children: [
+					Text("GATE $i"),
+					Text("${ld.loop.distance} km"),
 				],
 			)
 		);
 
-	Widget wrapTxtCol(Widget w) =>
+	Widget grid() =>
 		AspectRatio(
-			aspectRatio: 1,
-			child: Container(
-				padding: const EdgeInsets.all(20),
-				decoration: BoxDecoration(
-					border: Border.all(
-						color: Colors.black54,
-						width: 0.3,
-					),
-				),
-				child: FittedBox(
-					child: w,
-				),
-			)
-		);
-
-	Widget txtCol(List<String> strs) =>
-		Column(
-			children: strs.map((s) => Text(s)).toList(),
+			aspectRatio: 3/2,
+			child: GridView.count(
+				crossAxisCount: 3,
+				children: [
+					txtCol([maybe(ld.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
+					txtCol(["${ld.data?.hr1 ?? "-"}/${ld.data?.hr2 ?? "-"}","Heartrate"]),
+					txtCol([maybe(ld.speed(finish: finish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
+					txtCol([maybe(ld.expDeparture, unixHMS) ?? "-","Departure"]),
+					txtCol([maybe(ld.arrival, unixHMS) ?? "-","Arrival"]),
+					txtCol([maybe(ld.vet, unixHMS) ?? "-","Vet"]),
+				].map(wrapTxtCol).toList(),
+			),
 		);
 
 }
+
+Widget txtCol(List<String> strs) =>
+	Column(
+		children: strs.map((s) => Text(s)).toList(),
+	);
+	
+Widget wrapTxtCol(Widget w) =>
+	AspectRatio(
+		aspectRatio: 1,
+		child: Container(
+			padding: const EdgeInsets.all(20),
+			decoration: BoxDecoration(
+				border: Border.all(
+					color: Colors.black54,
+					width: 0.3,
+				),
+			),
+			child: FittedBox(
+				child: w,
+			),
+		)
+	);

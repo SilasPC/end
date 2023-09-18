@@ -53,19 +53,35 @@ class _ExamDataPageState extends State<ExamDataPage> {
 			),
 			body:	Column(
 				children: [
-					// CHECK: cooldown time, prev data
-					Row(
-						children: [
-							textCol(
-								maybe(widget.equipage.currentLoopData?.recoveryTime, unixHMS) ?? "-",
-								"Recovery"
+					Card(
+						margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+						color: const Color.fromARGB(255, 146, 119, 68),
+						child: Padding(
+							padding: const EdgeInsets.all(12),
+							child: Row(
+								children: [
+									// UI: prettier
+									textCol(
+										"${1 + (widget.equipage.currentLoop ?? -1)}/${widget.equipage.category.loops.length}",
+										"Loop"
+									),
+									const SizedBox(width: 10),
+									textCol(
+										maybe(widget.equipage.currentLoopData?.recoveryTime, unixHMS) ?? "-",
+										"Recovery"
+									),
+									const SizedBox(width: 10),
+									for (VetFieldValue remark in widget.equipage.previousLoopData?.data?.remarks(true) ?? const [])
+									...[
+										const SizedBox(width: 10),
+										textCol(
+											remark.toString(),
+											remark.field.name,
+										),
+									]
+								],
 							),
-							for (VetFieldValue remark in widget.equipage.previousLoopData?.data?.remarks() ?? const [])
-							textCol(
-								remark.toString(),
-								remark.field.name,
-							),
-						],
+						),
 					),
 					Expanded(
 						child: GridView.count(
@@ -124,7 +140,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 									child: Container(
 									margin: const EdgeInsets.all(10),
 									child: ElevatedButton(
-										style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
+										style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
 										onPressed: () => submit(context, true, retire: true),
 										child: const Text("RETIRE", style: TextStyle(fontSize: 20)),
 									)

@@ -3,7 +3,6 @@ abstract class GateState {
 	void refresh();
 }
 
-// TODO: more idiomatic
 class GateController {
 
 	GateState? _state;

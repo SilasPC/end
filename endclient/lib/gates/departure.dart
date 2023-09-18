@@ -42,7 +42,7 @@ class _DeparturePageState extends State<DeparturePage> {
          predicate: (e) => e.status == EquipageStatus.RESTING,
          onSubmit: () => submit(ctx),
          submitDisabled: timers.isEmpty,
-         builder: (eq, ok) => // UI: use ok
+         builder: (eq, ok) =>
             EquipageTile(
                eq,
                trailing: [

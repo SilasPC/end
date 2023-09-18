@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'settings.dart';
 import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
-import 'LocalModel.dart';
 import 'gates/arrival.dart';
 import 'gates/exam.dart';
 import 'gates/vet.dart';

@@ -11,16 +11,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-class ModelProvider extends StatefulWidget {
+class ModelProvider extends StatelessWidget {
 	const ModelProvider({super.key, required this.child});
 
 	final Widget child;
-
-	@override
-	ModelProviderState createState() => ModelProviderState();
-}
-
-class ModelProviderState extends State<ModelProvider> {
 
 	@override
 	Widget build(BuildContext context) =>
@@ -31,7 +25,7 @@ class ModelProviderState extends State<ModelProvider> {
 				mod!.connection.socketAddress = set.serverURI;
 				return mod;
 			},
-			child: widget.child,
+			child: child,
 		);
 }
 

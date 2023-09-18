@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:common/util.dart';
 import 'hms_picker.dart';
@@ -19,7 +21,7 @@ class TimingList extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		SingleChildScrollView(
 			child: SizedBox(
-				height: children.length * height,
+				height: max(children.length, timers.length) * height,
 				child: Row(
 					children: [
 						Expanded(
@@ -31,35 +33,35 @@ class TimingList extends StatelessWidget {
 							),
 						),
 						SizedBox(
-							width: 100,
+							width: 80,
 							child: ListView(
 								children: [
 									for (int i = 0; i < timers.length; i++)
-									SizedBox(
+									Container(
+										padding: const EdgeInsets.all(8),
 										height: height,
-										child: Center(
-											child: ListTile(
-												onLongPress: () => onRemoveTimer(i),
-												onTap: () {
-													showDialog(
-														context: context,
-														builder: (context) {
-															return Dialog(
-																child: HmsPicker(
-																	dateTime: timers[i],
-																	onAccept: (dt) {
-																		Navigator.pop(context);
-																		onReorderRow(i, dt);
-																	},
-																)
-															);
-														}
-													);
-												},
-												title: i == 0
-													? Text(toHMS(timers[i]))
-													: Text("${toHMS(timers[i])}\n(${unixDifToMS((timers[i].millisecondsSinceEpoch-timers[i-1].millisecondsSinceEpoch)~/1000, true)})")
-											),
+										alignment: Alignment.center,
+										child: GestureDetector(
+											onLongPress: () => onRemoveTimer(i),
+											onTap: () {
+												showDialog(
+													context: context,
+													builder: (context) {
+														return Dialog(
+															child: HmsPicker(
+																dateTime: timers[i],
+																onAccept: (dt) {
+																	Navigator.pop(context);
+																	onReorderRow(i, dt);
+																},
+															)
+														);
+													}
+												);
+											},
+											child: i == 0
+												? Text(toHMS(timers[i]))
+												: Text("${toHMS(timers[i])}\n(${unixDifToMS((timers[i].millisecondsSinceEpoch-timers[i-1].millisecondsSinceEpoch)~/1000, true)})")
 										),
 									),
 								],
