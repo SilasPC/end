@@ -77,11 +77,11 @@ class SocketServer {
 
 	final ValueNotifier<bool> status = ValueNotifier(false);
 
-	String _socketAddress = "http://192.168.8.101:3000";
+	String? _socketAddress;
 
-	String get socketAddress => _socketAddress;
-	set socketAddress(String value) {
-		if (value == _socketAddress) return;
+	String? get socketAddress => _socketAddress;
+	set socketAddress(String? value) {
+		if (value == _socketAddress || value == null) return;
 		_socketAddress = value;
 		_initSocket();
 	}
@@ -104,26 +104,35 @@ class SocketServer {
 		_socket!.emit("reset");
 	}
 
-	SocketServer({this.onConnect, this.onDisconnect, this.onPush}) {
-		_initSocket();
-	}
+	SocketServer({this.onConnect, this.onDisconnect, this.onPush});
 
+	int _initCount = 0;
 	void _initSocket() {
 
-		_socket?.close();
+		var initCount = ++_initCount;
+
+		print("init $initCount $_socketAddress");
+
+		_socket?.disconnect();
 		status.value = false;
+		onDisconnect?.call();
+		// FIXME: io.io will not reconnect to a previously connected socket ???
 		io.Socket socket = _socket = io.io(
-			_socketAddress,
+			_socketAddress!,
 			io.OptionBuilder()
 				.setTransports(["websocket"])
 				.build()
 		);
 
 		socket.onConnect((_) {
+			if (initCount != _initCount) return;
+			print("connect $initCount");
 			status.value = true;
 			onConnect?.call();
 		});
 		socket.onDisconnect((_) {
+			if (initCount != _initCount) return;
+			print("disconnect $initCount");
 			status.value = false;
 			onDisconnect?.call();
 		});

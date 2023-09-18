@@ -54,8 +54,9 @@ class _SettingsPageState extends State<SettingsPage> {
 								label: Text("Server address"),
 							),
 							controller: _servAddr,
-							onSubmitted: (value) {
-								model.connection.socketAddress = value;
+							onSubmitted: (val) {
+								set.serverURI = val;
+								set.save();
 							},
 						)
 					),

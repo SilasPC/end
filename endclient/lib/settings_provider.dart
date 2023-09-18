@@ -36,7 +36,7 @@ class SettingsProviderState extends State<SettingsProvider> {
 
 	Future<void> _save() async {
 		var prefs = await SharedPreferences.getInstance();
-		await prefs.setString("settings", _current.toString());
+		await prefs.setString("settings", _current.toJsonString());
 	}
 
 	Future<void> _load() async {
@@ -44,7 +44,8 @@ class SettingsProviderState extends State<SettingsProvider> {
 		var val = prefs.getString("settings");
 		if (val == null) return;
 		try {
-			set(Settings.fromJson(val, this));
+			print("loading settings $val");
+			set(Settings.fromJsonString(val, this));
 		} on FormatException catch (_) {
 			_save();
 		}
@@ -54,6 +55,7 @@ class SettingsProviderState extends State<SettingsProvider> {
 		if (!mounted) return;
 		setState(() {
 			_current = value;
+			print("settings = ${_current.toJsonString()}");
 		});
 		_save();
 	}
@@ -67,7 +69,7 @@ class SettingsProviderState extends State<SettingsProvider> {
 
 }
 
-class Settings {
+class Settings extends IJSON {
 
 	final SettingsProviderState _provider;
 
@@ -103,24 +105,24 @@ class Settings {
 		showAdmin,
 	);
 
-	JSON toMap() => {
+	@override
+	JSON toJson() => {
 		'serverURI': serverURI,
 		'author': author,
 		'darkTheme': darkTheme,
 		'showAdmin': showAdmin,
 	};
 
-	factory Settings.fromMap(SettingsProviderState provider,  map) =>
+	factory Settings.fromJson(JSON json, SettingsProviderState provider) =>
 		Settings(
 			provider,
-			map['serverURI'] as String,
-			map['author'] as String,
-			map['darkTheme'] as bool,
-			map['showAdmin'] as bool,
+			json['serverURI'] as String,
+			json['author'] as String,
+			json['darkTheme'] as bool,
+			json['showAdmin'] as bool,
 		);
 
-	String toJson() => jsonEncode(toMap());
-	factory Settings.fromJson(String json, SettingsProviderState provider) =>
-		Settings.fromMap(jsonDecode(json), provider);
+	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>
+		Settings.fromJson(jsonDecode(json), provider);
 
 }

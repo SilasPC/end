@@ -35,15 +35,19 @@ Future<void> main() async {
 
 	io = Server();
 	io.on("connection", (client) {
+		print("connect $client");
 		setJsonAck(client, "sync", (json) {
 			var sr = SyncRequest<Model>.fromJSON(json);
 			var res = sr.applyTo(em);
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 			return res;
 		});
-		client.on("reset", () {
+		client.on("reset", (_) {
 			em.reset();
 			client.broadcast.emit("reset");
+		});
+		client.on("disconnect", (_) {
+			print("disconnect $client");
 		});
 	});
 	io.listen(3000);
