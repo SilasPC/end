@@ -23,9 +23,12 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
           .map((e) => Loop.fromJson(e as Map<String, dynamic>))
           .toList(),
       json['startTime'] as int,
-    )..equipages = (json['equipages'] as List<dynamic>)
-        .map((e) => Equipage.fromJson(e as Map<String, dynamic>))
-        .toList();
+    )
+      ..equipages = (json['equipages'] as List<dynamic>)
+          .map((e) => Equipage.fromJson(e as Map<String, dynamic>))
+          .toList()
+      ..minSpeed = json['minSpeed'] as int?
+      ..maxSpeed = json['maxSpeed'] as int?;
 
 Map<String, dynamic> _$CategoryToJson(Category instance) {
   final val = <String, dynamic>{};
@@ -41,5 +44,7 @@ Map<String, dynamic> _$CategoryToJson(Category instance) {
   val['loops'] = instance.loops;
   val['equipages'] = instance.equipages;
   val['startTime'] = instance.startTime;
+  writeNotNull('minSpeed', instance.minSpeed);
+  writeNotNull('maxSpeed', instance.maxSpeed);
   return val;
 }

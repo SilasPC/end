@@ -74,6 +74,17 @@ class _SettingsPageState extends State<SettingsPage> {
 					),
 					ListTile(
 						leading: const Icon(Icons.admin_panel_settings),
+						title: const Text("Enable notifications"),
+						trailing: Switch(
+							value: set.sendNotifs,
+							onChanged: (val) => setState((){
+								set.sendNotifs = val;
+								set.save();
+							}),
+						),
+					),
+					ListTile(
+						leading: const Icon(Icons.admin_panel_settings),
 						title: const Text("Enable advanced mode"),
 						trailing: Switch(
 							value: set.showAdmin,
@@ -122,25 +133,25 @@ class _SettingsPageState extends State<SettingsPage> {
 		);
 	}
 
-		static Future<void> loadModel(BuildContext context) async {
-			var m = context.read<LocalModel>();
-			var meets = await loadRecentMeetings();
-			showChoicesModal(
-				context,
-				["DEMO", ...meets.map((e) => e.name)],
-				(name) async {
-					m.reset();
-					if (name == "DEMO") {
-						m.addSync(demoInitEvent(nowUNIX()+300));
-						return;
-					}
-					var meet = meets.firstWhere((e) => e.name == name);
-					var evs = await loadModelEvents(meet.id);
-					m.addSync(evs);
+	static Future<void> loadModel(BuildContext context) async {
+		var m = context.read<LocalModel>();
+		var meets = await EquipeMeeting.loadRecent();
+		showChoicesModal(
+			context,
+			["DEMO", ...meets.map((e) => e.name)],
+			(name) async {
+				m.reset();
+				if (name == "DEMO") {
+					m.addSync(demoInitEvent(nowUNIX()+300));
 					return;
 				}
-			);
-		}
+				var meet = meets.firstWhere((e) => e.name == name);
+				var evs = await meet.loadEvents();
+				m.addSync(evs);
+				return;
+			}
+		);
+	}
 
 	static Future<void> saveCSV(BuildContext context) async {
 		// CHECK: android saving works

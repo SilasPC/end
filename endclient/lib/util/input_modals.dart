@@ -3,6 +3,8 @@ import 'package:animations/animations.dart';
 import 'package:esys_client/util/int_picker.dart';
 import 'package:flutter/material.dart';
 
+import 'hms_picker.dart';
+
 void showInputDialog(
 	BuildContext context,
 	String label,
@@ -42,6 +44,22 @@ void showInputDialog(
 				)
 			)
 		)
+	);
+}
+void showHMSPicker(BuildContext context, DateTime time, void Function(DateTime) onAccept) {
+	showDialog(
+		context: context,
+		builder: (context) {
+			return Dialog(
+				child: HmsPicker(
+					dateTime: time,
+					onAccept: (dt) {
+						Navigator.of(context).pop();
+						onAccept(dt);
+					}
+				)
+			);
+		}
 	);
 }
 

@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:common/EnduranceEvent.dart';
-import 'package:common/consts.dart';
 import 'package:common/util.dart';
 import 'package:http/http.dart' as http;
 import 'EventModel.dart';
@@ -12,10 +11,14 @@ class EquipeMeeting {
 	final String name;
 	final int id;
 
+	static Future<List<EquipeMeeting>> loadRecent() => _loadRecentMeetings();
+
 	EquipeMeeting(this.name, this.id);
+
+	Future<List<Event<Model>>> loadEvents() => _loadModelEvents(id);
 }
 
-Future<List<EquipeMeeting>> loadRecentMeetings() async {
+Future<List<EquipeMeeting>> _loadRecentMeetings() async {
 	dynamic res = await _loadJSON("api/v1/meetings/recent");
 	List<dynamic> recent = res as List;
 	recent.retainWhere((e) => e["discipline"] == "endurance");
@@ -27,8 +30,7 @@ Future<List<EquipeMeeting>> loadRecentMeetings() async {
 /// TODO: determine actual rest time?
 const TYPICAL_REST_TIME = 40;
 
-// TODO: refactor equipe loading code
-Future<List<Event<Model>>> loadModelEvents(int classId) async {
+Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");
 	if (schd["discipline"] != "endurance")
 		throw Exception("Could not load a non-endurance event");
@@ -44,45 +46,24 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 	
 	for (var day in days) {
 		for (var cl in day["meeting_classes"]) {
-			String? distStr = rgx.firstMatch(cl["name"])?[1];
-			if (distStr == null) continue;
-			int dist = int.parse(distStr);
-			String name = rgx2.firstMatch(cl["name"])?[0] ?? cl["name"];
 
-			if (m.categories.containsKey(name)) {
-				int i = 1;
-				while (m.categories.containsKey("$name $i")) {
-					i++;
-				}
-				name = "$name $i";
-			}
+			var tup = _parseCategory(cl, m);
+			if (tup == null) continue;
+			var cat = tup.a;
+			var dist = tup.b;
+
 			try {
-				var id = cl["class_sections"][0]["id"];
-				var cat = Category(id, name, [], UNIX_FUTURE);
-				List<Event<Model>> evs = [];
 
-				var cls = await _loadJSON("api/v1/class_sections/$id");
-				parseEquipages(cls["starts"], cat, evs);
+				var cls = await _loadJSON("api/v1/class_sections/${cat.equipeId!}");
+				_parseEquipages(cls["starts"], cat, mevs);
 
 				if (cat.distance() != dist) {
-					print("$name distance mismatch (needed $dist, found ${cat.distance()})");
-
-					int lenGuess = (dist / 30).ceil();
-
-					int ldist = (dist / lenGuess).ceil();
-					int fdist = dist - (ldist * (lenGuess - 1));
-
-					for (int i = 0; i < lenGuess - 1; i++) {
-						cat.loops.add(Loop(ldist, TYPICAL_REST_TIME));
-					}
-					cat.loops.add(Loop(fdist, TYPICAL_REST_TIME));
+					_guessCategoryLoops(cat, dist);
 				}
 
-				// okay, write into model
-				m.categories[cat.name] = cat;
-				mevs.addAll(evs);
-				for (var eq in cat.equipages)
+				for (var eq in cat.equipages) {
 					m.equipages[eq.eid] = eq;
+				}
 				
 			} catch (e) {
 				print(e);
@@ -96,7 +77,54 @@ Future<List<Event<Model>>> loadModelEvents(int classId) async {
 
 }
 
-void parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
+Tuple<Category, int>? _parseCategory(dynamic meeting_class, Model model) {
+	String name = meeting_class["name"];
+	var class_sections = meeting_class["class_sections"] as List;
+	if (class_sections.isEmpty) return null;
+	var equipeId = class_sections.first["id"];
+	String? distStr = rgxDist.firstMatch(name)?[1];
+	if (distStr == null) return null;
+	int dist = int.parse(distStr);
+	String lvl = rgxCatLvl.firstMatch(name)?[0] ?? name;
+
+	int? minSpeed = maybe(rgxMinSpd.firstMatch(name)?[1], int.parse);
+	int? maxSpeed = maybe(rgxMaxSpd.firstMatch(name)?[1], int.parse);
+
+	var other = model.categories[lvl];
+	if (other != null) {
+		other.name += " 1";
+	}
+	if (model.categories.containsKey("$lvl 1")) {
+		int i = 2;
+		while (model.categories.containsKey("$lvl $i")) {
+			i++;
+		}
+		lvl += " $i";
+	}
+
+	var cat = model.categories[lvl] =
+		Category(equipeId, lvl, [], UNIX_FUTURE)
+			..minSpeed = minSpeed
+			..maxSpeed = maxSpeed;
+
+	return Tuple(cat, dist);
+}
+
+void _guessCategoryLoops(Category cat, int dist) {
+	print("Guessing loops for ${cat.name}");
+
+	int lenGuess = (dist / 30).ceil();
+
+	int ldist = (dist / lenGuess).ceil();
+	int fdist = dist - (ldist * (lenGuess - 1));
+
+	for (int i = 0; i < lenGuess - 1; i++) {
+		cat.loops.add(Loop(ldist, TYPICAL_REST_TIME));
+	}
+	cat.loops.add(Loop(fdist, TYPICAL_REST_TIME));
+}
+
+void _parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
 	bool hasResults = false;
 	for (var eq in equipages) {
 		var eid = int.parse(eq["start_no"]);
@@ -175,8 +203,10 @@ void parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
 		}
 }
 
-RegExp rgx = RegExp(r"(\d+)(?:[.,]\d+)?\s?km");
-RegExp rgx2 = RegExp(r"[LMS][ABCDE]|CEI.*\d?\*+");
+RegExp rgxDist = RegExp(r"(\d+)(?:[.,]\d+)?\s?km");
+RegExp rgxCatLvl = RegExp(r"[LMS][ABCDE]|CEI.*\d?\*+");
+RegExp rgxMinSpd = RegExp(r"min\D*(\d+)(?:[.,]\d+)?\s?km", caseSensitive: false);
+RegExp rgxMaxSpd = RegExp(r"max\D*(\d+)(?:[.,]\d+)?\s?km", caseSensitive: false);
 
 Future<dynamic> _loadJSON(String loc) async {
 	var res = await http.get(Uri.https("online.equipe.com", loc));

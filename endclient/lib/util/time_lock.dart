@@ -1,4 +1,5 @@
 
+import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:common/util.dart';
 
@@ -20,19 +21,10 @@ class TimeLock extends StatelessWidget {
 			: GestureDetector(
 				child: Text(toHMS(time!)),
 				onTap: () {
-					showDialog(
-						context: context,
-						builder: (context) {
-							return Dialog(
-								child: HmsPicker(
-									dateTime: time!,
-									onAccept: (dt) {
-										Navigator.pop(context);
-										onChanged(dt);
-									},
-								)
-							);
-						}
+					showHMSPicker(
+						context,
+						time!,
+						onChanged
 					);
 				}
 			);

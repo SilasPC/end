@@ -105,8 +105,7 @@ class EventModel<M extends IJSON> {
 		if (maxTime == _maxBuildTime) return;
 		if (_maxBuildTime != null && (maxTime == null || maxTime > _maxBuildTime!)) {
 			// delete constraint
-			// PERF: binary search
-			int buildFrom = events.indexWhere((e) => e.time > _maxBuildTime!);
+			int buildFrom = events.binarySearch((e) => e.time > _maxBuildTime!);
 			_maxBuildTime = maxTime;
 			if (buildFrom != -1) {
 				_handle.willUpdate();
@@ -174,9 +173,7 @@ class EventModel<M extends IJSON> {
 	SyncInfo get syncState => SyncInfo(events.length, deletes.length);
 
 	void _killSavepointsAfter(int evLen) {
-		// PERF: binary search
-		int i = savepoints.lastIndexWhere((sp) => sp.si.evLen <= evLen);
-		//int i = binarySearchLast(savepoints, (sp) => sp.si.evLen < evLen);
+		int i = binarySearchLast(savepoints, (sp) => sp.si.evLen <= evLen);
 		savepoints.removeRange(i + 1, savepoints.length);
 	}
 

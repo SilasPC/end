@@ -22,7 +22,7 @@ class VetData extends IJSON {
 			if (hr1 != null && returnHr) 
 				VetField.HR1.withValue(hr1!),
 			if (hr2 != null && returnHr)
-				VetField.HR1.withValue(hr2!),
+				VetField.HR2.withValue(hr2!),
 			if (resp != null && resp != 1)
 				VetField.RESP.withValue(resp!),
 			if (mucMem != null && mucMem != 1)

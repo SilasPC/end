@@ -1,18 +1,10 @@
 
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:common/Equipe.dart';
-import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'LocalModel.dart';
-import 'util/input_modals.dart';
 
 class SettingsProvider extends StatefulWidget {
 	const SettingsProvider({super.key, required this.child});
@@ -77,13 +69,15 @@ class Settings extends IJSON {
 	String author;
 	bool darkTheme;
 	bool showAdmin;
+	bool sendNotifs;
 	
-	Settings(this._provider, this.serverURI, this.author, this.darkTheme, this.showAdmin);
+	Settings(this._provider, this.serverURI, this.author, this.darkTheme, this.showAdmin, this.sendNotifs);
 	Settings.defaults(this._provider):
 		serverURI = "http://192.168.8.100:3000",
 		author = "default",
 		darkTheme = false,
-		showAdmin = false;
+		showAdmin = false,
+		sendNotifs = Platform.isAndroid || Platform.isIOS;
 
 	// TODO: this is not very nice
 	void setDefaults() {
@@ -91,6 +85,7 @@ class Settings extends IJSON {
 		author = "default";
 		darkTheme = false;
 		showAdmin = false;
+		sendNotifs = Platform.isAndroid || Platform.isIOS;
 	}
 
 	void save() {
@@ -103,6 +98,7 @@ class Settings extends IJSON {
 		author,
 		darkTheme,
 		showAdmin,
+		sendNotifs
 	);
 
 	@override
@@ -111,6 +107,7 @@ class Settings extends IJSON {
 		'author': author,
 		'darkTheme': darkTheme,
 		'showAdmin': showAdmin,
+		'sendNotifs': sendNotifs,
 	};
 
 	factory Settings.fromJson(JSON json, SettingsProviderState provider) =>
@@ -120,6 +117,7 @@ class Settings extends IJSON {
 			json['author'] as String,
 			json['darkTheme'] as bool,
 			json['showAdmin'] as bool,
+			json['sendNotifs'] as bool,
 		);
 
 	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>

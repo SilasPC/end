@@ -56,29 +56,17 @@ class _ExamDataPageState extends State<ExamDataPage> {
 					Card(
 						margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
 						color: const Color.fromARGB(255, 146, 119, 68),
-						child: Padding(
-							padding: const EdgeInsets.all(12),
-							child: Row(
+						child: Container(
+							height: 50,
+							padding: const EdgeInsets.only(right: 10),
+							child: ListView(
+								scrollDirection: Axis.horizontal,
 								children: [
-									// UI: prettier
-									textCol(
-										"${1 + (widget.equipage.currentLoop ?? -1)}/${widget.equipage.category.loops.length}",
-										"Loop"
-									),
-									const SizedBox(width: 10),
-									textCol(
-										maybe(widget.equipage.currentLoopData?.recoveryTime, unixHMS) ?? "-",
-										"Recovery"
-									),
-									const SizedBox(width: 10),
+									paddedChip("Loop ${1 + (widget.equipage.currentLoop ?? -1)}/${widget.equipage.category.loops.length}"),
+									if (widget.equipage.currentLoopData?.recoveryTime != null)
+										paddedChip("Recovery ${unixDifToMS(widget.equipage.currentLoopData!.recoveryTime!)}"),
 									for (VetFieldValue remark in widget.equipage.previousLoopData?.data?.remarks(true) ?? const [])
-									...[
-										const SizedBox(width: 10),
-										textCol(
-											remark.toString(),
-											remark.field.name,
-										),
-									]
+										paddedChip("${remark.field.name} ${remark.toString()}", Colors.amber)
 								],
 							),
 						),
@@ -90,7 +78,6 @@ class _ExamDataPageState extends State<ExamDataPage> {
 							crossAxisSpacing: 10,
 							crossAxisCount: 3,
 							children: [
-								// TODO: use VetField.values (?)
 								numField(context, data.hr1,"Pulse 1", (n) => setState(() => data.hr1 = n)),
 								numField(context, data.hr2,"Pulse 2", (n) => setState(() => data.hr2 = n)),
 								letField(data.resp,"Respiration", (n) => setState(() => data.resp = n)),
@@ -151,6 +138,15 @@ class _ExamDataPageState extends State<ExamDataPage> {
 					)
 				],
 			)
+		);
+	
+	Widget paddedChip(String label, [Color? color]) =>
+		Padding(
+			padding: const EdgeInsets.only(left: 10),
+			child: Chip(
+				backgroundColor: color,
+				label: Text(label)
+			),
 		);
 
 	Widget numField(BuildContext context, int? val, String display, void Function(int? n) f) =>

@@ -1,12 +1,17 @@
 
-import 'package:common/consts.dart';
-import 'package:esys_client/util/timer.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:common/models/glob.dart';
-import 'package:common/util.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
+
+import 'package:common/consts.dart';
+import 'package:common/models/glob.dart';
+import 'package:common/util.dart';
+
+import '../settings_provider.dart';
+import '../util/chip_strip.dart';
+import '../util/timer.dart';
+import 'equipage_tile.dart';
 
 import '../LocalModel.dart';
 
@@ -29,10 +34,7 @@ class EquipagePageState extends State<EquipagePage> {
 		_prevStatus = widget.equipage.status;
 	}
 
-	@override
-	Widget build(BuildContext context) {
-		context.watch<LocalModel>();
-
+	void checkStatusUpdate() {
 		if (_prevStatus != widget.equipage.status) {
 			_prevStatus = widget.equipage.status;
 			String? msg;
@@ -47,9 +49,15 @@ class EquipagePageState extends State<EquipagePage> {
 					if (time == null) break;
 					msg = "Departure time ${unixHMS(time)}";
 					break;
+				case EquipageStatus.FINISHED:
+					var pos = (widget.equipage.category.equipages.toList()
+						..sort(Equipage.byRank))
+						.indexOf(widget.equipage) + 1;
+					msg = "Finished as #$pos";
+					break;
 				default:
 			}
-			if (msg != null) {
+			if (msg != null && context.read<Settings>().sendNotifs) {
 				int loop = widget.equipage.currentLoop! + 1;
 				Locally(
 					context: context,
@@ -59,7 +67,12 @@ class EquipagePageState extends State<EquipagePage> {
 				).show(title: "Status loop $loop", message: msg);
 			}
 		}
+	}
 
+	@override
+	Widget build(BuildContext context) {
+		context.watch<LocalModel>();
+		checkStatusUpdate();
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Equipage"),
@@ -95,7 +108,32 @@ class EquipagePageState extends State<EquipagePage> {
 		if (cl == null) return [];
 		return [
 			for (int l = cl; l >= 0; l--)
-			LoopCard(i: l + 1, ld: lps[l], finish: l == lps.length)
+				LoopCard(i: l + 1, ld: lps[l], finish: l == lps.length),
+			if (widget.equipage.preExam != null)
+				Card(
+					child: Column(
+						children: [
+							Container(
+								padding: const EdgeInsets.symmetric(horizontal: 10),
+								decoration: BoxDecoration(
+									color: const Color.fromARGB(255, 98, 85, 115),
+									border: Border.all(
+										color: Colors.black54,
+										width: 0.3,
+									),
+								),
+								height: 30,
+								child: Row(
+									mainAxisAlignment: MainAxisAlignment.spaceBetween,
+									children: const [
+										Text("PRE-EXAM"),
+									],
+								)
+							),
+							LoopCard.remarksList(widget.equipage.preExam!.remarks())
+						],
+					),
+				)
 		];
 	}
 
@@ -118,33 +156,28 @@ class LoopCard extends StatelessWidget {
 					header(),
 					grid(),
 					if (remarks.isNotEmpty)
-					Container(
-						height: 50,
-						padding: const EdgeInsets.only(right: 10),
-						decoration: BoxDecoration(
-							border: Border.all(
-								color: Colors.black54,
-								width: 0.3,
-							),
-						),
-						child: ListView( // alternative: Wrap
-							scrollDirection: Axis.horizontal,
-							children: [
-								for (var remark in remarks)
-								Padding(
-									padding: const EdgeInsets.only(left: 10),
-									child: Chip(
-										backgroundColor: Colors.amber,
-										label: Text("${remark.field.name} ${remark.toString()}")
-									),
-								)
-							],
-						)
-					),
+					remarksList(remarks),
 				],
 			)
 		);
 	}
+
+	static Widget remarksList(List<VetFieldValue> remarks, [Color? color = Colors.amber]) =>
+		ChipStrip(
+			decoration: BoxDecoration(
+				border: Border.all(
+					color: Colors.black54,
+					width: 0.3,
+				),
+			),
+			chips: [
+				for (var remark in remarks)
+				Chip(
+					backgroundColor: color,
+					label: Text("${remark.field.name} ${remark.toString()}")
+				)
+			],
+		);
 
 	Widget header() =>
 		Container(

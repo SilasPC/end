@@ -1,7 +1,9 @@
 
 import 'dart:collection';
 
-import 'package:common/util.dart';
+import '../util.dart' hide binarySearch, binarySearchLast;
+import '../util.dart' as util;
+
 
 class OrderedSet<T> {
 
@@ -40,9 +42,7 @@ class OrderedSet<T> {
 
 	/// finds the ordered index given an element
 	int? findOrdIndex(T t) {
-		int i = _byOrd.indexWhere((e) => _cmp(e.a, t) == 0);
-		// PERF: binary search
-		//int i = binarySearch(_byOrd, (t0) => _cmp(t0.a,t) < 0);
+		int i = binarySearch((t0) => _cmp(t0, t) >= 0);
 		if (i == -1) return null;
 		if (_cmp(_byOrd[i].a,t) == 0) return i;
 		return null;
@@ -66,9 +66,11 @@ class OrderedSet<T> {
 	int lastIndexWhere(Predicate<T> p) =>_byOrd.lastIndexWhere((e) => p(e.a));
 	int indexWhere(Predicate<T> p) =>_byOrd.indexWhere((e) => p(e.a));
 
+	/** See util.binarySearch */
+	int binarySearch(Predicate<T> p) => util.binarySearch(_byOrd, (e) => p(e.a));
+	/** See util.binarySearchLast */
+	int binarySearchLast(Predicate<T> p) => util.binarySearchLast(_byOrd, (e) => p(e.a));
+
 	T operator[] (int idx) => _byOrd[idx].a;
 
 }
-
-bool _isBeforeOrSame<T extends Comparable<T>>(T t0, T t1)
-	=>	t0.compareTo(t1) <= 0;

@@ -1,6 +1,7 @@
 
 import 'dart:math';
 
+import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:common/util.dart';
 import 'hms_picker.dart';
@@ -44,19 +45,10 @@ class TimingList extends StatelessWidget {
 										child: GestureDetector(
 											onLongPress: () => onRemoveTimer(i),
 											onTap: () {
-												showDialog(
-													context: context,
-													builder: (context) {
-														return Dialog(
-															child: HmsPicker(
-																dateTime: timers[i],
-																onAccept: (dt) {
-																	Navigator.pop(context);
-																	onReorderRow(i, dt);
-																},
-															)
-														);
-													}
+												showHMSPicker(
+													context,
+													timers[i],
+													(dt) => onReorderRow(i, dt)
 												);
 											},
 											child: i == 0

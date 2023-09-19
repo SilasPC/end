@@ -4,6 +4,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/EquipeIcons.dart';
+import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,48 +37,7 @@ class CategoryViewState extends State<CategoryView> {
 					padding: const EdgeInsets.all(10),
 					child: Column(
 						children: [
-							Card(
-								child: Column(
-									children: [
-										cardHeader(context, widget.cat.name, color: const Color.fromARGB(255, 98, 85, 115)),
-										// Text("8-16 km/h"),
-										Padding(
-											padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-											child: Row(
-												mainAxisAlignment: MainAxisAlignment.spaceBetween,
-												children: [
-													// UI: clear/free/ideal min/max time/speed status
-													// UI: loop cards (#riders / color?)
-													for (var loop in widget.cat.loops)
-													Container(
-														alignment: Alignment.center,
-														padding: const EdgeInsets.all(10),
-														margin: const EdgeInsets.symmetric(horizontal: 4),
-														decoration: const BoxDecoration(
-															borderRadius: BorderRadius.all(Radius.circular(10)),
-															color: Color.fromARGB(255, 146, 119, 68),
-														),
-														child: Text("${loop.distance}km"),
-													),
-													const Spacer(),
-													/* if (widget.cat.isEnded())
-													IconButton(
-														icon: const Icon(Icons.)
-													) */
-													if (widget.cat.equipeId != null)
-													IconButton(
-														icon: const Icon(EquipeIcons.logo),
-														onPressed: () {
-															var uri = Uri.parse("https://online.equipe.com/da/class_sections/${widget.cat.equipeId}");
-															launchUrl(uri);
-														},
-													),
-												],
-											),
-										)
-									],
-								)
-							),
+							CategoryCard(category: widget.cat),
 							Expanded(
 								child: ListView.builder(
 									itemCount: eqs.length,
@@ -170,4 +130,70 @@ class CategoryViewState extends State<CategoryView> {
 				),
 			],
 		);
+}
+
+class CategoryCard extends StatelessWidget {
+
+	const CategoryCard({super.key, required this.category});
+
+	final Category category;
+
+	@override
+	Widget build(BuildContext context) {
+		context.watch<LocalModel>();
+
+		return Card(
+			child: Column(
+				children: [
+					cardHeader(context, category.name, color: const Color.fromARGB(255, 98, 85, 115)),
+					// Text("8-16 km/h"),
+					Padding(
+						padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+						child: Row(
+							mainAxisAlignment: MainAxisAlignment.spaceBetween,
+							children: [
+								Expanded(
+									child: ChipStrip(
+										chips: [
+											// UI: clear/free/ideal min/max time/speed status
+											// UI: loop cards (#riders / color?)
+											if (category.minSpeed != null)
+												Chip(
+													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													label: Text("min. ${category.minSpeed} km/h")
+												),
+											if (category.maxSpeed != null)
+												Chip(
+													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													label: Text("max. ${category.maxSpeed} km/h")
+												),
+											Chip(
+												backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+												label: Text(
+													category.loops.map((c) => "${c.distance} km").join(" | ")
+												)
+											),
+										],
+									),
+								),
+								/* if (widget.cat.isEnded())
+								IconButton(
+									icon: const Icon(Icons.)
+								) */
+								if (category.equipeId != null)
+								IconButton(
+									icon: const Icon(EquipeIcons.logo),
+									onPressed: () {
+										var uri = Uri.parse("https://online.equipe.com/da/class_sections/${category.equipeId}");
+										launchUrl(uri);
+									},
+								),
+							],
+						),
+					)
+				],
+			)
+		);
+	}
+
 }

@@ -129,7 +129,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 					.toList();
 
 				_finishedCats.addAll(newFin);
-				if (isInit && (Platform.isAndroid || Platform.isIOS)) {
+				if (isInit && context.read<Settings>().sendNotifs) {
 					for (var cat in newFin) {
 						Locally(
 							context: context,

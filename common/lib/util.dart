@@ -86,10 +86,8 @@ class Tuple3<A,B,C> {
 }
 
 /**
- * Find the index of the first element where the predicate is true.
- * This assummes that the predicate partitions the list, such that
- * the first part is assigned false.
- * Returns -1 if no elements match the predicate.
+ * Return the index of the first element for which `p` is true.
+ * `p` should thus return true for the tail of the list.
  */
 int binarySearch<T>(List<T> list, bool Function(T) p) {
 	if (list.isEmpty) return -1;
@@ -106,9 +104,9 @@ int binarySearch<T>(List<T> list, bool Function(T) p) {
 }
 
 /**
- * Like `binarySearch`, but returns the index of the last element
- * matching the predicate.
-*/
+ * Return the index of the last element for which `p` is true.
+ * `p` should thus return false for the tail of the list.
+ */
 int binarySearchLast<T>(List<T> list, bool Function(T) p) {
 	if (list.isEmpty) return -1;
 	int low = 0, hgh = list.length - 1;

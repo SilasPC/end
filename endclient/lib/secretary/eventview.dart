@@ -1,8 +1,11 @@
 
+import 'dart:convert';
+
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -62,13 +65,12 @@ class _EventViewState extends State<EventView> {
 		Consumer<LocalModel>(
 			builder: (context, value, child) {
 
-				// UI: index here does not correspond to filtered index
-				Map<int, EventError> errs = {};
+				Map<Event, EventError> errs = {};
 				for (var err in value.model.errors) {
-					errs[err.causedBy] = err;
+					errs[value.events.byInsertionIndex(err.causedBy)] = err;
 				}
 				for (var err in value.model.warnings) {
-					errs[err.causedBy] = err;
+					errs[value.events.byInsertionIndex(err.causedBy)] = err;
 				}
 
 				var evs = filterFn != null ? value.events.iterator.where(filterFn!).toList() : value.events.iterator.toList();
@@ -86,11 +88,36 @@ class _EventViewState extends State<EventView> {
 										itemBuilder: (context, i) {
                                  var evIdx = evs.length - 1 - i;
 											var e = evs[evIdx];
-											var err = errs[evIdx];
+											var err = errs[e];
 											bool deleted = value.deletes.contains(e);
 											return ListTile(
 												onLongPress: () {
-													value.addSync([], [e]);
+													showChoicesModal(
+														context,
+														["Delete", "Move"],
+														(s) {
+															switch (s) {
+																case "Delete":
+																	value.addSync([], [e]);
+																	break;
+																case "Move":
+																	showHMSPicker(
+																		context,
+																		fromUNIX(e.time),
+																		(dt) {
+																			// TODO: this is a hack
+																			var json = jsonDecode(e.toJsonString());
+																			json["time"] = toUNIX(dt);
+																			var e2 = eventFromJSON(json);
+																			value.addSync([e2], [e]);
+																		}
+																	);
+																	break;
+																default:
+																	break;
+															}
+														}
+													);
 												},
 												leading: Column(
                                        mainAxisAlignment: MainAxisAlignment.center,
