@@ -25,9 +25,10 @@ class Category extends IJSON {
 	List<Loop> loops;
 	List<Equipage> equipages;
 	int startTime;
+	bool clearRound = false;
 
 	/// km/h
-	int? minSpeed, maxSpeed;
+	int? minSpeed, maxSpeed, idealSpeed;
 
 	Category(this.equipeId, this.name, this.loops, this.startTime) :
 		equipages = [];
@@ -45,9 +46,6 @@ class Category extends IJSON {
 	
 	int? minRideTime() => minSpeed == null ? null : (3600 * distance() / minSpeed!).floor();
 	int? maxRideTime() => maxSpeed == null ? null : (3600 * distance() / maxSpeed!).floor();
-
-	int? minFinishTime() => minSpeed == null ? null : startTime + minRideTime()! + totalRestTime();
-	int? maxFinishTime() => maxSpeed == null ? null : startTime + maxRideTime()! + totalRestTime();
 
 	int totalRestTime() {
 		int time = 0;

@@ -47,6 +47,7 @@ class Equipage extends IJSON {
 	List<LoopData> loops = [];
 	int? currentLoop;
 	String? dsqReason;
+	int startOffsetSecs = 0;
 	
 	@JsonKey(ignore: true)
 	late Category category;
@@ -91,6 +92,11 @@ class Equipage extends IJSON {
 		return dist * 3600 / time;
 	}
 
+	int? minFinishTime() => category.minSpeed == null ? null :
+		category.startTime + startOffsetSecs + category.minRideTime()! + category.totalRestTime();
+	int? maxFinishTime() => category.maxSpeed == null ? null :
+		category.startTime + startOffsetSecs + category.maxRideTime()! + category.totalRestTime();
+
 	static int byClassAndEid(Equipage a, Equipage b)
 		=> a.compareClassAndEid(b);
 	int compareClassAndEid(Equipage eq) {
@@ -111,7 +117,16 @@ class Equipage extends IJSON {
 		// check for dnf
 		if (isOut != eq.isOut) {
 			if (isOut) return 1;
-			else return -1;
+			return -1;
+		}
+
+		if (isFinished != eq.isFinished) {
+			if (isFinished) return 1;
+			return -1;
+		}
+
+		if (category.clearRound) {
+			return eid - eq.eid;
 		}
 
 		if (currentLoop != eq.currentLoop)
@@ -120,9 +135,12 @@ class Equipage extends IJSON {
 		if (currentLoop == null)
 			// before preExam, smallest eid
 			return eid - eq.eid;
+
+		// FEAT: cmp ideal time
+
 		var l = loops[currentLoop!];
 		var eql = eq.loops[currentLoop!];
-		if (l.vet != eql.vet && currentLoop! != eq.loops.length-1)
+		if (l.vet != eql.vet && !isFinalLoop)
 			// first vet time, unless final loop
 			return (l.vet ?? UNIX_FUTURE) - (eql.vet ?? UNIX_FUTURE);
 		if (l.arrival != eql.arrival)

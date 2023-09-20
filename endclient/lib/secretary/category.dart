@@ -157,15 +157,25 @@ class CategoryCard extends StatelessWidget {
 										chips: [
 											// UI: clear/free/ideal min/max time/speed status
 											// UI: loop cards (#riders / color?)
+											if (category.clearRound)
+												const Chip(
+													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													label: Text("Clearround")
+												),
+											if (category.idealSpeed != null)
+												Chip(
+													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													label: Text("Ideal ${category.idealSpeed} km/h")
+												),
 											if (category.minSpeed != null)
 												Chip(
 													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-													label: Text("min. ${category.minSpeed} km/h")
+													label: Text("Min. ${category.minSpeed} km/h")
 												),
 											if (category.maxSpeed != null)
 												Chip(
 													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-													label: Text("max. ${category.maxSpeed} km/h")
+													label: Text("Max. ${category.maxSpeed} km/h")
 												),
 											Chip(
 												backgroundColor: const Color.fromARGB(255, 146, 119, 68),

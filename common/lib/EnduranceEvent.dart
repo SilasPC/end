@@ -225,8 +225,8 @@ class ExamEvent extends EnduranceEvent {
 						eq.loops[next].expDeparture = l.vet! + l.loop.restTime * 60;
 					}
 				}
-				var minFin = eq.category.minFinishTime();
-				var maxFin = eq.category.maxFinishTime();
+				var minFin = eq.minFinishTime();
+				var maxFin = eq.maxFinishTime();
 				if (minFin != null && time < minFin) {
 					m.model.warnings.add(EventError(m.buildIndex, "${eid} finished too early"));
 				}

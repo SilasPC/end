@@ -55,18 +55,26 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 			try {
 
 				var cls = await _loadJSON("api/v1/class_sections/${cat.equipeId!}");
-				_parseEquipages(cls["starts"], cat, mevs);
+				var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
 				if (cat.distance() != dist) {
 					_guessCategoryLoops(cat, dist);
+				}
+
+				if (startTimes.isNotEmpty) {
+					cat.startTime = startTimes.values.reduce(min);
+					for (var eq in startTimes.entries) {
+						eq.key.startOffsetSecs = eq.value - cat.startTime;
+					}
 				}
 
 				for (var eq in cat.equipages) {
 					m.equipages[eq.eid] = eq;
 				}
 				
-			} catch (e) {
+			} catch (e, st) {
 				print(e);
+				print(st);
 			}
 		}
 	}
@@ -89,6 +97,8 @@ Tuple<Category, int>? _parseCategory(dynamic meeting_class, Model model) {
 
 	int? minSpeed = maybe(rgxMinSpd.firstMatch(name)?[1], int.parse);
 	int? maxSpeed = maybe(rgxMaxSpd.firstMatch(name)?[1], int.parse);
+	int? idealSpeed = maybe(rgxIdeal.firstMatch(name)?[1], int.parse);
+	bool clearRound = rgxClearRound.hasMatch(name);
 
 	var other = model.categories[lvl];
 	if (other != null) {
@@ -104,6 +114,8 @@ Tuple<Category, int>? _parseCategory(dynamic meeting_class, Model model) {
 
 	var cat = model.categories[lvl] =
 		Category(equipeId, lvl, [], UNIX_FUTURE)
+			..clearRound = clearRound
+			..idealSpeed = idealSpeed
 			..minSpeed = minSpeed
 			..maxSpeed = maxSpeed;
 
@@ -124,89 +136,95 @@ void _guessCategoryLoops(Category cat, int dist) {
 	cat.loops.add(Loop(fdist, TYPICAL_REST_TIME));
 }
 
-void _parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
+Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
 	bool hasResults = false;
+	Map<Equipage, int> startTimes = {};
 	for (var eq in equipages) {
 		var eid = int.parse(eq["start_no"]);
 		Equipage e = Equipage(
-				eid,
-				eq["rider_name"],
-				eq["horse_name"],
-				cat
-			);
-			cat.equipages.add(e);
+			eid,
+			eq["rider_name"],
+			eq["horse_name"],
+			cat
+		);
+		cat.equipages.add(e);
 
-			List results = eq["results"] as List;
-			if (results.isNotEmpty) {
-				hasResults = true;
-				try {
-					int loop = 0;
-					List<int>? loopDists = [];
-					bool dsqPreExam = true;
-					bool retirePreExam = results[0]["reason"] == "RET";
-					if (!retirePreExam) {
-						for (int i = 0; i < results.length; i++) {
-							var res = results[i];
-							if (res["type"] != "Endurance") break;
-							bool passed = nullOrEmpty(res["reason"]);
-							bool retire = results[i+1]["reason"] == "RET";
+		List results = eq["results"] as List;
+		if (results.isNotEmpty) {
+			hasResults = true;
+			try {
+				int loop = 0;
+				List<int>? loopDists = [];
+				bool dsqPreExam = true;
+				bool retirePreExam = results[0]["reason"] == "RET";
+				if (!retirePreExam) {
+					for (int i = 0; i < results.length; i++) {
+						var res = results[i];
+						if (res["type"] != "Endurance") break;
+						bool passed = nullOrEmpty(res["reason"]);
+						bool retire = results[i+1]["reason"] == "RET";
 
-							loopDists?.add(double.parse(res["distance"]).floor());
-							if (nullOrEmpty(res["start_time"])) break;
-							var expDep = hmsToUNIX(res["start_time"]);
-							cat.startTime = min(cat.startTime, expDep);
+						loopDists?.add(double.parse(res["distance"]).floor());
+						if (nullOrEmpty(res["start_time"])) break;
+						var expDep = hmsToUNIX(res["start_time"]);
+						cat.startTime = min(cat.startTime, expDep);
+						if (i == 0) {
+							startTimes[e] = expDep;
+						}
 
-							if (nullOrEmpty(res["arrival"])) break;
-							dsqPreExam = false;
-							evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
-							evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
+						if (nullOrEmpty(res["arrival"])) break;
+						dsqPreExam = false;
+						evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
+						evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
 
-							if (nullOrEmpty(res["pulse_time"])) break;
-							var vetTime = hmsToUNIX(res["pulse_time"]);
-							evs.add(VetEvent("equipe", vetTime, eid, loop));
-							var vetdata = VetData(
-								passed
-							)..hr1 = res["pulse"];
+						if (nullOrEmpty(res["pulse_time"])) break;
+						var vetTime = hmsToUNIX(res["pulse_time"]);
+						evs.add(VetEvent("equipe", vetTime, eid, loop));
+						var vetdata = VetData(
+							passed
+						)..hr1 = res["pulse"];
 
-							evs.add(ExamEvent("equipe", vetTime + 60, eid, vetdata, loop));
-							if (retire)
-								evs.add(RetireEvent("equipe", vetTime + 61, eid));
-							loop++;
-							if (!vetdata.passed || retire) {
-								loopDists = null;
-								break;
-							}
+						evs.add(ExamEvent("equipe", vetTime + 60, eid, vetdata, loop));
+						if (retire)
+							evs.add(RetireEvent("equipe", vetTime + 61, eid));
+						loop++;
+						if (!vetdata.passed || retire) {
+							loopDists = null;
+							break;
 						}
 					}
-					
-					evs.add(ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
-					if (retirePreExam)
-						evs.add(RetireEvent("equipe", hmsToUNIX("00:00:03"), eid));
-
-					if (loopDists != null && loopDists.isNotEmpty) {
-						int sum = loopDists.reduce((a,b) => a+b);
-						if (sum > cat.distance())
-							cat.loops = loopDists.map((d) => Loop(d, TYPICAL_REST_TIME)).toList();
-					}
-					
-				} catch (e, st) {
-					print("$eq exception:");
-					print(e);
-					print(st);
 				}
+				
+				evs.add(ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
+				if (retirePreExam)
+					evs.add(RetireEvent("equipe", hmsToUNIX("00:00:03"), eid));
+
+				if (loopDists != null && loopDists.length > cat.loops.length) {
+					cat.loops = loopDists.map((d) => Loop(d, TYPICAL_REST_TIME)).toList();
+				}
+				
+				
+			} catch (e, st) {
+				print(e);
+				print(st);
 			}
 
 		}
-		List<int> eids = cat.equipages.map((e) => e.eid).toList();
-		if (hasResults) {
-			evs.add(StartClearanceEvent("equipe", hmsToUNIX("00:00:01"), eids));
-		}
+
+	}
+	List<int> eids = cat.equipages.map((e) => e.eid).toList();
+	if (hasResults) {
+		evs.add(StartClearanceEvent("equipe", hmsToUNIX("00:00:01"), eids));
+	}
+	return startTimes;
 }
 
 RegExp rgxDist = RegExp(r"(\d+)(?:[.,]\d+)?\s?km");
 RegExp rgxCatLvl = RegExp(r"[LMS][ABCDE]|CEI.*\d?\*+");
 RegExp rgxMinSpd = RegExp(r"min\D*(\d+)(?:[.,]\d+)?\s?km", caseSensitive: false);
 RegExp rgxMaxSpd = RegExp(r"max\D*(\d+)(?:[.,]\d+)?\s?km", caseSensitive: false);
+RegExp rgxIdeal = RegExp(r"idealtid\D*(\d+)(?:[.,]\d+)?\s?km", caseSensitive: false);
+RegExp rgxClearRound = RegExp(r"clear.*round", caseSensitive: false);
 
 Future<dynamic> _loadJSON(String loc) async {
 	var res = await http.get(Uri.https("online.equipe.com", loc));

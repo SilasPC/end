@@ -19,7 +19,8 @@ Equipage _$EquipageFromJson(Map<String, dynamic> json) => Equipage.raw(
           .map((e) => LoopData.fromJson(e as Map<String, dynamic>))
           .toList()
       ..currentLoop = json['currentLoop'] as int?
-      ..dsqReason = json['dsqReason'] as String?;
+      ..dsqReason = json['dsqReason'] as String?
+      ..startOffsetSecs = json['startOffsetSecs'] as int;
 
 Map<String, dynamic> _$EquipageToJson(Equipage instance) {
   final val = <String, dynamic>{
@@ -39,5 +40,6 @@ Map<String, dynamic> _$EquipageToJson(Equipage instance) {
   val['loops'] = instance.loops;
   writeNotNull('currentLoop', instance.currentLoop);
   writeNotNull('dsqReason', instance.dsqReason);
+  val['startOffsetSecs'] = instance.startOffsetSecs;
   return val;
 }
