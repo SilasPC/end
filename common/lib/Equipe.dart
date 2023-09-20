@@ -57,8 +57,9 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 				var cls = await _loadJSON("api/v1/class_sections/${cat.equipeId!}");
 				var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
-				if (cat.distance() != dist) {
-					_guessCategoryLoops(cat, dist);
+				var catDist = cat.distance();
+				if (catDist != dist && dist != null || catDist == 0) {
+					_guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
 				}
 
 				if (startTimes.isNotEmpty) {
@@ -85,14 +86,12 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 
 }
 
-Tuple<Category, int>? _parseCategory(dynamic meeting_class, Model model) {
+Tuple<Category, int?>? _parseCategory(dynamic meeting_class, Model model) {
 	String name = meeting_class["name"];
 	var class_sections = meeting_class["class_sections"] as List;
 	if (class_sections.isEmpty) return null;
 	var equipeId = class_sections.first["id"];
-	String? distStr = rgxDist.firstMatch(name)?[1];
-	if (distStr == null) return null;
-	int dist = int.parse(distStr);
+	int? dist = maybe(rgxDist.firstMatch(name)?[1], int.parse);
 	String lvl = rgxCatLvl.firstMatch(name)?[0] ?? name;
 
 	int? minSpeed = maybe(rgxMinSpd.firstMatch(name)?[1], int.parse);
