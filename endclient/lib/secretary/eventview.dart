@@ -5,6 +5,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/secretary/eventedit.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -94,9 +95,15 @@ class _EventViewState extends State<EventView> {
 												onLongPress: () {
 													showChoicesModal(
 														context,
-														["Delete", "Move"],
+														["Edit", "Delete", "Move"],
 														(s) {
 															switch (s) {
+																case "Edit":
+																	Navigator.of(context)
+																		.push(MaterialPageRoute(
+																			builder: (context) => EventEditPage(event: e),
+																		));
+																	break;
 																case "Delete":
 																	value.addSync([], [e]);
 																	break;
