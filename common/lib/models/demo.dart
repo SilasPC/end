@@ -42,7 +42,7 @@ Model demoModel() {
 	);
 	
 	var m = Model()
-		..rideName = "Demo ride"
+		..rideName = "Demo ridt"
 		..categories = catMap
 		..equipages = eqsMap;
 	return m;

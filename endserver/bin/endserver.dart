@@ -3,9 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
-import 'package:common/Equipe.dart' as equipe;
 import 'package:common/EventModel.dart';
-import 'package:common/models/demo.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
@@ -21,13 +19,7 @@ Future<List<Event<Model>>> readCachedEvents() async {
 
 Future<void> main() async {
 
-	List<Event<Model>> evs =
-		//await readCachedEvents();
-		demoInitEvent(nowUNIX() + 300);
-		//await equipe.loadModelEvents(44178);
-		//await loadEventsFromFile("roddingeritten");
-	
-	//evs.removeRange((evs.length / 2).floor(), evs.length);
+	List<Event<Model>> evs = await readCachedEvents();
 
 	var handle = Handle();
 	em = EventModel(handle);
@@ -78,6 +70,7 @@ class Handle extends EventModelHandle<Model> {
 
 	@override
 	Future<void> didUpdate() async {
+		// TODO: database or mutex/redundancy for error-correction
 		await backupFile.writeAsString(
 			jsonEncode(iterj(model.events.iteratorInsertion)),
 			flush: true

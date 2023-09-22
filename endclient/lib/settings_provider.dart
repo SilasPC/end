@@ -73,16 +73,16 @@ class Settings extends IJSON {
 	
 	Settings(this._provider, this.serverURI, this.author, this.darkTheme, this.showAdmin, this.sendNotifs);
 	Settings.defaults(this._provider):
-		serverURI = "http://192.168.8.100:3000",
-		author = "default",
+		serverURI = "https://kastanie.ddns.net/esys",
+		author = Platform.localHostname,
 		darkTheme = false,
 		showAdmin = false,
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
 
 	// TODO: this is not very nice
 	void setDefaults() {
-		serverURI = "http://192.168.8.100:3000";
-		author = "default";
+		serverURI = "https://kastanie.ddns.net/esys";
+		author = Platform.localHostname;
 		darkTheme = false;
 		showAdmin = false;
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
