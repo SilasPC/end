@@ -1,92 +1,50 @@
 
-import 'dart:convert';
-
-import 'package:common/EnduranceEvent.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
-List<EnduranceEvent> demoInitEvent(int startTime) =>
-	jlist_map(jsonDecode(_demoInitEvent(startTime)) as List, eventFromJSON);
+import '../EnduranceEvent.dart';
+import '../EventModel.dart';
 
-String _demoInitEvent(int startTime) => """
-[
-	{
-		"kind": "init",
-		"author": "root",
-		"model": {
-			"rideName": "Demo",
-			"errors": [],
-			"warnings": [],
-			"categories": {
-				"1km": {
-					"name": "1km",
-					"loops": [
-						{
-							"distance": 1,
-							"restTime": 3
-						}
-					],
-					"startTime": $startTime,
-					"equipages": [
-						{
-							"status": "WAITING",
-							"eid": 1,
-							"rider": "Alex",
-							"horse": "Bob",
-							"dsqReason": null,
-							"preExam": null,
-							"loops": [],
-							"currentLoop": null
-						},
-						{
-							"status": "WAITING",
-							"eid": 2,
-							"rider": "Casey",
-							"horse": "Doozie",
-							"dsqReason": null,
-							"preExam": null,
-							"loops": [],
-							"currentLoop": null
-						}
-					]
-				},
-				"2km": {
-					"name": "2km",
-					"loops": [
-						{
-							"distance": 1,
-							"restTime": 3
-						},
-						{
-							"distance": 1,
-							"restTime": 3
-						}
-					],
-					"startTime": ${startTime+120},
-					"equipages": [
-						{
-							"status": "WAITING",
-							"eid": 3,
-							"rider": "Elvis",
-							"horse": "Fred",
-							"dsqReason": null,
-							"preExam": null,
-							"loops": [],
-							"currentLoop": null
-						},
-						{
-							"status": "WAITING",
-							"eid": 4,
-							"rider": "Ginny",
-							"horse": "Hans",
-							"dsqReason": null,
-							"preExam": null,
-							"loops": [],
-							"currentLoop": null
-						}
-					]
-				}
-			}
-		}
-	}
-]
-""";
+List<Event<Model>> demoInitEvent(int startTime) =>
+	[InitEvent("demo", demoModel())];
+
+Model demoModel() {
+	
+	const FIVE_MINS = 5 * 60;
+
+	var now = nowUNIX();
+
+	var c1 = Category(null, "Kort clearround", [Loop(1, 3)], now + FIVE_MINS)
+		..clearRound = true;
+	var c2 = Category(null, "Kort ideal", [Loop(1, 3)], now + FIVE_MINS)
+		..idealSpeed = 10
+		..minSpeed = 8
+		..maxSpeed = 12;
+	var c3 = Category(null, "Lang fri", [Loop(1, 3), Loop(1, 3)], now + FIVE_MINS);
+
+	var eqs = [
+		Equipage(1, "Anna", "Amouroq", c1),
+		Equipage(2, "Bjarke", "Børge", c1),
+
+		Equipage(10, "Cathrine", "Comeback", c2),
+		Equipage(11, "Didde", "Donnager", c2),
+
+		Equipage(21, "Erik", "Enhjørningen", c3),
+		Equipage(22, "Freja", "Felix", c3),
+	]
+	..forEach((e) => e.category.equipages.add(e));
+
+	var eqsMap = Map.fromEntries(
+		eqs.map((e) => MapEntry(e.eid, e))
+	);
+	var catMap = Map.fromEntries(
+		[c1,c2,c3].map((c) => MapEntry(c.name, c))
+	);
+	
+	var m = Model()
+		..rideName = "Demo ride"
+		..categories = catMap
+		..equipages = eqsMap;
+	return m;
+	
+}

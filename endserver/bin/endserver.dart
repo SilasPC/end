@@ -39,12 +39,15 @@ Future<void> main() async {
 		setJsonAck(client, "sync", (json) {
 			var sr = SyncRequest<Model>.fromJSON(json);
 			var res = sr.applyTo(em);
+			print(json);
+			print(res.toJsonString());
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 			return res;
 		});
-		client.on("reset", (_) {
+		client.on("do-reset", (_) {
+			print("reset!");
 			em.reset();
-			client.broadcast.emit("reset");
+			client.broadcast.emit("do-reset");
 		});
 		client.on("disconnect", (_) {
 			print("disconnect $client");

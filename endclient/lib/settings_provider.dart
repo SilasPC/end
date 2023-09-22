@@ -38,7 +38,7 @@ class SettingsProviderState extends State<SettingsProvider> {
 		try {
 			print("loading settings $val");
 			set(Settings.fromJsonString(val, this));
-		} on FormatException catch (_) {
+		} catch (_) {
 			_save();
 		}
 	}

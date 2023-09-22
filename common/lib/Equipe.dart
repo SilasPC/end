@@ -16,6 +16,9 @@ class EquipeMeeting {
 	EquipeMeeting(this.name, this.id);
 
 	Future<List<Event<Model>>> loadEvents() => _loadModelEvents(id);
+
+	// FEAT: upload to equipe
+
 }
 
 Future<List<EquipeMeeting>> _loadRecentMeetings() async {

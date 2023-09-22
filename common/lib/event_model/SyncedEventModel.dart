@@ -7,19 +7,18 @@ class SyncedEventModel<M extends IJSON> extends EventModel<M> {
 
 	final Future<SyncResult<M>> Function(SyncRequest<M>) _syncFunc;
 
-	SyncInfo _lastSyncRemote = SyncInfo.zero();
-	SyncInfo _lastSyncLocal = SyncInfo.zero();
+	SyncInfo lastSyncRemote = SyncInfo.zero();
+	SyncInfo lastSyncLocal = SyncInfo.zero();
 
 	SyncedEventModel(super.handle, this._syncFunc);
 
-	Future<void> sync() =>_syncFut = _syncFut.then((_) => _sync());
-	Future<void> _syncFut = Future((){});
-	Future<void> _sync() async {
-		var data = getNewerData(_lastSyncLocal);
-		var res = await _syncFunc(SyncRequest(_lastSyncRemote, data.events, data.deletes));
+	Future<void> sync() async {
+		print("sync");
+		var data = getNewerData(lastSyncLocal);
+		var res = await _syncFunc(SyncRequest(lastSyncRemote, data.events, data.deletes));
 		add(res.events, res.deletes);
-		_lastSyncRemote = res.syncInfo;
-		_lastSyncLocal = syncState;
+		lastSyncRemote = res.syncInfo;
+		lastSyncLocal = syncState;
 	}
 
 	Future<void> addSync(List<Event<M>> newEvents, [List<Event<M>> newDeletes = const []]) {
@@ -27,8 +26,13 @@ class SyncedEventModel<M extends IJSON> extends EventModel<M> {
 		return sync();
 	}
 
+	void reset() {
+		super.reset();
+		lastSyncLocal = lastSyncRemote = SyncInfo.zero();
+	}
+
 	Future<void> resetSync() async {
-		_lastSyncLocal = _lastSyncRemote = SyncInfo.zero();
+		lastSyncLocal = lastSyncRemote = SyncInfo.zero();
 		reset();
 		return sync();
 	}

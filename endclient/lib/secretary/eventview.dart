@@ -136,12 +136,7 @@ class _EventViewState extends State<EventView> {
 												title: Text(e.runtimeType.toString()),
 												subtitle: Text(e.toString(), overflow: TextOverflow.fade),
 												trailing: err != null
-													? Column(
-														children: [
-															const Icon(Icons.warning),
-															Text(err.description),
-														]
-													)
+													? Text(err.description)
 													: (
 														deleted
 															? const Icon(Icons.delete)

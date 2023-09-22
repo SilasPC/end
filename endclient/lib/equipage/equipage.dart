@@ -1,5 +1,4 @@
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
@@ -193,7 +192,7 @@ class LoopCard extends StatelessWidget {
 			child: Row(
 				mainAxisAlignment: MainAxisAlignment.spaceBetween,
 				children: [
-					Text("GATE $i"),
+					Text("LOOP $i"),
 					Text("${ld.loop.distance} km"),
 				],
 			)

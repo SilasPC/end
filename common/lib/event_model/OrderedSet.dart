@@ -4,19 +4,11 @@ import 'dart:collection';
 import '../util.dart' hide binarySearch, binarySearchLast;
 import '../util.dart' as util;
 
+class OrderedSet<T> extends ReadOnlyOrderedSet<T> {
 
-class OrderedSet<T> {
-
-	final Comparator<T> _cmp;
-
-	HashSet<T> _els = HashSet();
-	List<Tuple<T,int>> _byOrd = [];
-	List<T> _byIns = [];
-
-	OrderedSet():
-		_cmp = ((a, b) => (a as Comparable<T>).compareTo(b));
-
-	OrderedSet.withComparator(this._cmp);
+	OrderedSet();
+	OrderedSet.withComparator(Comparator<T> cmp):
+		super.withComparator(cmp);
 
 	void clear() {
 		_els.clear();
@@ -36,6 +28,21 @@ class OrderedSet<T> {
 	void addAll(Iterable<T> ts) {
 		for (var t in ts) add(t);	
 	}
+
+}
+
+class ReadOnlyOrderedSet<T> {
+
+	final Comparator<T> _cmp;
+
+	HashSet<T> _els = HashSet();
+	List<Tuple<T,int>> _byOrd = [];
+	List<T> _byIns = [];
+
+	ReadOnlyOrderedSet():
+		_cmp = ((a, b) => (a as Comparable<T>).compareTo(b));
+
+	ReadOnlyOrderedSet.withComparator(this._cmp);
 
 	/// converts to insertion index into the corresponding ordered index
 	int? toOrdIndex(int insIdx) => findOrdIndex(byInsertionIndex(insIdx));

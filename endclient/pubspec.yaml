@@ -16,7 +16,6 @@ dependencies:
   shared_preferences: ^2.0.15
   flutter_spinkit: ^5.1.0
   flutter_treeview: ^1.0.7
-  cupertino_icons: ^1.0.2 # todo: remove?
   animations: ^2.0.5
   provider: ^6.0.4
   numberpicker: ^2.1.2
@@ -25,6 +24,10 @@ dependencies:
   marquee: ^2.2.3
   path_provider: ^2.1.0
   url_launcher: ^6.1.11
+  sqflite: ^2.2.8+4
+  path: ^1.8.2
+  mutex: ^3.0.1
+  sqflite_common_ffi: ^2.2.5
 
 dev_dependencies:
   flutter_test:

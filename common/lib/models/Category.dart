@@ -23,15 +23,14 @@ class Category extends IJSON {
 	int? equipeId;
 	String name;
 	List<Loop> loops;
-	List<Equipage> equipages;
+	List<Equipage> equipages = [];
 	int startTime;
 	bool clearRound = false;
 
 	/// km/h
 	int? minSpeed, maxSpeed, idealSpeed;
 
-	Category(this.equipeId, this.name, this.loops, this.startTime) :
-		equipages = [];
+	Category(this.equipeId, this.name, this.loops, this.startTime);
 
 	int numDNF() =>
 		equipages.where((e) => e.isOut).length;

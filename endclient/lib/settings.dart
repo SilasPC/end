@@ -136,19 +136,19 @@ class _SettingsPageState extends State<SettingsPage> {
 	static Future<void> loadModel(BuildContext context) async {
 		var m = context.read<LocalModel>();
 		var meets = await EquipeMeeting.loadRecent();
+		// ignore: use_build_context_synchronously
 		showChoicesModal(
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
-				m.reset();
+				await m.reset();
 				if (name == "DEMO") {
-					m.addSync(demoInitEvent(nowUNIX()+300));
-					return;
+					await m.addSync(demoInitEvent(nowUNIX()+300));
+				} else {
+					var meet = meets.firstWhere((e) => e.name == name);
+					var evs = await meet.loadEvents();
+					await m.addSync(evs);
 				}
-				var meet = meets.firstWhere((e) => e.name == name);
-				var evs = await meet.loadEvents();
-				m.addSync(evs);
-				return;
 			}
 		);
 	}

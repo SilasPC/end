@@ -69,6 +69,7 @@ abstract class EventModelHandle<M extends IJSON> {
 	M createModel();
 	void willUpdate() {}
 	void didUpdate() {}
+	void didReset() {}
 }
 
 class EventModel<M extends IJSON> {
@@ -76,11 +77,13 @@ class EventModel<M extends IJSON> {
 	final EventModelHandle<M> _handle;
 
 	late M model;
-	final OrderedSet<Event<M>> events = OrderedSet();
+	final OrderedSet<Event<M>> _events = OrderedSet();
 	final LinkedHashSet<Event<M>> deletes = LinkedHashSet();
 	final List<Savepoint<M>> savepoints = [];
 	final int _savepointInterval;
 	int? _maxBuildTime;
+
+	ReadOnlyOrderedSet<Event<M>> get events => _events;
 
    int _buildIndex = -1;
    int get buildIndex => _buildIndex;
@@ -92,11 +95,11 @@ class EventModel<M extends IJSON> {
 	}
 
 	void createSavepoint() {
-		int? lastEventTime = events.isEmpty ? null : events.last.time;
+		int? lastEventTime = _events.isEmpty ? null : _events.last.time;
 		savepoints.add(Savepoint(
-			SyncInfo(events.length, deletes.length),
+			SyncInfo(_events.length, deletes.length),
 			model,
-			events.lastInsertionIndex,
+			_events.lastInsertionIndex,
 			lastEventTime,
 		));
 	}
@@ -105,7 +108,7 @@ class EventModel<M extends IJSON> {
 		if (maxTime == _maxBuildTime) return;
 		if (_maxBuildTime != null && (maxTime == null || maxTime > _maxBuildTime!)) {
 			// delete constraint
-			int buildFrom = events.binarySearch((e) => e.time > _maxBuildTime!);
+			int buildFrom = _events.binarySearch((e) => e.time > _maxBuildTime!);
 			_maxBuildTime = maxTime;
 			if (buildFrom != -1) {
 				_handle.willUpdate();
@@ -123,10 +126,11 @@ class EventModel<M extends IJSON> {
 
 	void reset() {
 		model = _handle.createModel();
-		events.clear();
+		_events.clear();
 		deletes.clear();
 		savepoints.clear();
 		createSavepoint();
+		_handle.didReset();
 	}
 
 	void add(List<Event<M>> newEvents, [List<Event<M>> newDeletes = const []]) {
@@ -135,19 +139,19 @@ class EventModel<M extends IJSON> {
 		
 		_handle.willUpdate();
 
-		final int oldLength = events.length;
-		int buildFrom = events.length + newEvents.length;
+		final int oldLength = _events.length;
+		int buildFrom = _events.length + newEvents.length;
 
 		if (newDeletes.isNotEmpty) {
 			newDeletes.sort();
 			deletes.addAll(newDeletes);
-			buildFrom = events.findOrdIndex(newDeletes.first) ?? buildFrom;
+			buildFrom = _events.findOrdIndex(newDeletes.first) ?? buildFrom;
 		}
 
 		if (newEvents.isNotEmpty) {
 			newEvents.sort();
-			events.addAll(newEvents);
-			int? i = events.findOrdIndex(newEvents.first);
+			_events.addAll(newEvents);
+			int? i = _events.findOrdIndex(newEvents.first);
 			buildFrom = min(i ?? buildFrom, buildFrom);
 		}
 		
@@ -165,12 +169,12 @@ class EventModel<M extends IJSON> {
 	}
 
 	SyncResult<M> getNewerData(SyncInfo lastSync) {
-		var evs = events.iteratorInsertion.skip(lastSync.evLen).toList();
+		var evs = _events.iteratorInsertion.skip(lastSync.evLen).toList();
 		var dls = deletes.skip(lastSync.delLen).toList();
 		return SyncResult(evs, dls, syncState);
 	}
 
-	SyncInfo get syncState => SyncInfo(events.length, deletes.length);
+	SyncInfo get syncState => SyncInfo(_events.length, deletes.length);
 
 	void _killSavepointsAfter(int evLen) {
 		int i = binarySearchLast(savepoints, (sp) => sp.si.evLen <= evLen);
@@ -186,7 +190,7 @@ class EventModel<M extends IJSON> {
 		}
 		int i = 0;
 		if (sp.si.evLen > 0) {
-			i = events.toOrdIndex(sp.lastInsIndex!)! + 1;
+			i = _events.toOrdIndex(sp.lastInsIndex!)! + 1;
 			model = _handle.revive(jsonDecode(sp.json));
 		} else {
 			model = _handle.createModel();
@@ -195,7 +199,7 @@ class EventModel<M extends IJSON> {
 	}
 
 	void _buildFromIndex(int i) {
-		var it = events.iterator.skip(i);
+		var it = _events.iterator.skip(i);
 		if (_maxBuildTime != null) {
 			var max = _maxBuildTime!;
 			it = it.takeWhile((ev) => ev.time <= max);
