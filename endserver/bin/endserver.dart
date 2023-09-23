@@ -13,6 +13,9 @@ late Server io;
 File backupFile = File("../backup.events.json");
 
 Future<List<Event<Model>>> readCachedEvents() async {
+	if (!await backupFile.exists()) {
+		return [];
+	}
 	var json = jsonDecode(await backupFile.readAsString());
 	return jlist_map(json, eventFromJSON);
 }
@@ -26,23 +29,24 @@ Future<void> main() async {
 	em.add(evs);
 
 	io = Server();
+	int id = 0;
 	io.on("connection", (client) {
-		print("connect $client");
+		int idc = id++;
+		print("connect $idc");
 		setJsonAck(client, "sync", (json) {
+			print("sync $idc");
 			var sr = SyncRequest<Model>.fromJSON(json);
 			var res = sr.applyTo(em);
-			print(json);
-			print(res.toJsonString());
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 			return res;
 		});
 		client.on("do-reset", (_) {
-			print("reset!");
+			print("reset $idc");
 			em.reset();
 			client.broadcast.emit("do-reset");
 		});
 		client.on("disconnect", (_) {
-			print("disconnect $client");
+			print("disconnect $idc");
 		});
 	});
 	io.listen(3000);

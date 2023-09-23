@@ -103,6 +103,11 @@ class _SettingsPageState extends State<SettingsPage> {
 					),
 					ListTile(
 						leading: const Icon(Icons.sync),
+						title: const Text("Manual sync"),
+						onTap: () => model.manualSync(),
+					),
+					ListTile(
+						leading: const Icon(Icons.sync),
 						title: const Text("Resync"),
 						onTap: () => model.resetSync(),
 					),

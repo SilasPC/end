@@ -57,9 +57,9 @@ class LocalModel with ChangeNotifier {
 	void _initModel() {
 		var h = Handle(notifyListeners);
 		_model = SyncedEventModel(h, connection.sendSync);
-      connection.onConnect = () => _mutex.protect(() async {
+      /* connection.onConnect = () => _mutex.protect(() async {
 			await _model.sync();
-		});
+		}); */
       connection.onPush = (push) => _mutex.protect(() async {
 			_model.add(push.events, push.deletes);
 			await _save();
@@ -82,6 +82,17 @@ class LocalModel with ChangeNotifier {
 			}
 			await _save();
 			print("addSync exit");
+		});
+	}
+
+	Future<void> manualSync() async {
+		print("manualSync");
+		_mutex.protect(() async {
+			print("manualSync entry");
+			connection._socket!.emit("test");
+			await _model.sync();
+			await _save();
+			print("manualSync exit");
 		});
 	}
 
@@ -159,15 +170,15 @@ class SocketServer {
 		Completer<SyncResult<Model>> c = Completer();
 		// FIXME: why does this disconnect and reconnnect when executed?
 		_socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
-			print("syncfunc response");
+			print("backsync");
 			if (!c.isCompleted) {
-				print("syncfunc response completing");
+				//print("syncfunc response completing");
 				c.complete(SyncResult.fromJSON(jsonDecode(json)));
 			}
 		});
 		Timer(const Duration(seconds: 5), () {
 			if (!c.isCompleted) {
-				print("syncfunc response timeout");
+				print("sync timeout");
 				c.completeError(TimeoutException("server sync timed out"));
 			}
 		});
