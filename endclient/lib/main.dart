@@ -15,7 +15,7 @@ Future<void> main() async {
 		// TODO: custom exception handler
 	};
 
-	if (Platform.isWindows || Platform.isWindows) {
+	if (Platform.isWindows || Platform.isLinux) {
 		sqfliteFfiInit();
 		databaseFactory = databaseFactoryFfi;
 	}

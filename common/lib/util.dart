@@ -8,6 +8,7 @@ typedef Predicate<T> = bool Function(T);
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
+   List<int> toJsonBin() => utf8.encode(toJsonString());
 }
 
 T unimpl<T>([msg]) => throw UnimplementedError(msg);

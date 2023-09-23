@@ -13,7 +13,6 @@ class SyncedEventModel<M extends IJSON> extends EventModel<M> {
 	SyncedEventModel(super.handle, this._syncFunc);
 
 	Future<void> sync() async {
-		print("em sync");
 		var data = getNewerData(lastSyncLocal);
 		var res = await _syncFunc(SyncRequest(lastSyncRemote, data.events, data.deletes));
 		add(res.events, res.deletes);

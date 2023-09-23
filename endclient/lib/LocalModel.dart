@@ -57,66 +57,61 @@ class LocalModel with ChangeNotifier {
 	void _initModel() {
 		var h = Handle(notifyListeners);
 		_model = SyncedEventModel(h, connection.sendSync);
-      /* connection.onConnect = () => _mutex.protect(() async {
-			await _model.sync();
-		}); */
+      connection.onConnect = () => _mutex.protect(() async {
+         try {
+			   await _model.sync();
+         } catch (_) {}
+		});
       connection.onPush = (push) => _mutex.protect(() async {
 			_model.add(push.events, push.deletes);
 			await _save();
 		});
 		connection.onReset = () => _mutex.protect(() async {
-			print("got reset");
 			_model.reset();
 			await _save();
 		});
 	}
 
 	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []]) async {
-		print("addSync");
 		_mutex.protect(() async {
-			print("addSync entry");
 			if (connection.status.value) {
-				await _model.addSync(evs, dels);
+            try {
+				   await _model.addSync(evs, dels);
+            } catch (_) {}
 			} else {
 				_model.add(evs, dels);
 			}
 			await _save();
-			print("addSync exit");
 		});
 	}
 
 	Future<void> manualSync() async {
-		print("manualSync");
 		_mutex.protect(() async {
-			print("manualSync entry");
 			connection._socket!.emit("test");
-			await _model.sync();
+         try {
+			   await _model.sync();
+         } catch (_) {}
 			await _save();
-			print("manualSync exit");
 		});
 	}
 
 	Future<void> resetSync() async {
-		print("resetSync");
 		_mutex.protect(() async {
-			print("resetSync entry");
 			_db.clear();
 			_model.reset();
-			if (connection.status.value) {
-				await _model.sync();
-			}
+         try {
+            if (connection.status.value) {
+               await _model.sync();
+            }
+         } catch (_) {}
 			await _save();
-			print("resetSync exit");
 		});
 	}
 
 	Future<void> reset() async {
-		print("reset");
 		_mutex.protect(() async {
-			print("reset entry");
 			await _db.clear();
 			_model.reset();
-			print("reset exit");
 		});
 	}
 
@@ -162,33 +157,27 @@ class SocketServer {
 	void Function(SyncPush<Model> push)? onPush;
 
 	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req) {
-		print("syncfunc 1");
 		if (_socket!.disconnected) {
 			throw StateError("attempt to sync with unconnected server");
 		}
-		print("syncfunc 2");
 		Completer<SyncResult<Model>> c = Completer();
-		// FIXME: why does this disconnect and reconnnect when executed?
-		_socket!.emitWithAck("sync", req.toJsonString(), ack: (json) {
-			print("backsync");
+
+		_socket!.emitWithAck("sync", req.toJsonBin(), binary: true, ack: (json) {
 			if (!c.isCompleted) {
-				//print("syncfunc response completing");
-				c.complete(SyncResult.fromJSON(jsonDecode(json)));
+				c.complete(SyncResult.fromJSON(jsonDecode(utf8.decode(json))));
 			}
 		});
 		Timer(const Duration(seconds: 5), () {
 			if (!c.isCompleted) {
-				print("sync timeout");
 				c.completeError(TimeoutException("server sync timed out"));
 			}
 		});
-		print("syncfunc 3");
 		return c.future;
 	}
 
 	void sendReset() {
 		if (!_socket!.connected) return;
-		_socket!.emit("do-reset");
+		_socket!.emit("reset");
 	}
 
 	SocketServer({this.onConnect, this.onDisconnect, this.onPush});
@@ -197,8 +186,6 @@ class SocketServer {
 	void _initSocket() {
 
 		var initCount = ++_initCount;
-
-		print("init $initCount $_socketAddress");
 
 		_socket?.disconnect();
 		status.value = false;
@@ -224,12 +211,13 @@ class SocketServer {
 			onDisconnect?.call();
 		});
 
+      // FEAT: sync should just be symmetric (p2p)
 		socket.on("push", (json) {
 			var push = SyncPush<Model>.fromJson(json);
 			onPush?.call(push);
 		});
 
-		socket.on("do-reset", (_) {
+		socket.on("reset", (_) {
 			onReset?.call();
 		});
 		

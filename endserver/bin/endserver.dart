@@ -29,24 +29,22 @@ Future<void> main() async {
 	em.add(evs);
 
 	io = Server();
-	int id = 0;
 	io.on("connection", (client) {
-		int idc = id++;
-		print("connect $idc");
+		print("connect");
 		setJsonAck(client, "sync", (json) {
-			print("sync $idc");
+			print("sync");
 			var sr = SyncRequest<Model>.fromJSON(json);
 			var res = sr.applyTo(em);
 			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
 			return res;
 		});
-		client.on("do-reset", (_) {
-			print("reset $idc");
+		client.on("reset", (_) {
+			print("reset");
 			em.reset();
-			client.broadcast.emit("do-reset");
+			client.broadcast.emit("reset");
 		});
 		client.on("disconnect", (_) {
-			print("disconnect $idc");
+			print("disconnect");
 		});
 	});
 	io.listen(3000);
@@ -57,9 +55,9 @@ void setJsonAck<T extends IJSON>(dynamic client, String msg, FutureOr<T?>? Funct
 		List dataList = data as List;
 		var json = dataList.first;
 		var ack = dataList.last;
-		var res = await handler(jsonDecode(json));
+		var res = await handler(jsonDecode(utf8.decode(json)));
 		if (res != null) {
-			ack(res.toJsonString());
+			ack(res.toJsonBin());
 		}
 	});
 }
