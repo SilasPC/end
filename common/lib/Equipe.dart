@@ -61,9 +61,11 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 				var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
 				var catDist = cat.distance();
-				if (catDist != dist && dist != null || catDist == 0) {
+				if (catDist == 0) {
 					_guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
-				}
+				} else if (catDist != dist && dist != null) {
+               print("distance mismatch ${cat.name}: $catDist != $dist");
+            }
 
 				if (startTimes.isNotEmpty) {
 					cat.startTime = startTimes.values.reduce(min);
@@ -125,7 +127,7 @@ Tuple<Category, int?>? _parseCategory(dynamic meeting_class, Model model) {
 }
 
 void _guessCategoryLoops(Category cat, int dist) {
-	print("Guessing loops for ${cat.name}");
+	print("Guessing loops for ${cat.name} ${cat.distance()}km");
 
 	int lenGuess = (dist / 30).ceil();
 
@@ -180,6 +182,8 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 						evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
 
 						if (nullOrEmpty(res["pulse_time"])) break;
+                  // FIXME: in ranum23, 404, MA, loop 1, this is null,
+                  //      : despite FTQ-GA for loop 1, thus the ftq is not registered
 						var vetTime = hmsToUNIX(res["pulse_time"]);
 						evs.add(VetEvent("equipe", vetTime, eid, loop));
 						var vetdata = VetData(

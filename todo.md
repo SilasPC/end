@@ -1,3 +1,5 @@
+ - ftq/dsq ga me ...
+
  - warnings in error view
  - confirm closing with unsaved data
 
