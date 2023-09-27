@@ -237,9 +237,14 @@ class EventDatabase {
 
 	Future<void> add(SyncResult<Model> sr) async {
 		var b = _db.batch();
-		// TODO: save deletes
 		for (var ev in sr.events) {
 			b.insert("events", {
+				"time": ev.time,
+				"json": ev.toJsonString()
+			});
+		}
+		for (var ev in sr.deletes) {
+			b.insert("deletes", {
 				"time": ev.time,
 				"json": ev.toJsonString()
 			});
@@ -251,6 +256,7 @@ class EventDatabase {
 	Future<void> clear() async {
 		_db.batch()
 			..delete("events")
+			..delete("deletes")
 			..update("syncinfo", SyncInfo.zero().toJson())
 			..commit(noResult: true);
 		_lastSaved = SyncInfo.zero();
@@ -258,15 +264,18 @@ class EventDatabase {
 
 	Future<SyncResult<Model>> loadAll() async {
 		var b = _db.batch();
-		// TODO: deletes
 		b.query("events", columns: ["json"]);
+		b.query("deletes", columns: ["json"]);
 		b.query("syncinfo");
 		var data = await b.commit();
 		var evs = (data[0]! as List)
 			.map((d) => eventFromJSON(jsonDecode(d["json"] as String)))
+			.toList();
+		var dels = (data[1]! as List)
+			.map((d) => eventFromJSON(jsonDecode(d["json"] as String)))
 			.toList(); 
-		var si = SyncInfo.fromJson((data[1]! as List).first as JSON);
-		return SyncResult(evs, [], si);
+		var si = SyncInfo.fromJson((data[2]! as List).first as JSON);
+		return SyncResult(evs, dels, si);
 	}
 
 	static Future<Database> _createDB() async {
@@ -280,7 +289,7 @@ class EventDatabase {
 					..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
 					..execute("CREATE TABLE IF NOT EXISTS syncinfo (evLen INT NOT NULL, delLen INT NOT NULL)")
 					..insert("syncinfo", SyncInfo.zero().toJson()))
-					.commit();
+					.commit(noResult: true);
 			},
 			version: 6
 		);
