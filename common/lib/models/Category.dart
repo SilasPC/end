@@ -60,6 +60,22 @@ class Category extends IJSON {
 		return dist;
 	}
 
+   List<MapEntry<Equipage, int>> rankings() {
+      if (equipages.isEmpty) return const [];
+      var eqs = equipages.toList()..sort(Equipage.byRankAndEid);
+      var ranks = [MapEntry(eqs.first, 1)];
+      for (int i = 1; i < eqs.length; i++) {
+         var eq = eqs[i];
+         bool same = ranks.last.key.compareRank(eq) == 0;
+         if (same) {
+            ranks.add(MapEntry(eq, ranks.last.value));
+         } else {
+            ranks.add(MapEntry(eq, i + 1));
+         }
+      }
+      return ranks;
+   }
+
 	JSON toJson() => _$CategoryToJson(this);
 	factory Category.fromJson(JSON json) {
 		var self = _$CategoryFromJson(json);

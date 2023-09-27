@@ -207,7 +207,9 @@ class EventModel<M extends IJSON> {
       _buildIndex = i;
 		for (var ev in it) {
 			if (!deletes.contains(ev)) {
-            ev.build(this);
+            try {
+               ev.build(this);
+            } catch (_) {}
 			}
 			if (savepoints.last.si.evLen < _buildIndex - _savepointInterval) {
 				createSavepoint();

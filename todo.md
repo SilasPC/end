@@ -3,7 +3,6 @@
  - warnings in error view
  - confirm closing with unsaved data
 
- - shared rankings
  - more icons (?)
 
 # Production concerns

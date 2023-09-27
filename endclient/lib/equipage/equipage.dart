@@ -7,6 +7,7 @@ import 'package:common/consts.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
+import '../secretary/category.dart';
 import '../settings_provider.dart';
 import '../util/chip_strip.dart';
 import '../util/timer.dart';
@@ -82,8 +83,9 @@ class EquipagePageState extends State<EquipagePage> {
 				child: ListView(
 					children: [
 						Card(
-							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 228, 190, 53)),
+							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 98, 85, 115)),
 						),
+                  CategoryCard(category: widget.equipage.category),
 						...loopCards(),
 					],
 				)

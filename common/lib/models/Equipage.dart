@@ -109,6 +109,13 @@ class Equipage extends IJSON {
 	int compareEid(Equipage eq)
 		=> eid - eq.eid;
 
+   static int byRankAndEid(Equipage a, Equipage b)
+      => a.compareRankAndEid(b);
+   int compareRankAndEid(Equipage eq) {
+      int cmp = compareRank(eq);
+      return cmp != 0 ? cmp : eid - eq.eid;
+   }
+
 	static int byRank(Equipage a, Equipage b)
 		=> a.compareRank(b);
 	int compareRank(Equipage eq) {
@@ -121,20 +128,20 @@ class Equipage extends IJSON {
 		}
 
 		if (isFinished != eq.isFinished) {
-			if (isFinished) return 1;
-			return -1;
+			if (isFinished) return -1;
+			return 1;
 		}
 
 		if (category.clearRound) {
-			return eid - eq.eid;
+			return 0;
 		}
 
 		if (currentLoop != eq.currentLoop)
 			// largest loop
 			return (eq.currentLoop ?? -1) - (currentLoop ?? -1);
 		if (currentLoop == null)
-			// before preExam, smallest eid
-			return eid - eq.eid;
+			// before preExam
+			return 0;
 
 		// FEAT: cmp ideal time
 
@@ -150,8 +157,7 @@ class Equipage extends IJSON {
 			// first expected departure
 			return (l.expDeparture ?? UNIX_FUTURE) - (eql.expDeparture ?? UNIX_FUTURE);
 		
-		// smallest eid
-		return eid - eq.eid;
+		return 0;
 	}
 
 	void updateStatus() {

@@ -2,6 +2,7 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/results.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/EquipeIcons.dart';
 import 'package:esys_client/util/chip_strip.dart';
@@ -32,7 +33,7 @@ class CategoryViewState extends State<CategoryView> {
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
 				var eqs = widget.cat.equipages;
-				var rankOf = sortIndexMap(eqs, Equipage.byRank);
+            var rankOf = Map.fromEntries(widget.cat.rankings());
 				return Container(
 					padding: const EdgeInsets.all(10),
 					child: Column(
@@ -51,7 +52,7 @@ class CategoryViewState extends State<CategoryView> {
 															builder: (_) => EquipagePage(eq)
 														)),
 													leading: CircleAvatar(
-														child: eq.isOut ? const Text("DNF") : Text(" ${rankOf[i]+1}."),
+														child: eq.isOut ? const Text("DNF") : Text(" ${rankOf[eq]}."),
 													),
 													trailing: [createEquipagePopupMenu(eq, context)],
 												),
@@ -186,10 +187,16 @@ class CategoryCard extends StatelessWidget {
 										],
 									),
 								),
-								/* if (widget.cat.isEnded())
+								// if (category.isEnded())
 								IconButton(
-									icon: const Icon(Icons.)
-								) */
+									icon: const Icon(Icons.abc), // UI: trophy icon
+                           onPressed: () {
+                              Navigator.of(context)
+                                 .push(MaterialPageRoute(
+                                    builder: (_) => ResultsPage(cat: category)
+                                 ));
+                           }
+								),
 								if (category.equipeId != null)
 								IconButton(
 									icon: const Icon(EquipeIcons.logo),
