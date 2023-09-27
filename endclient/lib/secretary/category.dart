@@ -4,7 +4,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/results.dart';
 import 'package:esys_client/settings_provider.dart';
-import 'package:esys_client/util/EquipeIcons.dart';
+import 'package:esys_client/util/MyIcons.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
@@ -189,7 +189,7 @@ class CategoryCard extends StatelessWidget {
 								),
 								// if (category.isEnded())
 								IconButton(
-									icon: const Icon(Icons.abc), // UI: trophy icon
+									icon: const Icon(MyIcons.trophy),
                            onPressed: () {
                               Navigator.of(context)
                                  .push(MaterialPageRoute(
@@ -199,7 +199,7 @@ class CategoryCard extends StatelessWidget {
 								),
 								if (category.equipeId != null)
 								IconButton(
-									icon: const Icon(EquipeIcons.logo),
+									icon: const Icon(MyIcons.equipe),
 									onPressed: () {
 										var uri = Uri.parse("https://online.equipe.com/da/class_sections/${category.equipeId}");
 										launchUrl(uri);

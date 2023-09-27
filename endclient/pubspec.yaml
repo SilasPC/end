@@ -45,9 +45,9 @@ flutter:
     - assets/
   uses-material-design: true
   fonts:
-    - family: EquipeIcons
+    - family: MyIcons
       fonts:
-        - asset: fonts/EquipeIcons.ttf
+        - asset: fonts/MyIcons.ttf
 
 flutter_native_splash:
   # Rerun with `flutter pub run flutter_native_splash:create`
