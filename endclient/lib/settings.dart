@@ -121,18 +121,21 @@ class _SettingsPageState extends State<SettingsPage> {
 						title: const Text("Save CSV"),
 						onTap: () => saveCSV(context),
 					),
-					const ListTile(
-						title: Text("Administration"),
-						dense: true,
-					),
-					ListTile(
-						title: const Text("Reset remote"),
-						onTap: () => context.read<LocalModel>().connection.sendReset(),
-					),
-					ListTile(
-						title: const Text("Load model..."),
-						onTap: () => loadModel(context),
-					),
+					if (set.author.startsWith("admin"))
+					...[
+						const ListTile(
+							title: Text("Administration"),
+							dense: true,
+						),
+						ListTile(
+							title: const Text("Reset remote"),
+							onTap: () => context.read<LocalModel>().connection.sendReset(),
+						),
+						ListTile(
+							title: const Text("Load model..."),
+							onTap: () => loadModel(context),
+						),
+					],
 				],
 			),
 		);

@@ -245,14 +245,14 @@ class EventDatabase {
 			});
 		}
 		b.update("syncinfo", sr.syncInfo.toJson());
-		await b.commit();
+		await b.commit(noResult: true);
 	}
 
 	Future<void> clear() async {
 		_db.batch()
 			..delete("events")
 			..update("syncinfo", SyncInfo.zero().toJson())
-			..commit();
+			..commit(noResult: true);
 		_lastSaved = SyncInfo.zero();
 	}
 
@@ -272,17 +272,17 @@ class EventDatabase {
 	static Future<Database> _createDB() async {
 		WidgetsFlutterBinding.ensureInitialized();
 		var path = join(await getDatabasesPath(), "events.db");
-		print(path);
 		var db = await openDatabase(
 			path,
 			onUpgrade: (db, v0, v1) async {
 				await (db.batch()
-					..execute("CREATE TABLE events (time INT NOT NULL, json STRING NOT NULL)")
-					..execute("CREATE TABLE syncinfo (evLen INT NOT NULL, delLen INT NOT NULL)")
+					..execute("CREATE TABLE IF NOT EXISTS deletes (time INT NOT NULL, json STRING NOT NULL)")
+					..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
+					..execute("CREATE TABLE IF NOT EXISTS syncinfo (evLen INT NOT NULL, delLen INT NOT NULL)")
 					..insert("syncinfo", SyncInfo.zero().toJson()))
 					.commit();
 			},
-			version: 5
+			version: 6
 		);
 		return db;
 	}
