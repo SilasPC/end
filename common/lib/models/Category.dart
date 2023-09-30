@@ -44,6 +44,7 @@ class Category extends IJSON {
 	bool isEnded() => numEnded() == equipages.length;
 	
 	int? minRideTime() => minSpeed == null ? null : (3600 * distance() / minSpeed!).floor();
+	int? idealRideTime() => idealSpeed == null ? null : (3600 * distance() / idealSpeed!).floor();
 	int? maxRideTime() => maxSpeed == null ? null : (3600 * distance() / maxSpeed!).floor();
 
 	int totalRestTime() {

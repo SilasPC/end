@@ -42,6 +42,10 @@ class LocalModel with ChangeNotifier {
 	Model get model => _model.model;
 	Set<Event<Model>> get deletes => _model.deletes;
 	ReadOnlyOrderedSet<Event<Model>> get events => _model.events;
+
+	int get desyncCount =>
+		events.length + deletes.length
+		- _model.lastSyncLocal.evLen - _model.lastSyncLocal.delLen;
 	
 	LocalModel() {	
 		_initModel();

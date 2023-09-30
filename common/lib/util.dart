@@ -35,12 +35,12 @@ DateTime fromHMS(int h, int m, int s) {
 	var midnight = toUNIX(dt) - dt.hour * 3600 - dt.minute * 60 - dt.second;
 	return fromUNIX(midnight + 3600 * h + 60 * m + s);
 }
-String unixDifToMS(int dif, [bool addPlus = false]) {
+String unixDifToMS(int dif, [bool addPlus = false, bool addMinus = true]) {
 	int m = (dif.abs() / 60).floor();
 	int s = dif % 60;
 	String ms = m > 9 ? "$m" : "0$m";
 	String ss = s > 9 ? "$s" : "0$s";
-	return dif < 0 ? "-$ms:$ss" : (addPlus ? "+$ms:$ss" : "$ms:$ss" );
+	return (dif < 0 && addMinus) ? "-$ms:$ss" : (addPlus ? "+$ms:$ss" : "$ms:$ss" );
 }
 
 /** Optionally map a dictionary key */

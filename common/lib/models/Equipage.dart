@@ -44,6 +44,7 @@ class Equipage extends IJSON {
 	String rider;
 	String horse;
 	VetData? preExam;
+	/// empty until cleared for start
 	List<LoopData> loops = [];
 	int? currentLoop;
 	String? dsqReason;
@@ -71,6 +72,17 @@ class Equipage extends IJSON {
 	/// indicates whether the equipage is on their final loop
 	bool get isFinalLoop => currentLoop != null && currentLoop == category.loops.length - 1;
 
+	/// returns the total ride time (registered)
+	int? totalRideTime() {
+		if (loops.isEmpty) return null;
+		int time = 0;
+		for (int i = 0; i < loops.length - 1; i++) {
+			time += loops[i].timeToVet ?? 0;
+		}
+		time += loops.last.timeToArrival ?? 0;
+		return time;
+	}
+
 	double? averageSpeed() {
 		if (loops.isEmpty)
 			return null;
@@ -92,6 +104,9 @@ class Equipage extends IJSON {
 		return dist * 3600 / time;
 	}
 
+	
+	int? idealFinishTime() => category.idealSpeed == null ? null :
+		category.startTime + startOffsetSecs + category.idealRideTime()! + category.totalRestTime();
 	int? minFinishTime() => category.minSpeed == null ? null :
 		category.startTime + startOffsetSecs + category.minRideTime()! + category.totalRestTime();
 	int? maxFinishTime() => category.maxSpeed == null ? null :
@@ -130,6 +145,12 @@ class Equipage extends IJSON {
 		if (isFinished != eq.isFinished) {
 			if (isFinished) return -1;
 			return 1;
+		} else if (isFinished && category.idealSpeed != null) {
+			// CHECK: if this works
+			// TODO: avoid null checks
+			int dif = (loops.last.arrival! - idealFinishTime()!).abs();
+			int eqdif = (eq.loops.last.arrival! - eq.idealFinishTime()!).abs();
+			return dif - eqdif;
 		}
 
 		if (category.clearRound) {
@@ -142,8 +163,6 @@ class Equipage extends IJSON {
 		if (currentLoop == null)
 			// before preExam
 			return 0;
-
-		// FEAT: cmp ideal time
 
 		var l = loops[currentLoop!];
 		var eql = eq.loops[currentLoop!];

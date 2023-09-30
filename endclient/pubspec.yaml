@@ -28,6 +28,7 @@ dependencies:
   path: ^1.8.2
   mutex: ^3.0.1
   sqflite_common_ffi: ^2.2.5
+  flutter_blue_plus: ^1.16.1
 
 dev_dependencies:
   flutter_test:

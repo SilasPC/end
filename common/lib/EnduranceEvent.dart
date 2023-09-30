@@ -211,7 +211,6 @@ class ExamEvent extends EnduranceEvent {
 			// preExam
 			if (p) eq.currentLoop = 0;
 			eq.preExam = data;
-			eq.loops = eq.category.loops.map((l) => LoopData(l)).toList();
 			eq.loops.first.expDeparture = eq.category.startTime;
 		} else {
 			// regular gate
@@ -338,6 +337,7 @@ class StartClearanceEvent extends EnduranceEvent {
 	void safeBuild(EventModel<Model> m) {
 		for (int eid in eids) {
 			var eq = m.model.equipages[eid]!;
+			eq.loops = eq.category.loops.map((l) => LoopData(l)).toList();
 			if (eq.status != EquipageStatus.WAITING) {
 				m.model.errors.add(EventError(m.buildIndex, "Cannot clear $eid for start"));
 			} else {

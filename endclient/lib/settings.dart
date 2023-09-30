@@ -1,15 +1,15 @@
 
+import 'dart:async';
 import 'dart:io';
-
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'LocalModel.dart';
 import 'util/input_modals.dart';
@@ -114,7 +114,9 @@ class _SettingsPageState extends State<SettingsPage> {
 					ListTile(
 						leading: const Icon(Icons.bluetooth),
 						title: const Text("Bluetooth sync"),
-						onTap: () {}, // FEAT: add bluetooth sync
+						onTap: () {
+							btSync();
+						},
 					),
 					ListTile(
 						leading: const Icon(Icons.data_array),
@@ -174,4 +176,37 @@ class _SettingsPageState extends State<SettingsPage> {
 			content: Text("Saved CSV results"),
 		));
 	}
+
+	static void btSync() async {
+		// FEAT: bt sync
+		
+		if (!await FlutterBluePlus.isAvailable) {
+			print("No bluetooth");
+			return;
+		}
+
+		if (Platform.isAndroid) {
+			await FlutterBluePlus.turnOn();
+		}
+
+		Map<DeviceIdentifier, BluetoothDevice> seen = {};
+		FlutterBluePlus.scanResults.listen(
+			(devs) {
+				for (var dev in devs) {
+					if (seen.containsKey(dev.device.remoteId)) continue;
+					seen[dev.device.remoteId] = dev.device;
+					print('${dev.device.remoteId}: "${dev.advertisementData.localName}" found! rssi: ${dev.rssi}');
+				}
+			}
+		);
+		await FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
+		var dev = seen.values.first;
+		dev.connectionState.listen((state) {
+			if (state == BluetoothConnectionState.connected) {
+				print("Connected");
+			}
+		});
+		dev.connect();
+	}
+
 }
