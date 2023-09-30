@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 
 typedef JSON = Map<String, dynamic>;
@@ -146,4 +147,12 @@ List<int> sortIndexMap<T>(List<T> list, Comparator<T> cmp) {
 		map[indices[i]] = i;
 	}
 	return map;
+}
+
+Future<void> delay(Duration dur) {
+	var c = Completer();
+	Timer(dur, () {
+		c.complete();
+	});
+	return c.future;
 }

@@ -1,13 +1,14 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:bluetooth_classic/bluetooth_classic.dart';
+import 'package:bluetooth_classic/models/device.dart';
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -178,35 +179,26 @@ class _SettingsPageState extends State<SettingsPage> {
 	}
 
 	static void btSync() async {
-		// FEAT: bt sync
-		
-		if (!await FlutterBluePlus.isAvailable) {
-			print("No bluetooth");
+		var bt = BluetoothClassic();
+		if (!await bt.initPermissions()) {
+			print("no perm");
 			return;
 		}
-
-		if (Platform.isAndroid) {
-			await FlutterBluePlus.turnOn();
-		}
-
-		Map<DeviceIdentifier, BluetoothDevice> seen = {};
-		FlutterBluePlus.scanResults.listen(
-			(devs) {
-				for (var dev in devs) {
-					if (seen.containsKey(dev.device.remoteId)) continue;
-					seen[dev.device.remoteId] = dev.device;
-					print('${dev.device.remoteId}: "${dev.advertisementData.localName}" found! rssi: ${dev.rssi}');
-				}
-			}
-		);
-		await FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
-		var dev = seen.values.first;
-		dev.connectionState.listen((state) {
-			if (state == BluetoothConnectionState.connected) {
-				print("Connected");
-			}
+		List<Device> devs = [];
+		bt.onDeviceDiscovered().listen((dev) {
+			devs.add(dev);
 		});
-		dev.connect();
+		await bt.startScan();
+		await delay(const Duration(seconds: 5));
+		await bt.stopScan();
+		var dev = devs.first;
+		print("${dev.name}");
+		await bt.connect(dev.address, SERIAL_UUID);		
+		print("connected");
+		await bt.disconnect();
+		print("disconnected");
 	}
 
 }
+
+const SERIAL_UUID = "00001101-0000-1000-8000-00805f9b34fb";

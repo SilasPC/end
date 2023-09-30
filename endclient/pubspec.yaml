@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: '^3.0.0'
 
 dependencies:
   flutter:
@@ -28,7 +28,7 @@ dependencies:
   path: ^1.8.2
   mutex: ^3.0.1
   sqflite_common_ffi: ^2.2.5
-  flutter_blue_plus: ^1.16.1
+  bluetooth_classic: ^0.0.1
 
 dev_dependencies:
   flutter_test:
