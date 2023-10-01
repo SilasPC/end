@@ -1,6 +1,8 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:esys_client/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:nearby_connections/nearby_connections.dart';
@@ -26,11 +28,8 @@ class Device {
 
 class BluetoothPageState extends State<BluetoothPage> {
 
-	late final Nearby _bt;
-	Map<String, Device> _devs = {};
-	StreamSubscription? _rcv, _chg;
-
-	String _data = "";
+	late final NearbyMan man;
+	List<Device> devs = [];
 
 	@override
 	void initState() {
@@ -39,126 +38,77 @@ class BluetoothPageState extends State<BluetoothPage> {
 		Wakelock.enable();
 	}
 
+	void print(String msg) {
+		ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+			content: Text(msg)));
+	}
+
+	bool isSetup = false;
 	void _setup() async {
-		try {
-
-			if (!await Permission.location.isGranted) {
-				if (!(await Permission.location.request()).isGranted) {
-					print("no loc perm");
-				}
-			}
-
-			// location enable dialog
-			// await Location.instance.requestService()
-
-			// Bluetooth permissions
-			bool granted = !(await Future.wait([
-				Permission.bluetooth.isGranted,
-				Permission.bluetoothAdvertise.isGranted,
-				Permission.bluetoothConnect.isGranted,
-				Permission.bluetoothScan.isGranted,
-			])).any((element) => false);
-			if (!granted) {
-				var res = await [
-					Permission.bluetooth,
-					Permission.bluetoothAdvertise,
-					Permission.bluetoothConnect,
-					Permission.bluetoothScan
-				].request();
-				if (res.values.any((e) => !e.isGranted)) {
-					print("no bt perm");
-				}
-			}
-
-			if (!await Permission.nearbyWifiDevices.isGranted) {
-				if (!(await Permission.nearbyWifiDevices.request()).isGranted) {
-					print("no nbwifi perm");
-				}
-			}
-
-			if (!await Location.instance.serviceEnabled()) {
-				if (!await Location.instance.requestService()) {
-					print("no loc serv");
-				}
-			}
-
-			_bt = Nearby();
-			var suc = await _bt.startAdvertising(
-				Platform.localHostname,
-				Strategy.P2P_CLUSTER,
-				onConnectionInitiated: (id, info) {
-					print("init $id");
-				},
-				onConnectionResult: (id, state) {
-					print("res $id $state");
-					//_devs[id]?.status = state;
-				},
-				onDisconnected: (id) {
-					print("disc $id");
-					//_devs.remove(id);
-				},
-				serviceId: "com.example.endclient",
-			);
-			if (!suc) print("fuck ad");
-			suc = await _bt.startDiscovery(
-				Platform.localHostname,
-				Strategy.P2P_CLUSTER,
-				onEndpointFound: (id, name, sid) {
-					setState(() {
-						_devs[id] = Device(id, name, sid);
-					});
-				},
-				onEndpointLost: (id) {
-					setState(() {
-						_devs.remove(id);
-					});
-				},
-				serviceId: "com.example.endclient",
-			);
-			if (!suc) print("fuck dis");
-		} catch (e, st) {
-			print(e);
-			print(st);
-		}
+		isSetup = true;
+		man = NearbyMan();
 	}
 
 	@override
 	void dispose() {
 		Wakelock.disable();
-		_bt
-			..stopAdvertising()
-			..stopDiscovery();
+		man.dispose();
 		super.dispose();
 	}
 
 	@override
-	Widget build(BuildContext context) =>
-		Scaffold(
+	Widget build(BuildContext context) {
+		if (!isSetup) _setup();
+		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Nearby"),
 			),
-			body: ListView(
-				children: [
-					ListTile(
-						title: Text(_data),
-						onLongPress: () {setState(() {_data = "";});},
+			body: AnimatedBuilder(
+				animation: man.devices,
+				builder: (context, _) =>
+					ListView(
+						children: [
+							ListTile(
+								title: const Text("Autoconnect"),
+								trailing: Switch(
+									value: man.autoConnect,
+									onChanged: (val) {
+										setState(() {
+											man.autoConnect = val;
+										});
+									},
+								)
+							),
+							for (var dev in man.devices.value)
+							ListTile(
+								title: Text(dev.name),
+								subtitle: Text(dev.id),
+								onTap: () {
+									dev.transmit();
+								},
+								trailing: ElevatedButton(
+									child: AnimatedBuilder(
+										animation: dev.status,
+										builder: (context, _) => Text(dev.status.value.name),
+									),
+									onPressed: () {
+										switch (dev.status.value) {
+											case DevStatus.CONNECTED:
+												dev.disconnect();
+												break;
+											case DevStatus.AVAILABLE:
+												dev.connect();
+												break;
+											default:
+												break;
+										}
+									},
+								),
+							)
+						]
 					),
-					for (var dev in _devs.values)
-					ListTile(
-						title: Text("${dev.userName}: ${dev.service}"),
-						trailing: ElevatedButton(
-							child: Text(dev.status?.name ?? "UNKNOWN"),
-							onPressed: () async {
-								
-							},
-						),
-						onTap: () async {
-							
-						},
-					)
-				]
-			),
+			)
 		);
-
+	}
 
 }
