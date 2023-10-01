@@ -1,5 +1,6 @@
 
 import 'package:common/util.dart';
+import 'package:esys_client/bluetooth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -38,6 +39,15 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 							var difStr = unixDifToMS(dif.inSeconds, false, false);
 							ScaffoldMessenger.of(context)
 								.showSnackBar(SnackBar(
+									action: SnackBarAction(
+										label: "Settings...",
+										onPressed: () {
+											Navigator.of(context)
+												.push(MaterialPageRoute(
+													builder: (BuildContext context) => const BluetoothPage()
+												));
+										},
+									),
 									content: Text(
 										"Server connection unavailable ($difStr).\n"
 										"$desync unsynced event(s)."

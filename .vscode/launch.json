@@ -9,11 +9,18 @@
 			"args": ["-d", "win"]
 		},
 		{
-			"name": "android",
+			"name": "redmi",
 			"cwd": "endclient",
 			"request": "launch",
 			"type": "dart",
 			"args": ["-d", "m200"]
+		},
+		{
+			"name": "moto",
+			"cwd": "endclient",
+			"request": "launch",
+			"type": "dart",
+			"args": ["-d", "moto"]
 		},
 		{
 			"name": "client",

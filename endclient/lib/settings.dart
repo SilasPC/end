@@ -1,8 +1,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:bluetooth_classic/bluetooth_classic.dart';
-import 'package:bluetooth_classic/models/device.dart';
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
@@ -116,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						leading: const Icon(Icons.bluetooth),
 						title: const Text("Bluetooth sync"),
 						onTap: () {
-							btSync();
+							// FEAT: bt sync
 						},
 					),
 					ListTile(
@@ -178,27 +176,4 @@ class _SettingsPageState extends State<SettingsPage> {
 		));
 	}
 
-	static void btSync() async {
-		var bt = BluetoothClassic();
-		if (!await bt.initPermissions()) {
-			print("no perm");
-			return;
-		}
-		List<Device> devs = [];
-		bt.onDeviceDiscovered().listen((dev) {
-			devs.add(dev);
-		});
-		await bt.startScan();
-		await delay(const Duration(seconds: 5));
-		await bt.stopScan();
-		var dev = devs.first;
-		print("${dev.name}");
-		await bt.connect(dev.address, SERIAL_UUID);		
-		print("connected");
-		await bt.disconnect();
-		print("disconnected");
-	}
-
 }
-
-const SERIAL_UUID = "00001101-0000-1000-8000-00805f9b34fb";

@@ -148,11 +148,3 @@ List<int> sortIndexMap<T>(List<T> list, Comparator<T> cmp) {
 	}
 	return map;
 }
-
-Future<void> delay(Duration dur) {
-	var c = Completer();
-	Timer(dur, () {
-		c.complete();
-	});
-	return c.future;
-}
