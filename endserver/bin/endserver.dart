@@ -55,7 +55,7 @@ void setJsonAck<T extends IJSON>(dynamic client, String msg, FutureOr<T?>? Funct
 		List dataList = data as List;
 		var json = dataList.first;
 		var ack = dataList.last;
-		var res = await handler(jsonDecode(utf8.decode(json)));
+		var res = await handler(IJSON.fromBin(json));
 		if (res != null) {
 			ack(res.toJsonBin());
 		}
@@ -69,6 +69,9 @@ class Handle extends EventModelHandle<Model> {
 
 	@override
 	Model revive(JSON json) => Model.fromJson(json);
+
+	@override
+	EnduranceEvent reviveEvent(JSON json) => EnduranceEvent.fromJson(json);
 
 	@override
 	Future<void> didUpdate() async {

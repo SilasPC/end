@@ -23,6 +23,9 @@ abstract class EnduranceEvent extends Event<Model> {
 		}
 	}
 
+	factory EnduranceEvent.fromJson(JSON json) =>
+		eventFromJSON(json);
+
 	void safeBuild(EventModel<Model> m);
 
 	bool affectsEquipage(int eid);

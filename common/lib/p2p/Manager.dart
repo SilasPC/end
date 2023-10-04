@@ -1,138 +1,382 @@
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 
 import 'package:common/EventModel.dart';
+import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/Model.dart';
 import 'package:mutex/mutex.dart';
 
 import '../util.dart';
 import 'db.dart';
 
-typedef Ev = Event<Model>;
+class PreSyncMsg extends IJSON {
 
-class InitMsg {
+	final String peerId;
 	final int sessionId;
-	InitMsg(this.sessionId);
+	final int resetCount;
+	PreSyncMsg(this.peerId, this.sessionId, this.resetCount);
+	
+	JSON toJson() => {
+		"peerId": peerId,
+		"sessionId": sessionId,
+		"resetCount": resetCount,
+	};
+
+	factory PreSyncMsg.fromBin(List<int> bin) => PreSyncMsg.fromJson(IJSON.fromBin(bin));
+	factory PreSyncMsg.fromJson(JSON json) =>
+		PreSyncMsg(
+			json["peerId"],
+			json["sessionId"],
+			json["resetCount"],
+		);
 }
 
-class Msg extends IJSON {
-	final List<Ev> evs, dels;
-	Msg(this.evs, this.dels);
+class SyncMsg<M extends IJSON> extends IJSON {
+	final List<Event<M>> evs, dels;
+	SyncMsg(this.evs, this.dels);
 
-	factory Msg.fromBin(List<int> bin) => Msg.fromJson(IJSON.fromBin(bin));
-	factory Msg.fromJson(JSON json) => unimpl();
+	JSON toJson() => {
+		"evs": evs,
+		"dels": dels,
+	};
 
+	factory SyncMsg.fromBin(List<int> bin, Reviver<Event<M>> reviver) => SyncMsg.fromJson(IJSON.fromBin(bin), reviver);
+	factory SyncMsg.fromJson(JSON json, Reviver<Event<M>> reviver) =>
+		SyncMsg(
+			jlist_map(json["evs"], reviver),
+			jlist_map(json["dels"], reviver),
+		);
+
+}
+
+enum PeerState {
+	PRESYNC,
+	SYNCERR,
+	SYNC
 }
 
 abstract class Peer {
 
+	bool _connected = false;
+	bool get connected => _connected;
+	final StreamController<bool> connectStatus = StreamController();
+
+	PreSyncMsg? _lastKnownState;
+	late final PeerManager _man;
+
+	PeerState _state = PeerState.PRESYNC;
+
 	Mutex _mutex = Mutex();
 	SyncInfo _lastLocal = SyncInfo.zero();
 
-	// Future<bool> connect();
-	Future<Msg?> sendSync(Msg msg);
+	bool isOutgoing();
+	void connect();
+	void disconnect();
+
+	Future<List<int>?> send(String msg, List<int> data);
+	Future<List<int>?> onRecieve(String msg, List<int> data)
+		=> _man._onRecieve(this, msg, data);
 
 }
 
-class P2PManager {
+class PeerManager<M extends IJSON> {
 
-	VoidCallback? onUpdate;
+	bool _autoConnect = false;
+	bool get autoConnect => _autoConnect;
+	set autoConnect(bool val) {
+		if (val && !_autoConnect) {
+			// TODO: connect to all peers
+		}
+		_autoConnect = val;
+	}
 
-	int _sessionId = 0;
-	int get sessionId => _sessionId;
-	late final EventDatabase _db;
+	StreamController<void> _onUpdate = StreamController.broadcast();
+	Stream<void> get updateStream => _onUpdate.stream;
+
+	final String peerId;
+	
+	late int _sessionId;
+	int get sessionId => _sessionId;	
+	int _resetCount = 0;
+
+	late final EventDatabase<M> _db;
 	final Mutex _mutex = Mutex();
 	List<Peer> _peers = [];
-	final Peer? master;
-	late EventModel<Model> _em;
-	Stream<Peer> _peerSource;
+	Peer? master = null;
+	late EventModel<M> _em;
 
-	P2PManager(
-		this.master,
-		this._peerSource,
-		AsyncProducer<EventDatabase> createDb
+	M get model => _em.model;
+	ReadOnlyOrderedSet<Event<M>> get events => _em.events;
+	Set<Event<M>> get deletes => _em.deletes;
+
+	late final Handle<M> handle;
+
+	PeerManager(
+		this.peerId,
+		AsyncProducer<EventDatabase<M>> createDb,
+		Reviver<M> reviver,
+		Reviver<Event<M>> eventReviver,
+		Producer<M> producer,
+		[int? sessionId]
 	) {
-		_initModel();
+		_sessionId = sessionId ?? Random().nextInt(1 << 30);
+		handle = Handle<M>(
+			() => _onUpdate.add(null),
+			producer,
+			reviver,
+			eventReviver,
+		);
+		_em = EventModel(handle);
 		_initDatabase(createDb);
-		_initPeerSource();
 	}
 
-	void _initModel() {
-		var h = Handle(() {
-			onUpdate?.call();
-		});
-		_em = EventModel(h);
-	}
-
-	void _initDatabase(AsyncProducer<EventDatabase> createDb) {
+	void _initDatabase(AsyncProducer<EventDatabase<M>> createDb) {
 		_mutex.protect(() async {
 			_db = await createDb();
-			var data = await _db.loadAll();
-			_em.reset();
-			_em.add(data.evs, data.dels);
+			/* var data = await _db.loadAll();
+			await _reset(keepDatabase: true);
+			_em.add(data.evs, data.dels); */
 		});
 	}
 
-	void _initPeerSource() {
-		_peerSource.listen((peer) {
-			if (_peers.contains(peer)) return;
-			_peers.add(peer);
-		});
-	}
-
-	void add(List<Ev> evs, [List<Ev> dels = const []]) {
-		_mutex.protect(() async {
+	Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
+		if (evs.isEmpty && dels.isEmpty) return;
+		await _mutex.protect(() async {
+			var ss = _em.syncState;
 			_em.add(evs, dels);
+			if (ss == _em.syncState) return;
 			await _save();
 			_broadcastSync();
 		});
 	}
 	
-	/* Future<void> reset() async {
-		_mutex.protect(() async {
-			await _db.clear();
+	/// mutex order manager -> peer
+	Future<void> resetModel() async {
+		// print("reset $peerId");
+		await _mutex.protect(() async {
+			// TODO: await _db.clearEvents();
 			_em.reset();
-			// TODO: ensure other peers know this
+			_resetCount++;
+			for (var p in _peers) {
+				p._mutex.protect(() async {
+					p._lastLocal = SyncInfo.zero();
+					_preSync(p);
+				});
+			}
 		});
-	} */
+	}
 
 	Future<void> _save() async {
 		var data = _em.getNewerData(_db.lastSaved());
-		await _db.add(Msg(data.events, data.deletes), _em.syncState);
+		await _db.add(SyncMsg(data.events, data.deletes), _em.syncState);
+		// print("saved $peerId");
 	}
 
-	void _broadcastSync() async {
-		for (var p in _peers) {
+	void _broadcastSync() {
+		_peers.forEach(_syncTo);
+	}
+
+	void _syncTo(Peer p) {
+		// print("syncto ${p._lastKnownState?.peerId} ${p._state.name}");
+		p._mutex.protect(() async {
+			if (p._state != PeerState.SYNC) {
+				// print("cannot sync to ${p._lastKnownState?.peerId} ${p._state.name}");
+				return;
+			}
+			var ss = _em.syncState;
+			if (p._lastLocal == ss) {
+				// print("nothing to sync with ${p._lastKnownState?.peerId}");
+				return;
+			}
+			var data = _em.getNewerData(p._lastLocal);
+			// print("send ${data.events} to ${p._lastKnownState?.peerId}");
+			var res = await p.send(
+				"sync",
+				SyncMsg(data.events, data.deletes).toJsonBin()
+			);
+			if (res == null) {
+				// timeout
+				return;
+			}
+			p._lastLocal = ss;
+		});
+	}
+
+	Future<void> setMaster(Peer p) async {
+		p._man = this;
+		await _mutex.protect(() async {
+			if (master != null) {
+				// TODO: consult database for last known state
+				// TODO: reset and stuff (?)
+			}
+			// _reset(); // TODO: don't always do this
+			master = p;
+			_peers.add(p);
+			_bindConnectHandler(p);
+			p.connect();
+		});
+	}
+
+	Future<void> addPeer(Peer p) async {
+		p._man = this;
+		await _mutex.protect(() async {
+			// TODO: consult database for last known state
+			
+		});
+		_peers.add(p);
+		_bindConnectHandler(p);
+		if (_autoConnect) {
+			p.connect();
+		}
+	}
+
+	void _bindConnectHandler(Peer p) {
+		p.connectStatus.stream.listen((connected) {
+			if (p._connected == connected) {
+				return;
+			}
+			// print("con $peerId -> ${p._lastKnownState?.peerId} = $connected");
+			p._connected = connected;
+			if (connected && p.isOutgoing()) {
+				p._mutex.protect(() => _preSync(p));
+			} else if (!connected) {
+				// print("set presync ${p._lastKnownState?.peerId}");
+				p._state = PeerState.PRESYNC;
+			}
+		});
+	}
+
+	/// must have peer lock
+	Future<void> _preSync(Peer p) async {
+		// print("presync to ${p._lastKnownState?.peerId}");
+		p._state = PeerState.PRESYNC;
+		var res = await p.send("presync", _curPreSyncMsg().toJsonBin());
+		if (res == null) {
+			// print("null presync ack");
+			// TODO: ??
+			return;
+		}
+		p.send("syncack", []);
+		_handlePreSync(p, PreSyncMsg.fromBin(res));
+		_syncTo(p);
+	}
+
+	PreSyncMsg _curPreSyncMsg() =>
+		PreSyncMsg(
+			peerId,
+			_sessionId,
+			_resetCount
+		);
+
+	/// must have peer lock
+	void _handlePreSync(Peer p, PreSyncMsg ps) {
+		var last = p._lastKnownState ?? ps;
+		p._lastKnownState = ps;
+		// print("handle pre sync from ${ps.peerId}");
+		if (ps.sessionId != sessionId) {
+			// print("set syncerr ${ps.peerId}");
+			p._state = PeerState.SYNCERR;
+			// print("conflict ${ps.sessionId} != ${sessionId}");
+			// TODO: conflict
+			return;
+		}
+		if (last.resetCount != ps.resetCount) {
+			// print("discovered reset by ${ps.peerId}");
+			p._lastLocal = SyncInfo.zero();
+		}
+		// print("set sync ${ps.peerId}");
+		p._state = PeerState.SYNC;
+		p._lastKnownState = ps;
+	}
+
+	/// must have peer lock (when sending)
+	Future<List<int>?> _onRecieve(Peer p, String msg, List<int> data) async {
+		switch (msg) {
+			case "syncack":
+				_syncTo(p);
+				return [];
+			case "presync":
+				_handlePreSync(p, PreSyncMsg.fromBin(data));
+				return _curPreSyncMsg().toJsonBin();
+			case "sync":
+				if (p._state != PeerState.SYNC) {
+					// print("rcv: not in sync yet");
+					return null;
+				}
+				if (p._lastKnownState?.sessionId != _sessionId) {
+					// print("sync incorrect session");
+					// TODO: handle conflict, change state?
+					return null;
+				}
+				var msg = SyncMsg<M>.fromBin(data, handle.eventReviver);
+				var upToDate = _em.syncState == p._lastLocal;
+				await add(msg.evs, msg.dels);
+				if (upToDate) {
+					p._lastLocal = _em.syncState;
+				} else {
+					_syncTo(p);
+				}
+				return []; // TODO: ack ok?
+			default:
+				// print("$msg ?");
+				return null;
+		}
+	}
+
+	/// mutex order manager -> peer
+	Future<bool> yieldTo(Peer p) =>
+		_mutex.protect(() =>
 			p._mutex.protect(() async {
-				var ss = _em.syncState;
-				if (p._lastLocal == ss) return;
-				var data = _em.getNewerData(p._lastLocal);
-				var res = await p.sendSync(Msg(data.events, data.deletes));
-				if (res == null) {
-					// timeout
-					return;
+				// print("yield to ${p._lastKnownState?.peerId} ${p._state.name} ${p._lastKnownState?.sessionId}");
+				if (p._state != PeerState.SYNCERR) {
+					return false;
 				}
-				p._lastLocal = ss;
-				if (res.evs.isNotEmpty || res.dels.isNotEmpty) {
-					add(res.evs, res.dels);
-					// TODO: ack to peer
+				await _reset(disconnect: false);
+				_sessionId = p._lastKnownState!.sessionId;
+				for (var op in _peers) {
+					if (op == p) continue;
+					op._mutex.protect(() => _preSync(op));
 				}
-			});
+				await _preSync(p);
+				return true;
+			})
+		);
+
+	/// must have manager lock
+	Future<void> _reset({bool keepDatabase = false, bool disconnect = true}) async {
+		// print("reset");
+		if (!keepDatabase) {
+			await _db.clear();
+		}
+		_em.reset();
+		_sessionId = Random().nextInt(1 << 30);
+		_resetCount = 0;
+		if (disconnect) {
+			for (var p in _peers) {
+				p.disconnect();
+			}
 		}
 	}
 
 }
 
-class Handle extends EventModelHandle<Model> {
+class Handle<M extends IJSON> extends EventModelHandle<M> {
 
 	final void Function() onUpdate;
+	final Reviver<M> reviver;
+	final Reviver<Event<M>> eventReviver;
+	final Producer<M> create;
 
-	Handle(this.onUpdate);
+	Handle(this.onUpdate, this.create, this.reviver, this.eventReviver);
 
 	@override
-	Model createModel() => Model();
+	M createModel() => create();
 	@override
-	Model revive(JSON json) => Model.fromJson(json);
+	M revive(JSON json) => reviver(json);
+	@override
+	Event<M> reviveEvent(JSON json) => eventReviver(json);
 	@override
 	void didUpdate() => onUpdate();
 	@override
@@ -142,18 +386,38 @@ class Handle extends EventModelHandle<Model> {
 
 class LocalPeer extends Peer {
 
-	P2PManager man;
+	late final LocalPeer _other;
+	final bool _outgoing;
 
 	SyncInfo _lastRemote = SyncInfo.zero();
 
-	LocalPeer(this.man);
+	LocalPeer._(this._outgoing) {}
+	static Tuple<LocalPeer, LocalPeer> pair() {
+		var pair = Tuple(
+			LocalPeer._(true),
+			LocalPeer._(false),
+		);
+		pair.a._other = pair.b;
+		pair.b._other = pair.a;
+		return pair;
+	}
 
 	@override
-	Future<Msg?> sendSync(Msg msg) async {
-		man.add(msg.evs, msg.dels);
-		var data = man._em.getNewerData(_lastRemote);
-		_lastRemote = man._em.syncState; // TODO: should only happen after ack
-		return Msg(data.events, data.deletes);
+	void connect() {
+		connectStatus.add(true);
+		_other.connectStatus.add(true);
 	}
+	@override
+	void disconnect() {
+		connectStatus.add(false);
+		_other.connectStatus.add(false);
+	}
+
+	@override
+	bool isOutgoing() => _outgoing;
+
+	@override
+	Future<List<int>?> send(String msg, List<int> data)
+		=> _other.onRecieve(msg, data);
 
 }

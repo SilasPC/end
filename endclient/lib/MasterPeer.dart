@@ -1,77 +1,79 @@
 
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:common/p2p/Manager.dart';
 
 class SocketPeer extends Peer {
-	
-	final ValueNotifier<bool> status = ValueNotifier(false);
 
-	String? _socketAddress;
-
-	String? get socketAddress => _socketAddress;
-	set socketAddress(String? value) {
-		if (value == _socketAddress || value == null) return;
-		_socketAddress = value;
-		_initSocket();
+	SocketPeer(String uri) {
+		_initSocket(uri);
 	}
+	
+	late io.Socket _socket;
 
-	io.Socket? _socket;
+	void _initSocket(String uri) {
 
-	int _initCount = 0;
-	void _initSocket() {
-
-		var initCount = ++_initCount;
-
-		_socket?.disconnect();
-		status.value = false;
-		onDisconnect?.call();
-		// CHECK: io.io will not reconnect to a previously connected socket ???
-		io.Socket socket = _socket = io.io(
-			_socketAddress!,
+		_socket = io.io(
+			uri,
 			io.OptionBuilder()
-				.setTransports(["websocket"]) // TODO: add "polling"
+				.setTransports(["websocket", "polling"])
+				.disableAutoConnect()
 				.build()
 		);
 
-		socket.onConnect((_) {
-			if (initCount != _initCount) return;
-			print("connect $initCount");
-			status.value = true;
-			onConnect?.call();
+		_socket.onConnect((_) {
+			connectStatus.add(true);
 		});
-		socket.onDisconnect((_) {
-			if (initCount != _initCount) return;
-			print("disconnect $initCount");
-			status.value = false;
-			onDisconnect?.call();
+		_socket.onDisconnect((_) {
+			connectStatus.add(false);
 		});
 
-		socket.on("reset", (_) {
-			onReset?.call();
-		});
+		// TODO: on any?
+		_socket.on("presync", (data) => _handler("presync", data as List));
+		_socket.on("sync", (data) => _handler("sync", data as List));
 		
 	}
 
+	void _handler(String msg, List data) async {
+		var bin = data.first as List<int>;
+		var ack = data.last;
+		var res = await onRecieve(msg, bin);
+		if (res != null) {
+			ack(res);
+		}
+	}
+	
 	@override
-	Future<Msg?> sendSync(Msg msg) async {
+	bool isOutgoing() => true;
 
-		if (_socket!.disconnected) {
+	@override
+	void connect() => _socket.connect();
+
+	@override
+	void disconnect() => _socket.disconnect();
+
+
+	@override
+	Future<List<int>?> send(String msg, List<int> data) async {
+		if (_socket.disconnected) {
 			return null;
 		}
 
-		Completer<Msg?> c = Completer();
+		Completer<List<int>?> c = Completer();
 
-		_socket!.emitWithAck("sync", msg.toJsonBin(), binary: true, ack: (bin) {
-			if (!c.isCompleted) {
-				c.complete(Msg.fromBin(bin));
+		_socket.emitWithAck(
+			msg,
+			data,
+			binary: true,
+			ack: (msg) {
+				if (!c.isCompleted) {
+					c.complete(msg as List<int>);
+				}
 			}
-		});
+		);
 		Timer(const Duration(seconds: 5), () {
 			if (!c.isCompleted) {
-				c.complete();
+				c.complete(null);
 			}
 		});
 		return c.future;

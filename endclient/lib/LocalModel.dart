@@ -135,6 +135,8 @@ class Handle extends EventModelHandle<Model> {
 	@override
 	Model revive(JSON json) => Model.fromJson(json);
 	@override
+	EnduranceEvent reviveEvent(JSON json) => EnduranceEvent.fromJson(json);
+	@override
 	void didUpdate() => onUpdate();
 	@override
 	void didReset() => onUpdate();

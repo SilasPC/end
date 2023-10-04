@@ -9,6 +9,30 @@ typedef Producer<T> = T Function();
 typedef AsyncProducer<T> = Producer<FutureOr<T>>;
 typedef VoidCallback = void Function();
 
+void setJsonAck2<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<T?>? Function(T) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var json = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(reviver(IJSON.fromBin(json)));
+		if (res != null) {
+			ack(res.toJsonBin());
+		}
+	});
+}
+
+void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<String?>? Function(T) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var json = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(reviver(IJSON.fromBin(json)));
+		if (res != null) {
+			ack(res);
+		}
+	});
+}
+
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());

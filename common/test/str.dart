@@ -2,7 +2,7 @@
 import 'package:common/EventModel.dart';
 import 'package:common/util.dart';
 
-class StrEv extends Event<Model> {
+class StrEv extends Event<StrModel> {
 	
 	final String str;
 	StrEv(this.str, int time): super(time, "kind", "author");
@@ -19,11 +19,14 @@ class StrEv extends Event<Model> {
 		"char": str
 	};
 
+	factory StrEv.fromJson(JSON json) =>
+		StrEv(json['char'], json['time']);
+
 	@override
 	String toString() => "[$time;$str]";
 
 	@override
-	bool build(EventModel<Model> m) {
+	bool build(EventModel<StrModel> m) {
 		m.model.result += str;
 		return true;
 	}
@@ -33,7 +36,7 @@ class StrEv extends Event<Model> {
 
 }
 
-class Model extends IJSON {
+class StrModel extends IJSON {
 	String result = "";
 
 	@override
@@ -41,8 +44,8 @@ class Model extends IJSON {
 		"result": result
 	};
 	
-	Model();
-	Model.fromJson(JSON json):
+	StrModel();
+	StrModel.fromJson(JSON json):
 		result = json["result"];
 
 	@override
@@ -50,7 +53,8 @@ class Model extends IJSON {
 	
 }
 
-class Handle extends EventModelHandle<Model> {
-	Model revive(JSON json) => Model.fromJson(json);
-	Model createModel() => Model();
+class Handle extends EventModelHandle<StrModel> {
+	StrModel revive(JSON json) => StrModel.fromJson(json);
+	StrEv reviveEvent(JSON json) => StrEv.fromJson(json);
+	StrModel createModel() => StrModel();
 }

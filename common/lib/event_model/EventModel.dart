@@ -66,6 +66,7 @@ class SyncResult<M extends IJSON> extends IJSON {
 abstract class EventModelHandle<M extends IJSON> {
 	late EventModel<M> model;
 	M revive(JSON json);
+	Event<M> reviveEvent(JSON json);
 	M createModel();
 	void willUpdate() {}
 	void didUpdate() {}

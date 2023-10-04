@@ -2,21 +2,20 @@
 import 'package:common/p2p/Manager.dart';
 
 import '../event_model/EventModel.dart';
+import '../util.dart';
 
-abstract class EventDatabase {
+abstract class EventDatabase<M extends IJSON> {
 	SyncInfo lastSaved();
-	Future<void> add(Msg sr, SyncInfo si);
+	Future<void> add(SyncMsg<M> sr, SyncInfo si);
 	Future<void> clear();
-	Future<Msg> loadAll();
+	Future<SyncMsg<M>> loadAll();
 }
 
-class NullDatabase extends EventDatabase {
-
-	static NullDatabase create() => NullDatabase();
+class NullDatabase<M extends IJSON> extends EventDatabase<M> {
 
 	SyncInfo _lastSave = SyncInfo.zero();
 	@override
-	Future<void> add(Msg sr, SyncInfo si) async {
+	Future<void> add(SyncMsg<M> sr, SyncInfo si) async {
 		_lastSave = si;
 	}
 	@override
@@ -24,5 +23,5 @@ class NullDatabase extends EventDatabase {
 	@override
 	SyncInfo lastSaved() => _lastSave;
 	@override
-	Future<Msg> loadAll() => Future.value(Msg([], []));
+	Future<SyncMsg<M>> loadAll() => Future.value(SyncMsg([], []));
 }

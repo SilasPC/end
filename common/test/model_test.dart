@@ -172,11 +172,11 @@ void main() {
 	});
 }
 
-class ClientModel extends SyncedEventModel<Model> {
+class ClientModel extends SyncedEventModel<StrModel> {
 	ServerModel server;
 	ClientModel(this.server): super(Handle(), (req) async => req.applyTo(server));
 }
 
-class ServerModel extends EventModel<Model> {
+class ServerModel extends EventModel<StrModel> {
 	ServerModel(): super(Handle());
 }
