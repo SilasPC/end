@@ -13,7 +13,7 @@ import '../util/chip_strip.dart';
 import '../util/timer.dart';
 import 'equipage_tile.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class EquipagePage extends StatefulWidget {
 

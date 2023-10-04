@@ -10,7 +10,7 @@ import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class EventView extends StatefulWidget {
 	const EventView({super.key});

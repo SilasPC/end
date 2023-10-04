@@ -1,106 +1,15 @@
 
-import 'dart:io';
+import 'dart:convert';
+
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
-import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/MasterPeer.dart';
-import 'package:esys_client/settings_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
-import 'dart:async';
-import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
-
-class ModelProvider extends StatelessWidget {
-	const ModelProvider({super.key, required this.child});
-
-	final Widget child;
-
-	@override
-	Widget build(BuildContext context) =>
-		ChangeNotifierProxyProvider<Settings, LocalModel>(
-			lazy: false,
-			create: (_) => PeerManagedModel(),
-			// TODO: update socket address
-			update: (_, set, mod) {
-				// mod!.socket.socketAddress = set.serverURI;
-				return mod!;
-			},
-			child: child,
-		);
-}
-
-abstract class LocalModel with ChangeNotifier {
-
-	ValueNotifier<bool> get connection;
-
-	Model get model;
-	Set<Event<Model>> get deletes;
-	ReadOnlyOrderedSet<Event<Model>> get events;
-
-	int get desyncCount;
-
-	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []]);
-	Future<void> resetSync();
-
-}
-
-class PeerManagedModel with ChangeNotifier implements LocalModel {
-
-	late PeerManager<Model> manager;
-	final ValueNotifier<bool> _connection = ValueNotifier(false);
-	Peer? _master;
-	StreamSubscription? _masterConnectSub;
-
-	PeerManagedModel() {
-		manager = PeerManager(
-			Platform.localHostname,
-			SqfliteDatabase.create,
-			Model.fromJson,
-			EnduranceEvent.fromJson,
-			Model.new,
-		);
-		_initMaster();
-	}
-
-	void _initMaster() {
-		_master = SocketPeer(
-			"http://localhost:3000" // TODO: what to do ?
-		);
-		_masterConnectSub?.cancel();
-		_masterConnectSub = _master!.connectStatus
-			.listen((value) => _connection.value = value);
-		manager.setMaster(_master!);
-	}
-
-	@override
-	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []])
-		=> manager.add(evs, dels);
-
-	@override
-	ValueNotifier<bool> get connection => _connection;
-
-	@override
-	Set<Event<Model>> get deletes => manager.deletes;
-
-	@override
-	int get desyncCount => _master?.desyncCount ?? 0;
-
-	@override
-	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
-
-	@override
-	Model get model => manager.model;
-
-	@override
-	Future<void> resetSync() => manager.resetModel();
-
-}
 
 class SqfliteDatabase extends EventDatabase<Model> {
 
@@ -134,11 +43,12 @@ class SqfliteDatabase extends EventDatabase<Model> {
 	}
 
 	@override
-	Future<void> loadPeer(String peerId) async {
+	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async {
 		var peer = await _db.query("peers", where: "peerId = ?", whereArgs: [peerId]);
-		//if (peer.isEmpty) return null;
-		// TODO: change interface
-		// return null;
+		if (peer.isEmpty) return null;
+		var psm = PreSyncMsg.fromJson(peer.first);
+		var si = SyncInfo.fromJson(peer.first);
+
 	}
 
 	@override
@@ -177,6 +87,10 @@ class SqfliteDatabase extends EventDatabase<Model> {
 			path,
 			onUpgrade: (db, v0, v1) async {
 				await (db.batch()
+					..execute("DROP TABLE IF EXISTS deletes")
+					..execute("DROP TABLE IF EXISTS events")
+					..execute("DROP TABLE IF EXISTS peers")
+
 					..execute("CREATE TABLE IF NOT EXISTS deletes (time INT NOT NULL, json STRING NOT NULL)")
 					..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
 					..execute("""
@@ -184,14 +98,26 @@ class SqfliteDatabase extends EventDatabase<Model> {
 							peerId STRING NOT NULL PRIMARY KEY,
 							sessionId INT NOT NULL,
 							resetCount INT NOT NULL,
-							lastSync STRING NOT NULL
+							evLen INT NOT NULL,
+							delLen INT NOT NULL
 						)
 					"""))
 					.commit(noResult: true);
 			},
-			version: 7
+			version: 8
 		);
 		return db;
+	}
+	
+	@override
+	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) {
+		var row = state.toJson()..addEntries(syncInfo.toJson().entries);
+		return _db.update(
+			"peers",
+			row,
+			where: "peerId = ?",
+			whereArgs: [state.peerId]
+		);
 	}
 
 }

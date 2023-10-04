@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 import '../settings_provider.dart';
 
 class DeparturePage extends StatefulWidget {

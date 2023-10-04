@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:common/p2p/Manager.dart';
 
-class SocketPeer extends Peer {
+class ServerPeer extends Peer {
 
-	SocketPeer(String uri) {
-		_initSocket(uri);
+	ServerPeer(this.uri) {
+		_initSocket();
 	}
 	
+	final String uri;
 	late io.Socket _socket;
 
-	void _initSocket(String uri) {
+	void _initSocket() {
 
 		_socket = io.io(
 			uri,
 			io.OptionBuilder()
 				.setTransports(["websocket", "polling"])
-				.disableAutoConnect()
+				// .disableAutoConnect()
 				.build()
 		);
 
@@ -28,7 +29,6 @@ class SocketPeer extends Peer {
 			connectStatus.add(false);
 		});
 
-		// TODO: on any?
 		for (var ev in SyncProtocol.events) {
 			_socket.on(ev, (data) => _handler(ev, data as List));
 		}

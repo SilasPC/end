@@ -7,7 +7,7 @@ import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 import 'category.dart';
 import 'eventview.dart';
 import 'modelview.dart';

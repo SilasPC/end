@@ -79,7 +79,7 @@ class Settings extends IJSON {
 		showAdmin = false,
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
 
-	// TODO: this is not very nice
+	// IGNORED: TODO: this is not very nice
 	void setDefaults() {
 		serverURI = "https://kastanie.ddns.net/esys";
 		author = Platform.localHostname;

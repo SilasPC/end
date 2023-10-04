@@ -4,7 +4,7 @@ import 'package:common/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
 
-// FEAT: edit events
+// IGNORED: FEAT: edit events
 class EventEditPage extends StatefulWidget {
 	const EventEditPage({super.key, required this.event});
 

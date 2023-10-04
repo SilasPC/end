@@ -1,17 +1,22 @@
 
-import 'dart:math';
-
 import 'package:common/p2p/Manager.dart';
+import '../event_model/EventModel.dart';
 import '../util.dart';
 
 abstract class EventDatabase<M extends IJSON> {
 	Future<void> add(SyncMsg<M> sr);
 	Future<void> clear({required bool keepPeers});
 	Future<Tuple<SyncMsg<M>, PreSyncMsg?>> loadData();
-	Future<Object?> loadPeer(String peerId);
+	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId);
+	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo);
 }
 
 class NullDatabase<M extends IJSON> extends EventDatabase<M> {
+
+	final String peerId;
+	final int sessionId;
+
+	NullDatabase(this.peerId, this.sessionId);
 
 	@override
 	Future<void> add(SyncMsg<M> msg) async {}
@@ -22,10 +27,18 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
 		=> Future.value(
 				Tuple(
 					SyncMsg([], []),
-					null,
+					PreSyncMsg(
+						peerId,
+						sessionId,
+						0
+					),
 				)
 		);
 
 	@override
-	Future<Object?> loadPeer(String peerId) async => null;
+	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async => null;
+
+	@override
+	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) async {}
+
 }

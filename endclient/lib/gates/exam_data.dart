@@ -8,7 +8,7 @@ import 'package:common/util.dart';
 
 import '../settings_provider.dart';
 import '../util/input_modals.dart';
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class ExamDataPage extends StatefulWidget {
 

@@ -9,13 +9,12 @@ import 'str.dart';
 
 void main() {
 
-	var manager = (String name, [int? sessionId]) => PeerManager<StrModel>(
-		name,
-		() => NullDatabase<StrModel>(),
+	var manager = (String id, int sessionId) => PeerManager<StrModel>(
+		id,
+		() => NullDatabase<StrModel>(id, sessionId),
 		StrModel.fromJson,
 		StrEv.fromJson,
 		() => StrModel(),
-		sessionId
 	)..autoConnect = true;
 
 	test("two way", () async {
@@ -28,7 +27,7 @@ void main() {
 		expect(s.model.result, "1");
 		expect(c.model.result, "");
 
-		await c.setMaster(pair.a);
+		await c.addPeer(pair.a);
 		await s.addPeer(pair.b);
 		await pumpEventQueue();
 
@@ -60,7 +59,7 @@ void main() {
 		var p2 = manager("p2", 1);
 		var p3 = manager("p3", 1);
 		
-		await p2.setMaster(con1.a);
+		await p2.addPeer(con1.a);
 		await p1.addPeer(con1.b);
 		await p3.addPeer(con2.a);
 		await p2.addPeer(con2.b);
@@ -92,7 +91,7 @@ void main() {
 		var s = manager("server", 1);
 		var c = manager("client", 1);
 
-		await c.setMaster(pair.a);
+		await c.addPeer(pair.a);
 		await s.addPeer(pair.b);
 
 		await s.add([StrEv.dig(1)]);
@@ -113,7 +112,7 @@ void main() {
 		var s = manager("server", 1);
 		var c = manager("client", 2);
 
-		await c.setMaster(pair.a);
+		await c.addPeer(pair.a);
 		await s.addPeer(pair.b);
 
 		await s.add([StrEv.dig(1)]);

@@ -1,10 +1,11 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/bluetooth.dart';
+import 'package:esys_client/local_model/ServerConnection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class ConnectionIndicator extends StatefulWidget {
 	
@@ -20,43 +21,36 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 
 	@override
 	Widget build(BuildContext context) {
-		var model = context.read<LocalModel>();
-		var desync = context.select<LocalModel, int>((lm) => lm.desyncCount);
+		var conn = context.watch<ServerConnection>();
 		// UI: add desync chip on icon
-		return AnimatedBuilder(
-			animation: model.connection,
-			builder: (context, _) {
-				bool status = model.connection.value;
-				var now = DateTime.now();
-				if (status) _lastConn = now;
-				return status
-					? Container()
-					: IconButton(
-						color: Colors.red,
-						// TODO: open sync settings?
-						onPressed: () {
-							var dif = now.difference(_lastConn);
-							var difStr = unixDifToMS(dif.inSeconds, false, false);
-							ScaffoldMessenger.of(context)
-								.showSnackBar(SnackBar(
-									action: SnackBarAction(
-										label: "Settings...",
-										onPressed: () {
-											Navigator.of(context)
-												.push(MaterialPageRoute(
-													builder: (BuildContext context) => const BluetoothPage()
-												));
-										},
-									),
-									content: Text(
-										"Server connection unavailable ($difStr).\n"
-										"$desync unsynced event(s)."
-									),
-								));
-						},
-						icon: const Icon(Icons.sync_problem),
-					);
-			}
-		);
+		var now = DateTime.now();
+		if (conn.connected) _lastConn = now;
+		return conn.connected
+			? Container()
+			: IconButton(
+				color: Colors.red,
+				// TODO: open sync settings?
+				onPressed: () {
+					var dif = now.difference(_lastConn);
+					var difStr = unixDifToMS(dif.inSeconds, false, false);
+					ScaffoldMessenger.of(context)
+						.showSnackBar(SnackBar(
+							action: SnackBarAction(
+								label: "Settings...",
+								onPressed: () {
+									Navigator.of(context)
+										.push(MaterialPageRoute(
+											builder: (BuildContext context) => const BluetoothPage()
+										));
+								},
+							),
+							content: Text(
+								"Server connection unavailable ($difStr).\n"
+								"${conn.desyncCount} unsynced event(s)."
+							),
+						));
+				},
+				icon: const Icon(Icons.sync_problem),
+			);
 	}
 }

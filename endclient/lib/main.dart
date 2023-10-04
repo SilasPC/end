@@ -1,17 +1,18 @@
 import 'dart:io';
 
+import 'package:esys_client/local_model/ServerConnection.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'landing.dart';
-import 'LocalModel.dart';
+import 'local_model/LocalModel.dart';
 import 'settings_provider.dart';
 
 Future<void> main() async {
 
 	FlutterError.onError = (details) {
 		FlutterError.presentError(details);
-		// TODO: custom exception handler
+		// IGNORED: TODO: custom exception handler
 	};
 
 	if (Platform.isWindows || Platform.isLinux) {
@@ -22,7 +23,9 @@ Future<void> main() async {
 	runApp(
 		const SettingsProvider(
 			child: ModelProvider(
-				child: MyApp(),
+				child: ServerConnectionProvider(
+					child: MyApp(),
+				)
 			)
 		)
 	);

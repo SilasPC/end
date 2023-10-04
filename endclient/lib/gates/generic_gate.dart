@@ -7,7 +7,7 @@ import 'gate_controller.dart';
 import '../util/connection_indicator.dart';
 import '../util/equipage_selector_drawer.dart';
 import '../util/submit_button.dart';
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class GenericGate extends StatefulWidget {
 

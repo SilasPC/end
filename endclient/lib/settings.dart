@@ -4,13 +4,15 @@ import 'dart:io';
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/local_model/PeerManagedModel.dart';
+import 'package:esys_client/local_model/ServerConnection.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'LocalModel.dart';
+import 'local_model/LocalModel.dart';
 import 'util/input_modals.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -38,7 +40,6 @@ class _SettingsPageState extends State<SettingsPage> {
 			isInit = true;
 		}
 		var model = context.read<LocalModel>();
-		var peerModel = model is PeerManagedModel ? model : null;
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Settings"),
@@ -112,13 +113,6 @@ class _SettingsPageState extends State<SettingsPage> {
 						onTap: () => model.resetSync(),
 					),
 					ListTile(
-						leading: const Icon(Icons.bluetooth),
-						title: const Text("Bluetooth sync"),
-						onTap: () {
-							// FEAT: bt sync
-						},
-					),
-					ListTile(
 						leading: const Icon(Icons.data_array),
 						title: const Text("Save CSV"),
 						onTap: () => saveCSV(context),
@@ -129,28 +123,27 @@ class _SettingsPageState extends State<SettingsPage> {
 							title: Text("Administration"),
 							dense: true,
 						),
-						// TODO: administration
-						/* ListTile(
-							title: const Text("Reset remote"),
-							onTap: () => context.read<LocalModel>().connection.sendReset(),
-						), */
+						ListTile(
+							title: const Text("Yield remote"),
+							onTap: () => context.read<ServerConnection?>()?.yieldRemote(),
+						),
 						ListTile(
 							title: const Text("Load model..."),
 							onTap: () => loadModel(context),
 						),
 					],
 					// TODO: this has to be different
-					if (peerModel != null)
+					if (model is PeerManagedModel)
 					...[
 						const ListTile(
 							title: Text("Peers"),
 							dense: true,
 						),
-						for (var p in peerModel.manager.peers)
+						for (var p in model.manager.peers)
 						ListTile(
 							title: Text(p.id ?? "?"),
 							onTap: () {
-								peerModel.manager.yieldTo(p);
+								model.manager.yieldTo(p);
 							},
 						)
 					]

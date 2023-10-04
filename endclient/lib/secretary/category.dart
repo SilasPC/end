@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 import '../equipage/equipage.dart';
 import '../equipage/equipage_tile.dart';
 import 'util.dart';

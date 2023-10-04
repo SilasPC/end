@@ -16,7 +16,7 @@ Future<void> main() async {
 
 	var man = PeerManager<Model>(
 		"root-server",
-		NullDatabase.new,
+		() => NullDatabase.new("root-server", 0),
 		Model.fromJson,
 		EnduranceEvent.fromJson,
 		Model.new,
@@ -26,32 +26,16 @@ Future<void> main() async {
 	io.on("connection", (client_) {
 		var client = client_ as Socket;
 		print("connect");
-		man.addPeer(SocketPeer(client));
+		var peer = SocketPeer(client);
+		man.addPeer(peer);
+
+		setBinAck(client, "yield", (_) async {
+			var ok = await man.yieldTo(peer);
+			return ok ? SyncProtocol.OK : SyncProtocol.NOT_OK;
+		});
+
 	});
 	io.listen(3000);
-}
-
-class Handle extends EventModelHandle<Model> {
-
-	@override
-	Model createModel() => Model();
-
-	@override
-	Model revive(JSON json) => Model.fromJson(json);
-
-	@override
-	EnduranceEvent reviveEvent(JSON json) => EnduranceEvent.fromJson(json);
-
-	@override
-	Future<void> didUpdate() async {
-		// TODO: database or mutex/redundancy for error-correction
-		await backupFile.writeAsString(
-			jsonEncode(iterj(model.events.iteratorInsertion)),
-			flush: true
-		);
-		print("saved");
-	}
-
 }
 
 class SocketPeer extends Peer {
@@ -114,4 +98,40 @@ class SocketPeer extends Peer {
 		return c.future;
 	}
 
+}
+
+void setJsonAck2<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<T?>? Function(T) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var json = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(reviver(IJSON.fromBin(json)));
+		if (res != null) {
+			ack(res.toJsonBin());
+		}
+	});
+}
+
+void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<String?>? Function(T) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var json = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(reviver(IJSON.fromBin(json)));
+		if (res != null) {
+			ack(res);
+		}
+	});
+}
+
+void setBinAck<T extends IJSON>(dynamic client, String msg, FutureOr<List<int>?>? Function(List<int>) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var bin = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(bin);
+		if (res != null) {
+			ack(res);
+		}
+	});
 }

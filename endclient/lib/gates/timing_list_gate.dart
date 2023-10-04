@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 import '../util/submit_button.dart';
 import '../util/timing_list.dart';
 import 'gate_controller.dart';

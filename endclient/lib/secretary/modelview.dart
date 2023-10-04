@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:provider/provider.dart';
 
-import '../LocalModel.dart';
+import '../local_model/LocalModel.dart';
 
 class ModelView extends StatefulWidget {
 	const ModelView({super.key});
