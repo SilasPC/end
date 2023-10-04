@@ -1,13 +1,9 @@
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
-
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
-import 'package:common/models/Model.dart';
 import 'package:mutex/mutex.dart';
-
 import '../util.dart';
 import 'db.dart';
 
@@ -15,6 +11,7 @@ class PreSyncMsg extends IJSON {
 
 	final String peerId;
 	final int sessionId;
+	// TODO: resetCount is somewhat flawed, if session is switched like ABA
 	final int resetCount;
 	PreSyncMsg(this.peerId, this.sessionId, this.resetCount);
 	
@@ -54,19 +51,59 @@ class SyncMsg<M extends IJSON> extends IJSON {
 enum PeerState {
 	PRESYNC,
 	SYNCERR,
-	SYNC
+	SYNC;
+
+	bool get isSync => this == PeerState.SYNC;
+
 }
 
+class ConnectNotifier with Stream<bool> {
+
+	bool _value = false;
+	StreamController<bool> _stream = StreamController.broadcast();
+
+	bool get value => _value;
+	set value (val) {
+		if (val != _value)
+			_stream.add(val);
+		_value = val;
+	}
+
+	void add(bool val) {
+		value = val;
+	}
+
+	@override
+	StreamSubscription<bool> listen(
+		void Function(bool event)? onData, {
+			Function? onError,
+			void Function()? onDone,
+			bool? cancelOnError
+		}
+	) {
+			scheduleMicrotask(() => onData?.call(_value));
+			return _stream.stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+	}
+
+}
+
+// TODO: composition over inheritance
 abstract class Peer {
+
+	int get desyncCount =>
+		_man._em.events.length + _man._em.deletes.length
+		- _lastLocal.evLen - _lastLocal.delLen;
 
 	bool _connected = false;
 	bool get connected => _connected;
-	final StreamController<bool> connectStatus = StreamController();
+	final ConnectNotifier connectStatus = ConnectNotifier();
 
+	String? get id => _lastKnownState?.peerId;
 	PreSyncMsg? _lastKnownState;
 	late final PeerManager _man;
 
 	PeerState _state = PeerState.PRESYNC;
+	PeerState get state => _state;
 
 	Mutex _mutex = Mutex();
 	SyncInfo _lastLocal = SyncInfo.zero();
@@ -81,6 +118,22 @@ abstract class Peer {
 
 }
 
+abstract class SyncProtocol {
+	
+	/// SyncMsg payload
+	static const String SYNC = "sync";
+	/// PreSyncMsg payload
+	static const String PRE_SYNC = "presync";
+	/// no payload
+	static const String ACK_SYNC = "syncack";
+
+	static Iterable<String> get events => [SYNC, PRE_SYNC, ACK_SYNC];
+
+}
+
+// TODO: deal with exceptions
+// TODO: should master be considered special?
+// TODO: make database a peer?
 class PeerManager<M extends IJSON> {
 
 	bool _autoConnect = false;
@@ -102,8 +155,10 @@ class PeerManager<M extends IJSON> {
 	int _resetCount = 0;
 
 	late final EventDatabase<M> _db;
+	SyncInfo _lastDbSave = SyncInfo.zero();
 	final Mutex _mutex = Mutex();
 	List<Peer> _peers = [];
+	List<Peer> get peers => _peers;
 	Peer? master = null;
 	late EventModel<M> _em;
 
@@ -135,9 +190,14 @@ class PeerManager<M extends IJSON> {
 	void _initDatabase(AsyncProducer<EventDatabase<M>> createDb) {
 		_mutex.protect(() async {
 			_db = await createDb();
-			/* var data = await _db.loadAll();
-			await _reset(keepDatabase: true);
-			_em.add(data.evs, data.dels); */
+			var data = await _db.loadData();
+			_em.add(data.a.evs, data.a.dels);
+			if (data.b != null) {
+				// _peerId = data.b!.peerId;
+				// _sessionId = data.b!.sessionId;
+				// _resetCount = data.c!.resetCount;
+			}
+			_lastDbSave = _em.syncState;
 		});
 	}
 
@@ -154,9 +214,9 @@ class PeerManager<M extends IJSON> {
 	
 	/// mutex order manager -> peer
 	Future<void> resetModel() async {
-		// print("reset $peerId");
+		print("reset $peerId");
 		await _mutex.protect(() async {
-			// TODO: await _db.clearEvents();
+			await _db.clear(keepPeers: true);
 			_em.reset();
 			_resetCount++;
 			for (var p in _peers) {
@@ -169,9 +229,11 @@ class PeerManager<M extends IJSON> {
 	}
 
 	Future<void> _save() async {
-		var data = _em.getNewerData(_db.lastSaved());
-		await _db.add(SyncMsg(data.events, data.deletes), _em.syncState);
-		// print("saved $peerId");
+		var data = _em.getNewerData(_lastDbSave);
+		var curState = _em.syncState;
+		await _db.add(SyncMsg(data.events, data.deletes));
+		_lastDbSave = curState;
+		print("saved $peerId");
 	}
 
 	void _broadcastSync() {
@@ -179,21 +241,21 @@ class PeerManager<M extends IJSON> {
 	}
 
 	void _syncTo(Peer p) {
-		// print("syncto ${p._lastKnownState?.peerId} ${p._state.name}");
+		print("syncto ${p._lastKnownState?.peerId} ${p._state.name}");
 		p._mutex.protect(() async {
 			if (p._state != PeerState.SYNC) {
-				// print("cannot sync to ${p._lastKnownState?.peerId} ${p._state.name}");
+				print("cannot sync to ${p._lastKnownState?.peerId} ${p._state.name}");
 				return;
 			}
 			var ss = _em.syncState;
 			if (p._lastLocal == ss) {
-				// print("nothing to sync with ${p._lastKnownState?.peerId}");
+				print("nothing to sync with ${p._lastKnownState?.peerId}");
 				return;
 			}
 			var data = _em.getNewerData(p._lastLocal);
-			// print("send ${data.events} to ${p._lastKnownState?.peerId}");
+			print("send ${data.events} to ${p._lastKnownState?.peerId}");
 			var res = await p.send(
-				"sync",
+				SyncProtocol.SYNC,
 				SyncMsg(data.events, data.deletes).toJsonBin()
 			);
 			if (res == null) {
@@ -223,7 +285,6 @@ class PeerManager<M extends IJSON> {
 		p._man = this;
 		await _mutex.protect(() async {
 			// TODO: consult database for last known state
-			
 		});
 		_peers.add(p);
 		_bindConnectHandler(p);
@@ -233,16 +294,16 @@ class PeerManager<M extends IJSON> {
 	}
 
 	void _bindConnectHandler(Peer p) {
-		p.connectStatus.stream.listen((connected) {
+		p.connectStatus.listen((connected) {
 			if (p._connected == connected) {
 				return;
 			}
-			// print("con $peerId -> ${p._lastKnownState?.peerId} = $connected");
+			print("con $peerId -> ${p._lastKnownState?.peerId} = $connected");
 			p._connected = connected;
 			if (connected && p.isOutgoing()) {
 				p._mutex.protect(() => _preSync(p));
 			} else if (!connected) {
-				// print("set presync ${p._lastKnownState?.peerId}");
+				print("set presync ${p._lastKnownState?.peerId}");
 				p._state = PeerState.PRESYNC;
 			}
 		});
@@ -250,17 +311,20 @@ class PeerManager<M extends IJSON> {
 
 	/// must have peer lock
 	Future<void> _preSync(Peer p) async {
-		// print("presync to ${p._lastKnownState?.peerId}");
+		print("presync to ${p._lastKnownState?.peerId}");
 		p._state = PeerState.PRESYNC;
-		var res = await p.send("presync", _curPreSyncMsg().toJsonBin());
+		var res = await p.send(SyncProtocol.PRE_SYNC, _curPreSyncMsg().toJsonBin());
 		if (res == null) {
-			// print("null presync ack");
+			print("null presync ack");
 			// TODO: ??
 			return;
 		}
-		p.send("syncack", []);
-		_handlePreSync(p, PreSyncMsg.fromBin(res));
-		_syncTo(p);
+		await _handlePreSync(p, PreSyncMsg.fromBin(res));
+		if (p._state.isSync) {
+			// TODO: await this: ?
+			p.send(SyncProtocol.ACK_SYNC, []);
+			_syncTo(p);
+		}
 	}
 
 	PreSyncMsg _curPreSyncMsg() =>
@@ -271,22 +335,26 @@ class PeerManager<M extends IJSON> {
 		);
 
 	/// must have peer lock
-	void _handlePreSync(Peer p, PreSyncMsg ps) {
+	Future<void> _handlePreSync(Peer p, PreSyncMsg ps) async {
+		if (p._lastKnownState == null) {
+			var state = await _db.loadPeer(ps.peerId);
+			// TODO: refactor peer to do this
+		}
 		var last = p._lastKnownState ?? ps;
 		p._lastKnownState = ps;
-		// print("handle pre sync from ${ps.peerId}");
+		print("handle pre sync from ${ps.peerId}");
 		if (ps.sessionId != sessionId) {
-			// print("set syncerr ${ps.peerId}");
+			print("set syncerr ${ps.peerId}");
 			p._state = PeerState.SYNCERR;
-			// print("conflict ${ps.sessionId} != ${sessionId}");
+			print("conflict ${ps.sessionId} != ${sessionId}");
 			// TODO: conflict
 			return;
 		}
-		if (last.resetCount != ps.resetCount) {
-			// print("discovered reset by ${ps.peerId}");
+		if (last.resetCount != ps.resetCount || last.sessionId != ps.sessionId) {
+			print("discovered reset by ${ps.peerId}");
 			p._lastLocal = SyncInfo.zero();
 		}
-		// print("set sync ${ps.peerId}");
+		print("set sync ${ps.peerId}");
 		p._state = PeerState.SYNC;
 		p._lastKnownState = ps;
 	}
@@ -294,19 +362,20 @@ class PeerManager<M extends IJSON> {
 	/// must have peer lock (when sending)
 	Future<List<int>?> _onRecieve(Peer p, String msg, List<int> data) async {
 		switch (msg) {
-			case "syncack":
+			case SyncProtocol.ACK_SYNC:
+				print("syncack from ${p._lastKnownState?.peerId}");
 				_syncTo(p);
 				return [];
-			case "presync":
+			case SyncProtocol.PRE_SYNC:
 				_handlePreSync(p, PreSyncMsg.fromBin(data));
 				return _curPreSyncMsg().toJsonBin();
-			case "sync":
+			case SyncProtocol.SYNC:
 				if (p._state != PeerState.SYNC) {
-					// print("rcv: not in sync yet");
+					print("rcv: not in sync yet");
 					return null;
 				}
 				if (p._lastKnownState?.sessionId != _sessionId) {
-					// print("sync incorrect session");
+					print("sync incorrect session");
 					// TODO: handle conflict, change state?
 					return null;
 				}
@@ -320,7 +389,7 @@ class PeerManager<M extends IJSON> {
 				}
 				return []; // TODO: ack ok?
 			default:
-				// print("$msg ?");
+				print("$msg ?");
 				return null;
 		}
 	}
@@ -329,7 +398,7 @@ class PeerManager<M extends IJSON> {
 	Future<bool> yieldTo(Peer p) =>
 		_mutex.protect(() =>
 			p._mutex.protect(() async {
-				// print("yield to ${p._lastKnownState?.peerId} ${p._state.name} ${p._lastKnownState?.sessionId}");
+				print("yield to ${p._lastKnownState?.peerId} ${p._state.name} ${p._lastKnownState?.sessionId}");
 				if (p._state != PeerState.SYNCERR) {
 					return false;
 				}
@@ -345,10 +414,10 @@ class PeerManager<M extends IJSON> {
 		);
 
 	/// must have manager lock
-	Future<void> _reset({bool keepDatabase = false, bool disconnect = true}) async {
-		// print("reset");
+	Future<void> _reset({bool keepDatabase = false, bool disconnect = true, bool keepPeerData = true}) async {
+		print("reset");
 		if (!keepDatabase) {
-			await _db.clear();
+			await _db.clear(keepPeers: keepPeerData);
 		}
 		_em.reset();
 		_sessionId = Random().nextInt(1 << 30);
@@ -388,8 +457,6 @@ class LocalPeer extends Peer {
 
 	late final LocalPeer _other;
 	final bool _outgoing;
-
-	SyncInfo _lastRemote = SyncInfo.zero();
 
 	LocalPeer._(this._outgoing) {}
 	static Tuple<LocalPeer, LocalPeer> pair() {

@@ -104,8 +104,6 @@ class CategoryViewState extends State<CategoryView> {
 							}
 						);
 						break;
-					default:
-						unimpl(value);
 				}
 			},
 			itemBuilder: (context) => [

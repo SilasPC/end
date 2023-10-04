@@ -29,8 +29,9 @@ class SocketPeer extends Peer {
 		});
 
 		// TODO: on any?
-		_socket.on("presync", (data) => _handler("presync", data as List));
-		_socket.on("sync", (data) => _handler("sync", data as List));
+		for (var ev in SyncProtocol.events) {
+			_socket.on(ev, (data) => _handler(ev, data as List));
+		}
 		
 	}
 
@@ -67,7 +68,7 @@ class SocketPeer extends Peer {
 			binary: true,
 			ack: (msg) {
 				if (!c.isCompleted) {
-					c.complete(msg as List<int>);
+					c.complete((msg as List).cast<int>());
 				}
 			}
 		);

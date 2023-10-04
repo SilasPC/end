@@ -32,6 +32,11 @@ void main() {
 		await s.addPeer(pair.b);
 		await pumpEventQueue();
 
+		expect(c.sessionId, s.sessionId);
+		expect(c.sessionId, 1);
+		expect(pair.a.state.isSync, true);
+		expect(pair.b.state.isSync, true);
+
 		expect(s.model.result, "1");
 		expect(c.model.result, "1");
 

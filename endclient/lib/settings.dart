@@ -38,6 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
 			isInit = true;
 		}
 		var model = context.read<LocalModel>();
+		var peerModel = model is PeerManagedModel ? model : null;
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Settings"),
@@ -100,11 +101,11 @@ class _SettingsPageState extends State<SettingsPage> {
 							set..setDefaults()..save();
 						}),
 					),
-					ListTile(
+					/* ListTile(
 						leading: const Icon(Icons.sync),
 						title: const Text("Manual sync"),
 						onTap: () => model.manualSync(),
-					),
+					), */
 					ListTile(
 						leading: const Icon(Icons.sync),
 						title: const Text("Resync"),
@@ -128,15 +129,32 @@ class _SettingsPageState extends State<SettingsPage> {
 							title: Text("Administration"),
 							dense: true,
 						),
-						ListTile(
+						// TODO: administration
+						/* ListTile(
 							title: const Text("Reset remote"),
 							onTap: () => context.read<LocalModel>().connection.sendReset(),
-						),
+						), */
 						ListTile(
 							title: const Text("Load model..."),
 							onTap: () => loadModel(context),
 						),
 					],
+					// TODO: this has to be different
+					if (peerModel != null)
+					...[
+						const ListTile(
+							title: Text("Peers"),
+							dense: true,
+						),
+						for (var p in peerModel.manager.peers)
+						ListTile(
+							title: Text(p.id ?? "?"),
+							onTap: () {
+								peerModel.manager.yieldTo(p);
+							},
+						)
+					]
+
 				],
 			),
 		);
@@ -150,7 +168,8 @@ class _SettingsPageState extends State<SettingsPage> {
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
-				await m.reset();
+				// TODO: load from equipe with p2p
+				// await m.reset();
 				if (name == "DEMO") {
 					await m.addSync(demoInitEvent(nowUNIX()+300));
 				} else {

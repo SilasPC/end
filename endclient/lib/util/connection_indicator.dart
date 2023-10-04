@@ -24,9 +24,9 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 		var desync = context.select<LocalModel, int>((lm) => lm.desyncCount);
 		// UI: add desync chip on icon
 		return AnimatedBuilder(
-			animation: model.connection.status,
+			animation: model.connection,
 			builder: (context, _) {
-				bool status = model.connection.status.value;
+				bool status = model.connection.value;
 				var now = DateTime.now();
 				if (status) _lastConn = now;
 				return status

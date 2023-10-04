@@ -1,12 +1,7 @@
 
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:esys_client/nearby.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
 import 'package:nearby_connections/nearby_connections.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock/wakelock.dart';
 
 class BluetoothPage extends StatefulWidget {

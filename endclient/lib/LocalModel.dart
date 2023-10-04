@@ -1,17 +1,19 @@
 
+import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
+import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/db.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/MasterPeer.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mutex/mutex.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:sqflite/sqflite.dart';
 
 class ModelProvider extends StatelessWidget {
@@ -23,264 +25,149 @@ class ModelProvider extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		ChangeNotifierProxyProvider<Settings, LocalModel>(
 			lazy: false,
-			create: (_) => LocalModel(),
+			create: (_) => PeerManagedModel(),
+			// TODO: update socket address
 			update: (_, set, mod) {
-				mod!.connection.socketAddress = set.serverURI;
-				return mod;
+				// mod!.socket.socketAddress = set.serverURI;
+				return mod!;
 			},
 			child: child,
 		);
 }
 
-class LocalModel with ChangeNotifier {
+abstract class LocalModel with ChangeNotifier {
 
-	final Mutex _mutex = Mutex();
-	late SyncedEventModel<Model> _model;
-	late final SocketServer connection = SocketServer();
-	late final EventDatabase _db;
+	ValueNotifier<bool> get connection;
 
-	Model get model => _model.model;
-	Set<Event<Model>> get deletes => _model.deletes;
-	ReadOnlyOrderedSet<Event<Model>> get events => _model.events;
+	Model get model;
+	Set<Event<Model>> get deletes;
+	ReadOnlyOrderedSet<Event<Model>> get events;
 
-	int get desyncCount =>
-		events.length + deletes.length
-		- _model.lastSyncLocal.evLen - _model.lastSyncLocal.delLen;
-	
-	LocalModel() {	
-		_initModel();
-		_mutex.protect(() async {
-			_db = await EventDatabase.create();
-			var data = await _db.loadAll();
-			_model.reset();
-			_model.lastSyncLocal = _model.lastSyncRemote = data.syncInfo;
-			_model.add(data.events, data.deletes);
-		});
-	}
+	int get desyncCount;
 
-	void _initModel() {
-		var h = Handle(notifyListeners);
-		_model = SyncedEventModel(h, connection.sendSync);
-      connection.onConnect = () => _mutex.protect(() async {
-         try {
-			   await _model.sync();
-         } catch (_) {}
-		});
-      connection.onPush = (push) => _mutex.protect(() async {
-			_model.add(push.events, push.deletes);
-			await _save();
-		});
-		connection.onReset = () => _mutex.protect(() async {
-			_model.reset();
-			await _save();
-		});
-	}
-
-	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []]) async {
-		_mutex.protect(() async {
-			if (connection.status.value) {
-            try {
-				   await _model.addSync(evs, dels);
-            } catch (_) {}
-			} else {
-				_model.add(evs, dels);
-			}
-			await _save();
-		});
-	}
-
-	Future<void> manualSync() async {
-		_mutex.protect(() async {
-         try {
-			   await _model.sync();
-         } catch (_) {}
-			await _save();
-		});
-	}
-
-	Future<void> resetSync() async {
-		_mutex.protect(() async {
-			_db.clear();
-			_model.reset();
-         try {
-            if (connection.status.value) {
-               await _model.sync();
-            }
-         } catch (_) {}
-			await _save();
-		});
-	}
-
-	Future<void> reset() async {
-		_mutex.protect(() async {
-			await _db.clear();
-			_model.reset();
-		});
-	}
-
-	Future<void> _save() async {
-		await _db.add(_model.getNewerData(_db._lastSaved));
-	}
+	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []]);
+	Future<void> resetSync();
 
 }
 
-class Handle extends EventModelHandle<Model> {
+class PeerManagedModel with ChangeNotifier implements LocalModel {
 
-	final void Function() onUpdate;
+	late PeerManager<Model> manager;
+	final ValueNotifier<bool> _connection = ValueNotifier(false);
+	Peer? _master;
+	StreamSubscription? _masterConnectSub;
 
-	Handle(this.onUpdate);
-
-	@override
-	Model createModel() => Model();
-	@override
-	Model revive(JSON json) => Model.fromJson(json);
-	@override
-	EnduranceEvent reviveEvent(JSON json) => EnduranceEvent.fromJson(json);
-	@override
-	void didUpdate() => onUpdate();
-	@override
-	void didReset() => onUpdate();
-}
-
-
-class SocketServer {
-
-	final ValueNotifier<bool> status = ValueNotifier(false);
-
-	String? _socketAddress;
-
-	String? get socketAddress => _socketAddress;
-	set socketAddress(String? value) {
-		if (value == _socketAddress || value == null) return;
-		_socketAddress = value;
-		_initSocket();
-	}
-
-	io.Socket? _socket;
-
-	VoidCallback? onConnect, onDisconnect, onReset;
-	void Function(SyncPush<Model> push)? onPush;
-
-	Future<SyncResult<Model>> sendSync(SyncRequest<Model> req) {
-		if (_socket!.disconnected) {
-			throw StateError("attempt to sync with unconnected server");
-		}
-		Completer<SyncResult<Model>> c = Completer();
-
-		_socket!.emitWithAck("sync", req.toJsonBin(), binary: true, ack: (json) {
-			if (!c.isCompleted) {
-				c.complete(SyncResult.fromJSON(jsonDecode(utf8.decode(json))));
-			}
-		});
-		Timer(const Duration(seconds: 5), () {
-			if (!c.isCompleted) {
-				c.completeError(TimeoutException("server sync timed out"));
-			}
-		});
-		return c.future;
-	}
-
-	void sendReset() {
-		if (!_socket!.connected) return;
-		_socket!.emit("reset");
-	}
-
-	SocketServer({this.onConnect, this.onDisconnect, this.onPush});
-
-	int _initCount = 0;
-	void _initSocket() {
-
-		var initCount = ++_initCount;
-
-		_socket?.disconnect();
-		status.value = false;
-		onDisconnect?.call();
-		// FIXME: io.io will not reconnect to a previously connected socket ???
-		io.Socket socket = _socket = io.io(
-			_socketAddress!,
-			io.OptionBuilder()
-				.setTransports(["websocket"])
-				.build()
+	PeerManagedModel() {
+		manager = PeerManager(
+			Platform.localHostname,
+			SqfliteDatabase.create,
+			Model.fromJson,
+			EnduranceEvent.fromJson,
+			Model.new,
 		);
-
-		socket.onConnect((_) {
-			if (initCount != _initCount) return;
-			print("connect $initCount");
-			status.value = true;
-			onConnect?.call();
-		});
-		socket.onDisconnect((_) {
-			if (initCount != _initCount) return;
-			print("disconnect $initCount");
-			status.value = false;
-			onDisconnect?.call();
-		});
-
-      // FEAT: sync should just be symmetric (p2p)
-		socket.on("push", (json) {
-			var push = SyncPush<Model>.fromJson(json);
-			onPush?.call(push);
-		});
-
-		socket.on("reset", (_) {
-			onReset?.call();
-		});
-		
+		_initMaster();
 	}
+
+	void _initMaster() {
+		_master = SocketPeer(
+			"http://localhost:3000" // TODO: what to do ?
+		);
+		_masterConnectSub?.cancel();
+		_masterConnectSub = _master!.connectStatus
+			.listen((value) => _connection.value = value);
+		manager.setMaster(_master!);
+	}
+
+	@override
+	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []])
+		=> manager.add(evs, dels);
+
+	@override
+	ValueNotifier<bool> get connection => _connection;
+
+	@override
+	Set<Event<Model>> get deletes => manager.deletes;
+
+	@override
+	int get desyncCount => _master?.desyncCount ?? 0;
+
+	@override
+	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
+
+	@override
+	Model get model => manager.model;
+
+	@override
+	Future<void> resetSync() => manager.resetModel();
+
 }
 
-class EventDatabase {
+class SqfliteDatabase extends EventDatabase<Model> {
 
 	final Database _db;
 	SyncInfo _lastSaved = SyncInfo.zero();
+
+	SyncInfo get lastSaved => _lastSaved;
 	
-	EventDatabase._(this._db);
-	static Future<EventDatabase> create() async {
+	SqfliteDatabase._(this._db);
+	static Future<SqfliteDatabase> create() async {
 		var db = await _createDB();
-		return EventDatabase._(db);
+		return SqfliteDatabase._(db);
 	}
 
-	Future<void> add(SyncResult<Model> sr) async {
+	@override
+	Future<void> add(SyncMsg<Model> sr) async {
 		var b = _db.batch();
-		for (var ev in sr.events) {
+		for (var ev in sr.evs) {
 			b.insert("events", {
 				"time": ev.time,
 				"json": ev.toJsonString()
 			});
 		}
-		for (var ev in sr.deletes) {
+		for (var ev in sr.dels) {
 			b.insert("deletes", {
 				"time": ev.time,
 				"json": ev.toJsonString()
 			});
 		}
-		b.update("syncinfo", sr.syncInfo.toJson());
 		await b.commit(noResult: true);
 	}
 
-	Future<void> clear() async {
-		_db.batch()
+	@override
+	Future<void> loadPeer(String peerId) async {
+		var peer = await _db.query("peers", where: "peerId = ?", whereArgs: [peerId]);
+		//if (peer.isEmpty) return null;
+		// TODO: change interface
+		// return null;
+	}
+
+	@override
+	Future<void> clear({required bool keepPeers}) async {
+		var b = _db.batch()
 			..delete("events")
-			..delete("deletes")
-			..update("syncinfo", SyncInfo.zero().toJson())
-			..commit(noResult: true);
+			..delete("deletes");
+		if (!keepPeers) {
+			b.delete("peers");
+		}
+		await b.commit(noResult: true);
 		_lastSaved = SyncInfo.zero();
 	}
 
-	Future<SyncResult<Model>> loadAll() async {
-		var b = _db.batch();
-		b.query("events", columns: ["json"]);
-		b.query("deletes", columns: ["json"]);
-		b.query("syncinfo");
-		var data = await b.commit();
+	@override
+	Future<Tuple<SyncMsg<Model>, PreSyncMsg?>> loadData() async {
+		var data = await (
+			_db.batch()
+				..query("events", columns: ["json"])
+				..query("deletes", columns: ["json"])
+		).commit();
 		var evs = (data[0]! as List)
-			.map((d) => eventFromJSON(jsonDecode(d["json"] as String)))
+			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
 		var dels = (data[1]! as List)
-			.map((d) => eventFromJSON(jsonDecode(d["json"] as String)))
-			.toList(); 
-		var si = SyncInfo.fromJson((data[2]! as List).first as JSON);
-		return SyncResult(evs, dels, si);
+			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
+			.toList();
+		// TODO: presyncmsg
+		return Tuple(SyncMsg(evs, dels), null);
 	}
 
 	static Future<Database> _createDB() async {
@@ -292,11 +179,17 @@ class EventDatabase {
 				await (db.batch()
 					..execute("CREATE TABLE IF NOT EXISTS deletes (time INT NOT NULL, json STRING NOT NULL)")
 					..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
-					..execute("CREATE TABLE IF NOT EXISTS syncinfo (evLen INT NOT NULL, delLen INT NOT NULL)")
-					..insert("syncinfo", SyncInfo.zero().toJson()))
+					..execute("""
+						CREATE TABLE IF NOT EXISTS peers (
+							peerId STRING NOT NULL PRIMARY KEY,
+							sessionId INT NOT NULL,
+							resetCount INT NOT NULL,
+							lastSync STRING NOT NULL
+						)
+					"""))
 					.commit(noResult: true);
 			},
-			version: 6
+			version: 7
 		);
 		return db;
 	}

@@ -5,61 +5,30 @@ import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
+import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/db.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 
-late EventModel<Model> em;
-late Server io;
 File backupFile = File("../backup.events.json");
-
-Future<List<Event<Model>>> readCachedEvents() async {
-	if (!await backupFile.exists()) {
-		return [];
-	}
-	var json = jsonDecode(await backupFile.readAsString());
-	return jlist_map(json, eventFromJSON);
-}
 
 Future<void> main() async {
 
-	List<Event<Model>> evs = await readCachedEvents();
+	var man = PeerManager<Model>(
+		"root-server",
+		NullDatabase.new,
+		Model.fromJson,
+		EnduranceEvent.fromJson,
+		Model.new,
+	);
 
-	var handle = Handle();
-	em = EventModel(handle);
-	em.add(evs);
-
-	io = Server();
-	io.on("connection", (client) {
+	Server io = Server();
+	io.on("connection", (client_) {
+		var client = client_ as Socket;
 		print("connect");
-		setJsonAck(client, "sync", (json) {
-			print("sync");
-			var sr = SyncRequest<Model>.fromJSON(json);
-			var res = sr.applyTo(em);
-			client.broadcast.emit('push', SyncPush(sr.events, sr.deletes).toJson());
-			return res;
-		});
-		client.on("reset", (_) {
-			print("reset");
-			em.reset();
-			client.broadcast.emit("reset");
-		});
-		client.on("disconnect", (_) {
-			print("disconnect");
-		});
+		man.addPeer(SocketPeer(client));
 	});
 	io.listen(3000);
-}
-
-void setJsonAck<T extends IJSON>(dynamic client, String msg, FutureOr<T?>? Function(JSON data) handler) {
-	client.on(msg, (data) async {
-		List dataList = data as List;
-		var json = dataList.first;
-		var ack = dataList.last;
-		var res = await handler(IJSON.fromBin(json));
-		if (res != null) {
-			ack(res.toJsonBin());
-		}
-	});
 }
 
 class Handle extends EventModelHandle<Model> {
@@ -85,7 +54,64 @@ class Handle extends EventModelHandle<Model> {
 
 }
 
-Future<List<EnduranceEvent>> loadEventsFromFile(String fileName) async {
-	var json = jsonDecode(await File("../$fileName.events.json").readAsString());
-	return jlist_map(json, eventFromJSON);
+class SocketPeer extends Peer {
+
+	final Socket socket;
+
+	SocketPeer(this.socket) {
+		socket.on("connect", (_) {
+			connectStatus.add(true);
+		});
+		socket.on("disconnect", (_) {
+			connectStatus.add(false);
+		});
+		for (var ev in SyncProtocol.events) {
+			socket.on(ev, (data) => _handler(ev, data));
+		}
+	}
+
+	void _handler(String msg, List data) async {
+		var bin = (data.first as List).cast<int>();
+		var ack = data.last;
+		var res = await onRecieve(msg, bin);
+		if (res != null) {
+			ack(res);
+		}
+	}
+	
+	@override
+	bool isOutgoing() => false;
+
+	@override
+	void connect() {}
+
+	@override
+	void disconnect() => socket.disconnect();
+
+	@override
+	Future<List<int>?> send(String msg, List<int> data) async {
+		if (socket.disconnected) {
+			return null;
+		}
+
+		Completer<List<int>?> c = Completer();
+
+		socket.emitWithAck(
+			msg,
+			data,
+			binary: true,
+			ack: (msg) {
+				if (!c.isCompleted) {
+					c.complete((msg as List).cast<int>());
+				}
+			}
+		);
+		Timer(const Duration(seconds: 5), () {
+			if (!c.isCompleted) {
+				c.complete(null);
+			}
+		});
+		return c.future;
+	}
+
 }
