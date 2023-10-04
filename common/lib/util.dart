@@ -5,11 +5,16 @@ import 'dart:convert';
 typedef JSON = Map<String, dynamic>;
 typedef Reviver<T> = T Function(JSON);
 typedef Predicate<T> = bool Function(T);
+typedef Producer<T> = T Function();
+typedef AsyncProducer<T> = Producer<FutureOr<T>>;
+typedef VoidCallback = void Function();
 
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
    List<int> toJsonBin() => utf8.encode(toJsonString());
+	static JSON fromBin(List<int> bin) =>
+		jsonDecode(utf8.decode(bin));
 }
 
 T unimpl<T>([msg]) => throw UnimplementedError(msg);

@@ -91,7 +91,6 @@ class LocalModel with ChangeNotifier {
 
 	Future<void> manualSync() async {
 		_mutex.protect(() async {
-			connection._socket!.emit("test");
          try {
 			   await _model.sync();
          } catch (_) {}

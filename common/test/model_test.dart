@@ -88,12 +88,12 @@ void main() {
 		var m = ServerModel();
 		m.add([
 			for (int i = 0; i < 5; i++)
-			StrEv(i.toString(), i),
+			dig(i),
 		]);
 		m.createSavepoint();
 		m.add([
 			for (int i = 5; i < 10; i++)
-			StrEv(i.toString(), i),
+			dig(i),
 		]);
 		expect(m.savepoints.length, 2);
 		expect(m.model.result, "0123456789");
