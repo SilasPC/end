@@ -1,10 +1,10 @@
 name: endserver
-description: A sample command-line application.
+description: eSys server.
 version: 1.0.0
 publish_to: none
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: '^3.0.0'
 
 dependencies:
   shelf: ^1.2.0
@@ -13,6 +13,7 @@ dependencies:
   common:
     path: ../common
   socket_io: ^1.0.1
+  sqflite_common_ffi: ^2.3.0+2
 
 dev_dependencies:
   lints: ^2.0.0

@@ -46,10 +46,12 @@ class _SettingsPageState extends State<SettingsPage> {
 			_servAddr.text = set.serverURI;
 			_author.text = set.author;
 			isInit = true;
-			var pmm = context.read<PeerManagedModel?>();
+			var pmm = try_cast<PeerManagedModel>(context.read<LocalModel>());
 			_sub = pmm?.manager.peerStateChanges.listen((_) => setState((){}));
 		}
 		var model = context.read<LocalModel>();
+		var pmm = try_cast<PeerManagedModel>(model);
+		var conn = context.watch<ServerConnection>();
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Settings"),
@@ -95,6 +97,26 @@ class _SettingsPageState extends State<SettingsPage> {
 						),
 					),
 					ListTile(
+						leading: const Icon(Icons.cloud_download),
+						title: const Text("Auto yield"),
+						trailing: Switch(
+							value: set.autoYield,
+							onChanged: (val) => setState((){
+								set..autoYield = val..save();
+							}),
+						),
+					),
+					ListTile(
+						leading: const Icon(Icons.groups),
+						title: const Text("Use P2P"),
+						trailing: Switch(
+							value: set.useP2P,
+							onChanged: (val) => setState((){
+								set..useP2P = val..save();
+							}),
+						),
+					),
+					ListTile(
 						leading: const Icon(Icons.admin_panel_settings),
 						title: const Text("Enable advanced mode"),
 						trailing: Switch(
@@ -134,8 +156,16 @@ class _SettingsPageState extends State<SettingsPage> {
 							dense: true,
 						),
 						ListTile(
+							leading: const Icon(Icons.cancel),
+							title: const Text("New session"),
+							subtitle: pmm != null ? Text("Current: ${pmm.manager.sessionId}") : null,
+							onTap: () => pmm?.manager.resetSession(),
+						),
+						ListTile(
+							leading: const Icon(Icons.cloud_upload),
 							title: const Text("Yield remote"),
-							onTap: () => context.read<ServerConnection?>()?.yieldRemote(),
+							subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
+							onTap: () => conn.yieldRemote(),
 						),
 						ListTile(
 							title: const Text("Load model..."),

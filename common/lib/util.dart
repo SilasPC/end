@@ -17,6 +17,8 @@ abstract class IJSON {
 		jsonDecode(String.fromCharCodes(bin));
 }
 
+T? try_cast<T>(dynamic from) => from is T ? from : null;
+
 T unimpl<T>([msg]) => throw UnimplementedError(msg);
 
 P? maybe<T,P>(T? t, P? Function(T) f) =>

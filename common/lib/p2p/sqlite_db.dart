@@ -8,19 +8,19 @@ import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/util.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-class SqfliteDatabase extends EventDatabase<Model> {
+class SqliteDatabase extends EventDatabase<Model> {
 
 	final Database _db;
 	SyncInfo _lastSaved = SyncInfo.zero();
 
 	SyncInfo get lastSaved => _lastSaved;
 	
-	SqfliteDatabase._(this._db);
-	static Future<SqfliteDatabase> create() async {
+	SqliteDatabase._(this._db);
+	static Future<SqliteDatabase> create() async {
 		var db = await _createDB();
-		return SqfliteDatabase._(db);
+		return SqliteDatabase._(db);
 	}
 
 	@override
@@ -47,7 +47,7 @@ class SqfliteDatabase extends EventDatabase<Model> {
 		if (peer.isEmpty) return null;
 		var psm = PreSyncMsg.fromJson(peer.first);
 		var si = SyncInfo.fromJson(peer.first);
-
+		return Tuple(psm, si);
 	}
 
 	@override
@@ -63,11 +63,12 @@ class SqfliteDatabase extends EventDatabase<Model> {
 	}
 
 	@override
-	Future<Tuple<SyncMsg<Model>, PreSyncMsg?>> loadData() async {
+	Future<Tuple<SyncMsg<Model>, PreSyncMsg?>> loadData(String peerId) async {
 		var data = await (
 			_db.batch()
 				..query("events", columns: ["json"])
 				..query("deletes", columns: ["json"])
+				..query("peers", where: "peerId = ?", whereArgs: [peerId])
 		).commit();
 		var evs = (data[0]! as List)
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
@@ -75,8 +76,10 @@ class SqfliteDatabase extends EventDatabase<Model> {
 		var dels = (data[1]! as List)
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
-		// TODO: presyncmsg
-		return Tuple(SyncMsg(evs, dels), null);
+		var self = (data[2]! as List)
+			.map((d) => PreSyncMsg.fromJson(d..["protocolVersion"] = SyncProtocol.VERSION)) // TODO: hack
+			.firstOrNull;
+		return Tuple(SyncMsg(evs, dels), self);
 	}
 
 	static Future<Database> _createDB() async {
@@ -110,6 +113,7 @@ class SqfliteDatabase extends EventDatabase<Model> {
 	@override
 	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) {
 		var row = state.toJson()..addEntries(syncInfo.toJson().entries);
+		row.remove("protocolVersion");
 		return _db.update(
 			"peers",
 			row,

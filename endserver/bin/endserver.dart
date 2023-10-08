@@ -4,18 +4,21 @@ import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
-import 'package:common/p2p/db.dart';
+import 'package:common/p2p/sqlite_db.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 File backupFile = File("../backup.events.json");
 
 Future<void> main() async {
 
+	sqfliteFfiInit();
+	databaseFactory = databaseFactoryFfi;
+
 	var man = PeerManager<Model>(
 		"root-server",
-		// TODO: sqflite persistence
-		() => NullDatabase.new("root-server", 0),
+		SqliteDatabase.create,
 		Model.fromJson,
 		EnduranceEvent.fromJson,
 		Model.new,
@@ -43,9 +46,11 @@ class SocketPeer extends Peer {
 
 	SocketPeer(this.socket) {
 		socket.on("connect", (_) {
+			print("connect $id");
 			connectStatus.add(true);
 		});
 		socket.on("disconnect", (_) {
+			print("disconnect $id");
 			connectStatus.add(false);
 		});
 		for (var ev in SyncProtocol.events) {
@@ -126,8 +131,8 @@ void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver,
 void setBinAck<T extends IJSON>(dynamic client, String msg, FutureOr<List<int>?>? Function(List<int>) handler) {
 	client.on(msg, (data) async {
 		List dataList = data as List;
-		var bin = dataList.first;
-		var ack = dataList.last;
+		var bin = (dataList.first as List).cast<int>();
+		var ack = (dataList.last) as void Function(dynamic);
 		var res = await handler(bin);
 		if (res != null) {
 			ack(res);

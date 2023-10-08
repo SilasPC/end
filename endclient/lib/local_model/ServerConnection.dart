@@ -1,4 +1,5 @@
 
+import 'package:common/util.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/local_model/PeerManagedModel.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class ServerConnectionProvider extends StatelessWidget {
 class ServerConnection with ChangeNotifier {
 
 	bool get connected => pmm?.master?.connected ?? false;
+	int? get sessionId => pmm?.master?.sessionId;
 
 	final PeerManagedModel? pmm;
 	ServerConnection(this.pmm);

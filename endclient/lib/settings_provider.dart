@@ -36,9 +36,9 @@ class SettingsProviderState extends State<SettingsProvider> {
 		var val = prefs.getString("settings");
 		if (val == null) return;
 		try {
-			print("loading settings $val");
 			set(Settings.fromJsonString(val, this));
 		} catch (_) {
+			print("loading settings failed");
 			_save();
 		}
 	}
@@ -125,6 +125,7 @@ class Settings extends IJSON {
 		'darkTheme': darkTheme,
 		'showAdmin': showAdmin,
 		'sendNotifs': sendNotifs,
+		'autoYield': autoYield,
 		'useP2P': useP2P,
 	};
 
@@ -137,7 +138,7 @@ class Settings extends IJSON {
 			json['showAdmin'] as bool,
 			json['sendNotifs'] as bool,
 			json['autoYield'] as bool,
-			json['useYield'] as bool,
+			json['useP2P'] as bool,
 		);
 
 	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>

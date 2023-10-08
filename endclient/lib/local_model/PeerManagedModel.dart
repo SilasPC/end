@@ -9,9 +9,9 @@ import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/sqlite_db.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/p2p/ServerPeer.dart';
-import 'package:esys_client/p2p/database.dart';
 import 'package:flutter/foundation.dart';
 
 class PeerManagedModel with ChangeNotifier implements LocalModel {
@@ -35,7 +35,7 @@ class PeerManagedModel with ChangeNotifier implements LocalModel {
 	PeerManagedModel() {
 		manager = PeerManager(
 			Platform.localHostname,
-			SqfliteDatabase.create,
+			SqliteDatabase.create,
 			Model.fromJson,
 			EnduranceEvent.fromJson,
 			Model.new,
