@@ -36,7 +36,7 @@ class ServerPeer extends Peer {
 	}
 
 	void _handler(String msg, List data) async {
-		var bin = data.first as List<int>;
+		var bin = (data.first as List).cast<int>();
 		var ack = data.last;
 		var res = await onRecieve(msg, bin);
 		if (res != null) {

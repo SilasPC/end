@@ -1,7 +1,6 @@
 
 import 'package:common/util.dart';
-import 'package:esys_client/local_model/PeerManagedModel.dart';
-import 'package:esys_client/local_model/ServerConnection.dart';
+import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,10 +27,12 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 		if (conn.connected) _lastConn = now;
 		// UI: not pretty
 		return IconButton(
-			color: conn.connected ? Colors.green : Colors.red,
+			color: conn.connected
+				? (conn.state?.isSync ?? false ? Colors.green : Colors.amber)
+				: Colors.red,
 			icon: Icon(
 				conn.connected
-					? Icons.cloud_done
+					? (conn.state?.isSync ?? false ? Icons.cloud_done : Icons.cloud)
 					: Icons.cloud_off
 			),
 			onPressed: () {
@@ -50,12 +51,10 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 		return Dialog(
 			child: ListView(
 				children: [
-					if (ppm is PeerManagedModel)
 					ListTile(
 						dense: true,
 						title: Text("SessionId: ${ppm.manager.sessionId}")
 					),
-					if (ppm is PeerManagedModel)
 					ListTile(
 						title: const Text("Server"),
 						subtitle: Text(ppm.master?.state.name ?? "Disconnected"),

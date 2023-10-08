@@ -5,12 +5,12 @@ import 'package:common/util.dart';
 import '../EnduranceEvent.dart';
 import '../EventModel.dart';
 
-List<Event<Model>> demoInitEvent(int startTime) =>
-	[InitEvent("demo", demoModel())];
+const FIVE_MINS = 5 * 60;
 
-Model demoModel() {
-	
-	const FIVE_MINS = 5 * 60;
+List<Event<Model>> demoInitEvent(int startTime) =>
+	[InitEvent(startTime - FIVE_MINS, "demo", demoModel())];
+
+Model demoModel() {	
 
 	var now = nowUNIX();
 

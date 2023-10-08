@@ -39,7 +39,7 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 		throw Exception("Could not load a non-endurance event");
 
 	Model m = Model();
-	List<Event<Model>> mevs = [InitEvent("equipe", m)];
+	List<Event<Model>> mevs = [InitEvent(0, "equipe", m)];
 	m.rideName = schd["display_name"];
 
 	var days = [schd];

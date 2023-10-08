@@ -4,15 +4,13 @@ import 'dart:io';
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/local_model/PeerManagedModel.dart';
-import 'package:esys_client/local_model/ServerConnection.dart';
+import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-
-import 'local_model/LocalModel.dart';
 import 'util/input_modals.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -31,27 +29,17 @@ class _SettingsPageState extends State<SettingsPage> {
 	late Settings set;
 	bool isInit = false;
 
-	StreamSubscription? _sub;
-
-	@override
-	void dispose() {
-		_sub?.cancel();
-		super.dispose();
-	}
-
 	@override
 	Widget build(BuildContext context) {
 		if (!isInit) {
-			set = context.watch<Settings>().clone();
+			set = context.read<Settings>().clone();
 			_servAddr.text = set.serverURI;
 			_author.text = set.author;
 			isInit = true;
-			var pmm = try_cast<PeerManagedModel>(context.read<LocalModel>());
-			_sub = pmm?.manager.peerStateChanges.listen((_) => setState((){}));
 		}
 		var model = context.read<LocalModel>();
-		var pmm = try_cast<PeerManagedModel>(model);
 		var conn = context.watch<ServerConnection>();
+		context.watch<PeerStates>();
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Settings"),
@@ -134,15 +122,10 @@ class _SettingsPageState extends State<SettingsPage> {
 							set..setDefaults()..save();
 						}),
 					),
-					/* ListTile(
-						leading: const Icon(Icons.sync),
-						title: const Text("Manual sync"),
-						onTap: () => model.manualSync(),
-					), */
 					ListTile(
 						leading: const Icon(Icons.sync),
 						title: const Text("Resync"),
-						onTap: () => model.resetSync(),
+						onTap: () => model.manager.resetModel(),
 					),
 					ListTile(
 						leading: const Icon(Icons.data_array),
@@ -158,8 +141,8 @@ class _SettingsPageState extends State<SettingsPage> {
 						ListTile(
 							leading: const Icon(Icons.cancel),
 							title: const Text("New session"),
-							subtitle: pmm != null ? Text("Current: ${pmm.manager.sessionId}") : null,
-							onTap: () => pmm?.manager.resetSession(),
+							subtitle: Text("Current: ${model.manager.sessionId}"),
+							onTap: () => model.manager.resetSession(),
 						),
 						ListTile(
 							leading: const Icon(Icons.cloud_upload),
@@ -173,22 +156,18 @@ class _SettingsPageState extends State<SettingsPage> {
 						),
 					],
 					// TODO: this has to be different
-					if (model is PeerManagedModel)
-					...[
-						const ListTile(
-							title: Text("Peers"),
-							dense: true,
-						),
-						for (var p in model.manager.peers)
-						ListTile(
-							title: Text(p.id ?? "?"),
-							subtitle: Text(!p.connected ? "-" : p.state.name),
-							onTap: () {
-								model.manager.yieldTo(p);
-							},
-						)
-					]
-
+					const ListTile(
+						title: Text("Peers"),
+						dense: true,
+					),
+					for (var p in model.manager.peers)
+					ListTile(
+						title: Text(p.id ?? "?"),
+						subtitle: Text(!p.connected ? "-" : p.state.name),
+						onTap: () {
+							model.manager.yieldTo(p);
+						},
+					)
 				],
 			),
 		);
@@ -196,23 +175,18 @@ class _SettingsPageState extends State<SettingsPage> {
 
 	static Future<void> loadModel(BuildContext context) async {
 		var m = context.read<LocalModel>();
-		var sc = context.read<ServerConnection>();
 		var meets = await EquipeMeeting.loadRecent();
 		// ignore: use_build_context_synchronously
 		showChoicesModal(
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
-				await m.resetSync();
 				if (name == "DEMO") {
 					await m.addSync(demoInitEvent(nowUNIX()+300));
 				} else {
 					var meet = meets.firstWhere((e) => e.name == name);
 					var evs = await meet.loadEvents();
 					await m.addSync(evs);
-				}
-				if (sc.connected) {
-					await sc.yieldRemote();
 				}
 			}
 		);

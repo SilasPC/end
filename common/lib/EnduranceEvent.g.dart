@@ -7,12 +7,14 @@ part of 'EnduranceEvent.dart';
 // **************************************************************************
 
 InitEvent _$InitEventFromJson(Map<String, dynamic> json) => InitEvent(
+		json['time'] as int,
       json['author'] as String,
       Model.fromJson(json['model'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$InitEventToJson(InitEvent instance) => <String, dynamic>{
       'kind': instance.kind,
+      'time': instance.time,
       'author': instance.author,
       'model': instance.model,
     };

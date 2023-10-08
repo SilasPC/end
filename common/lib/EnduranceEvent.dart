@@ -64,7 +64,7 @@ EnduranceEvent eventFromJSON(JSON json) {
 @JsonSerializable()
 class InitEvent extends EnduranceEvent {
 	final Model model;
-	InitEvent(String author, this.model) : super(0, "init", author);
+	InitEvent(int time, String author, this.model) : super(time, "init", author);
 
 	JSON toJson() => _$InitEventToJson(this);
 	factory InitEvent.fromJson(JSON json) =>

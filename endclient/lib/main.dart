@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:esys_client/local_model/ServerConnection.dart';
+import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/nearby_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -25,7 +25,7 @@ Future<void> main() async {
 	runApp(
 		const SettingsProvider(
 			child: ModelProvider(
-				child: ServerConnectionProvider(
+				child: VariousStatesProvider(
 					child: NearbyProvider(
 						child: MyApp(),
 					)
