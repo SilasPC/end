@@ -1,7 +1,7 @@
 
 import 'package:common/util.dart';
-import 'package:esys_client/bluetooth.dart';
 import 'package:esys_client/local_model/ServerConnection.dart';
+import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,14 +22,37 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	@override
 	Widget build(BuildContext context) {
 		var conn = context.watch<ServerConnection>();
+		// var nearby = context.watch<NearbyManager>();
 		// UI: add desync chip on icon
 		var now = DateTime.now();
 		if (conn.connected) _lastConn = now;
-		return conn.connected
-			? Container()
-			: IconButton(
-				color: Colors.red,
-				// TODO: open sync settings?
+		return PopupMenuButton(
+			child: Icon(
+				conn.connected
+					? Icons.cloud_done
+					: Icons.cloud_off
+			),
+			itemBuilder: (context) => [
+				PopupMenuItem(
+					child: ListTile(
+						title: Text("Server"),
+						subtitle: Text("In sync"),
+					),
+				),
+				PopupMenuItem(
+					child: ListTile(
+						title: Text("Server"),
+						subtitle: Text("In sync"),
+						trailing: Switch(
+							value: true,
+							onChanged: null,
+						),
+					),
+				),
+			]
+		);
+		/* return IconButton(
+				color: conn.connected ? Colors.green : Colors.red,
 				onPressed: () {
 					var dif = now.difference(_lastConn);
 					var difStr = unixDifToMS(dif.inSeconds, false, false);
@@ -50,7 +73,33 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 							),
 						));
 				},
-				icon: const Icon(Icons.sync_problem),
-			);
+				icon: 
+			); */
 	}
+
+	// UI: new sync indicator
+	Widget _syncMenu() {
+		return ListView(
+			children: [
+				ListTile(
+					title: Text("Server"),
+					subtitle: Text("Syncronized"),
+				),
+				Divider(),
+				ListTile(
+					title: Text("P2P enabled"),
+					trailing: Switch(
+						value: false,
+						onChanged: null,
+					),
+				),
+				Divider(),
+				ListTile(
+					title: Text("Android device"),
+					subtitle: Text("13 event(s) old")
+				)
+			],
+		);
+	}
+
 }

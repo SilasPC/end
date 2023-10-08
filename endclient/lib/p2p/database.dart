@@ -7,7 +7,6 @@ import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/util.dart';
-import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -81,7 +80,6 @@ class SqfliteDatabase extends EventDatabase<Model> {
 	}
 
 	static Future<Database> _createDB() async {
-		WidgetsFlutterBinding.ensureInitialized();
 		var path = join(await getDatabasesPath(), "events.db");
 		var db = await openDatabase(
 			path,

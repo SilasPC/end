@@ -70,14 +70,27 @@ class Settings extends IJSON {
 	bool darkTheme;
 	bool showAdmin;
 	bool sendNotifs;
+	bool autoYield;
+	bool useP2P;
 	
-	Settings(this._provider, this.serverURI, this.author, this.darkTheme, this.showAdmin, this.sendNotifs);
+	Settings(
+		this._provider, 
+		this.serverURI, 
+		this.author, 
+		this.darkTheme, 
+		this.showAdmin, 
+		this.sendNotifs,
+		this.autoYield,
+		this.useP2P,
+	);
 	Settings.defaults(this._provider):
 		serverURI = "https://kastanie.ddns.net/esys",
 		author = Platform.localHostname,
 		darkTheme = false,
 		showAdmin = false,
-		sendNotifs = Platform.isAndroid || Platform.isIOS;
+		sendNotifs = Platform.isAndroid || Platform.isIOS,
+		autoYield = false,
+		useP2P = true;
 
 	// IGNORED: TODO: this is not very nice
 	void setDefaults() {
@@ -86,6 +99,8 @@ class Settings extends IJSON {
 		darkTheme = false;
 		showAdmin = false;
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
+		autoYield = false;
+		useP2P = true;
 	}
 
 	void save() {
@@ -98,7 +113,9 @@ class Settings extends IJSON {
 		author,
 		darkTheme,
 		showAdmin,
-		sendNotifs
+		sendNotifs,
+		autoYield,
+		useP2P,
 	);
 
 	@override
@@ -108,6 +125,7 @@ class Settings extends IJSON {
 		'darkTheme': darkTheme,
 		'showAdmin': showAdmin,
 		'sendNotifs': sendNotifs,
+		'useP2P': useP2P,
 	};
 
 	factory Settings.fromJson(JSON json, SettingsProviderState provider) =>
@@ -118,6 +136,8 @@ class Settings extends IJSON {
 			json['darkTheme'] as bool,
 			json['showAdmin'] as bool,
 			json['sendNotifs'] as bool,
+			json['autoYield'] as bool,
+			json['useYield'] as bool,
 		);
 
 	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>

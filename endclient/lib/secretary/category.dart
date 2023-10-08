@@ -154,8 +154,6 @@ class CategoryCard extends StatelessWidget {
 								Expanded(
 									child: ChipStrip(
 										chips: [
-											// UI: clear/free/ideal min/max time/speed status
-											// UI: loop cards (#riders / color?)
 											if (category.clearRound)
 												const Chip(
 													backgroundColor: const Color.fromARGB(255, 146, 119, 68),

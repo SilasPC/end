@@ -1,9 +1,7 @@
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:common/EnduranceEvent.dart';
-import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
@@ -16,6 +14,7 @@ Future<void> main() async {
 
 	var man = PeerManager<Model>(
 		"root-server",
+		// TODO: sqflite persistence
 		() => NullDatabase.new("root-server", 0),
 		Model.fromJson,
 		EnduranceEvent.fromJson,

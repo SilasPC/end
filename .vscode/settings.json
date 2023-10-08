@@ -7,4 +7,5 @@
 	"todo-list.expression": "(?:/{2,}\\s+)([A-Z]+):\\s+(.+)$",
 	"todo-list.include": "**/*.{ts,js,php,css,scss,html,dart}",
 	"todo-list.exclude": "{**/dist/**,**/build/**,**/.vscode/**,**/_output/**,**/vendor/**,**/*.min.*,**/*.map,**/.dart_tool/**}",
+	"files.eol": "\n",
 }

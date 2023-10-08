@@ -54,6 +54,7 @@ enum PeerState {
 	SYNC;
 
 	bool get isSync => this == PeerState.SYNC;
+	bool get isConflict => this == PeerState.SYNCERR;
 
 }
 
@@ -433,6 +434,7 @@ class PeerManager<M extends IJSON> {
 				p.disconnect();
 			}
 		}
+		_onUpdate.add(null);
 	}
 
 }

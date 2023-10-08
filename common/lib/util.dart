@@ -12,9 +12,9 @@ typedef VoidCallback = void Function();
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
-   List<int> toJsonBin() => utf8.encode(toJsonString());
+   List<int> toJsonBin() => toJsonString().codeUnits;
 	static JSON fromBin(List<int> bin) =>
-		jsonDecode(utf8.decode(bin));
+		jsonDecode(String.fromCharCodes(bin));
 }
 
 T unimpl<T>([msg]) => throw UnimplementedError(msg);

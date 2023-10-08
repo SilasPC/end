@@ -31,6 +31,14 @@ class _SettingsPageState extends State<SettingsPage> {
 	late Settings set;
 	bool isInit = false;
 
+	StreamSubscription? _sub;
+
+	@override
+	void dispose() {
+		_sub?.cancel();
+		super.dispose();
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		if (!isInit) {
@@ -38,6 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
 			_servAddr.text = set.serverURI;
 			_author.text = set.author;
 			isInit = true;
+			var pmm = context.read<PeerManagedModel?>();
+			_sub = pmm?.manager.peerStateChanges.listen((_) => setState((){}));
 		}
 		var model = context.read<LocalModel>();
 		return Scaffold(
@@ -142,6 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						for (var p in model.manager.peers)
 						ListTile(
 							title: Text(p.id ?? "?"),
+							subtitle: Text(!p.connected ? "-" : p.state.name),
 							onTap: () {
 								model.manager.yieldTo(p);
 							},
@@ -155,20 +166,23 @@ class _SettingsPageState extends State<SettingsPage> {
 
 	static Future<void> loadModel(BuildContext context) async {
 		var m = context.read<LocalModel>();
+		var sc = context.read<ServerConnection>();
 		var meets = await EquipeMeeting.loadRecent();
 		// ignore: use_build_context_synchronously
 		showChoicesModal(
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
-				// TODO: load from equipe with p2p
-				// await m.reset();
+				await m.resetSync();
 				if (name == "DEMO") {
 					await m.addSync(demoInitEvent(nowUNIX()+300));
 				} else {
 					var meet = meets.firstWhere((e) => e.name == name);
 					var evs = await meet.loadEvents();
 					await m.addSync(evs);
+				}
+				if (sc.connected) {
+					await sc.yieldRemote();
 				}
 			}
 		);

@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:common/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:location/location.dart';
+import 'package:mutex/mutex.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -20,7 +21,7 @@ enum DevStatus {
 // FIXME: race conditions
 class Device {
 	
-	final NearbyMan _man;
+	final NearbyManager _man;
 	final String id;
 	final String name;
 
@@ -31,12 +32,12 @@ class Device {
 	bool get connected => status.value == DevStatus.CONNECTED;
 	bool get disconnected => status.value != DevStatus.CONNECTED;
 	
-	Device(this._man, this.id, this.name);
+	Device._(this._man, this.id, this.name);
 
 	Future<bool> connect() async {
 		if (unavailable) return false;
 		if (connected) return true;
-		return _man._bt.requestConnection(
+		return _man._bt!.requestConnection(
 			_man.localName,
 			id,
 			onConnectionInitiated: _man._onInit,
@@ -46,32 +47,49 @@ class Device {
 	}
 	Future<void> disconnect() async {
 		if (disconnected) return;
-		await _man._bt.disconnectFromEndpoint(id);
+		await _man._bt!.disconnectFromEndpoint(id);
 		if (available) {
 			status.value = DevStatus.AVAILABLE;
 		}
 	}
 
-	Future<bool> transmit() async {
+	Future<bool> transmit(Uint8List data) async {
 		if (disconnected) return false;
-		await _man._bt.sendBytesPayload(id, Uint8List.fromList([42,43,44]));
+		await _man._bt!.sendBytesPayload(id, data);
 		return true;
 	}
 
-	final StreamController<void> _stream = StreamController.broadcast();
+	final StreamController<Uint8List> _stream = StreamController();
 	Stream<void> get dataStream => _stream.stream;
 
 }
 
-class NearbyMan {
+class NearbyManager with ChangeNotifier {
 
 	static const String SERVICE_ID = "com.example.endclient";
 
-	late final Nearby _bt;
+	late final Nearby? _bt;
 	final Map<String, Device> _devs = {};
 	final String localName = Platform.localHostname;
+	final Mutex _mutex = Mutex();
 
-	ValueNotifier<List<Device>> devices = ValueNotifier([]);
+	List<Device> devices = [];
+
+	final bool available = Platform.isAndroid | Platform.isIOS;
+
+	bool _enabled = true;
+	bool get enabled => _enabled;
+	set enabled (bool enable) {
+		_mutex.protect(() async {
+			if (_enabled == enable) return;
+			if (enable && available) {
+				await _startDiscovery();
+			} else {
+				await _bt?.stopDiscovery();
+			}
+			_enabled = enable;
+		});
+	}
 
 	bool _autoConnect = false;
 	bool get autoConnect => _autoConnect;
@@ -86,43 +104,55 @@ class NearbyMan {
 		_autoConnect = val;
 	}
 
-	NearbyMan() {
-		_getPerms().then((_) => _setup());
+	NearbyManager() {
+		if (available) {
+			_init();
+		}
 	}
 
-	void dispose() {
-		_bt..stopAdvertising()
-			..stopDiscovery();
-	}
-
-	Future<void> _setup() async {
-		
+	void _init() async {
 		_bt = Nearby();
+		_mutex.protect(() async {
+			await _getPerms();
+			return _setup();
+		});
+	}
 
-		await _bt.stopDiscovery();
-		await _bt.stopAdvertising();
-		await _bt.stopAllEndpoints();
+	@override
+	void dispose() {
+		_bt?..stopAdvertising()
+			..stopDiscovery()
+			..stopAllEndpoints();
+		super.dispose();
+	}
 
-		var suc = await _bt.startAdvertising(
+	Future<bool> _startAdvertising() async =>
+		await _bt?.startAdvertising(
 			localName,
 			Strategy.P2P_CLUSTER,
 			onConnectionInitiated: _onInit,
 			onConnectionResult: _onRes,
 			onDisconnected: _onDisconnect,
 			serviceId: SERVICE_ID,
-		);
-		if (!suc) print("fuck ad");
+		) ?? false;
 
-		suc = await _bt.startDiscovery(
+	Future<bool> _startDiscovery() async =>
+		await _bt?.startDiscovery(
 			localName,
 			Strategy.P2P_CLUSTER,
 			onEndpointFound: _onFound,
 			onEndpointLost: _onLost,
 			serviceId: SERVICE_ID,
-		);
-		if (!suc) print("fuck dis");
+		) ?? false;
 
-		print("ok");
+	Future<void> _setup() async {
+		await _bt?.stopDiscovery();
+		await _bt?.stopAdvertising();
+		await _bt?.stopAllEndpoints();
+		await _startAdvertising();
+		if (enabled && autoConnect) {
+			await _startDiscovery();
+		}
 	}
 
 	static Future<void> _getPerms() async {
@@ -147,7 +177,7 @@ class NearbyMan {
 				Permission.bluetoothScan
 			].request();
 			if (res.values.any((e) => !e.isGranted)) {
-				print("no _bt perm");
+				print("no bt perm");
 			}
 		}
 
@@ -183,11 +213,13 @@ class NearbyMan {
 
 	void _onInit(String id, ConnectionInfo info) async {
 		var dev = _dev(id, "?");
-		await _bt.acceptConnection(
+		await _bt?.acceptConnection(
 			id,
 			onPayLoadRecieved: (id, data) {
-				print("rcv $id ${data.type} ${maybe(data.bytes, (d) => utf8.decode(d, allowMalformed: true))}");
-				// dev._stream.add();
+				print("rcv $id ${data.type} ${data.bytes?.length}");
+				if (data.bytes != null) {
+					dev._stream.add(data.bytes!);
+				}
 			}
 		);
 	}
@@ -213,8 +245,9 @@ class NearbyMan {
 		_devs.putIfAbsent(
 			id,
 			() {
-				var dev = Device(this, id, name);
-				devices.value = [..._devs.values, dev];
+				var dev = Device._(this, id, name);
+				devices = [..._devs.values, dev];
+				notifyListeners();
 				return dev;
 			}
 		);
