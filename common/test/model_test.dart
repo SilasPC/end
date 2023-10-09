@@ -7,61 +7,11 @@ import 'str.dart';
 void main() {
 	var dig = StrEv.dig;
 	test("empty model", () {
-		var s = ServerModel();
-		var c = ClientModel(s);
+		var s = Model();
 		expect(s.model.result, "");
-		expect(c.model.result, "");
-	});
-	test("one-client sync", (() async {
-		var s = ServerModel();
-		var c = ClientModel(s);
-
-		s.add([StrEv("A", 10), StrEv("B", 20)]);
-		c.add([       StrEv("X", 15)         ]);
-		expect(s.model.result, "AB");
-		expect(c.model.result, "X");
-
-		await c.sync();
-		expect(s.model.result, "AXB");
-		expect(c.model.result, "AXB");
-		expect(s.events.toString(), s.events.toString());
-	}));
-	test("two-client sync", () async {
-		var s = ServerModel();
-		var c1 = ClientModel(s);
-		var c2 = ClientModel(s);
-
-		s.add([StrEv("A", 10), StrEv("B", 20)]);
-		await c2.sync();
-		await c1.addSync([StrEv("X", 15), StrEv("Y", 25)]);
-		expect(s.model.result,  "AXBY");
-		expect(c1.model.result, "AXBY");
-		expect(c2.model.result, "AB");
-
-		c2.add([StrEv("1", 30)]);
-		expect(c2.model.result, "AB1");
-
-		await c2.sync();
-		expect(s.model.result,  "AXBY1");
-		expect(c2.model.result, "AXBY1");
-		expect(c1.model.result, "AXBY");
-
-		await c1.addSync([StrEv("Z", 23)]);
-		expect(s.model.result,  "AXBZY1");
-		expect(c1.model.result, "AXBZY1");
-
-		await c2.sync();
-		expect(c2.model.result, "AXBZY1");
-
-		await c2.addSync([], [StrEv("X", 15)]);
-		expect(c2.model.result, "ABZY1");
-		expect(s.model.result, "ABZY1");
-
-		await c1.sync();
-		expect(c1.model.result, "ABZY1");
 	});
 	test("deletes", () {
-		var m = ServerModel();
+		var m = Model();
 
 		m.add([dig(0)]);
 		m.createSavepoint();
@@ -85,7 +35,7 @@ void main() {
 
 	});
 	test("set max time", () {
-		var m = ServerModel();
+		var m = Model();
 		m.add([
 			for (int i = 0; i < 5; i++)
 			dig(i),
@@ -121,7 +71,7 @@ void main() {
 
 	});
 	test("savepoints", () {
-		var m = ServerModel();
+		var m = Model();
 		m.add([dig(0), dig(2)]);
 		m.createSavepoint();
 		expect(m.savepoints.length, 2);
@@ -172,11 +122,6 @@ void main() {
 	});
 }
 
-class ClientModel extends SyncedEventModel<StrModel> {
-	ServerModel server;
-	ClientModel(this.server): super(Handle(), (req) async => req.applyTo(server));
-}
-
-class ServerModel extends EventModel<StrModel> {
-	ServerModel(): super(Handle());
+class Model extends EventModel<StrModel> {
+	Model(): super(Handle());
 }
