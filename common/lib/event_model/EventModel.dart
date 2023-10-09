@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 import 'package:common/event_model/OrderedSet.dart';
+import 'package:common/p2p/Manager.dart';
 import '../EnduranceEvent.dart';
 import '../util.dart';
 import 'Event.dart';
@@ -40,27 +41,6 @@ class Savepoint<M extends IJSON> {
 		json = model.toJsonString();
 
 	String toString() => "SP ${si.toJsonString()} $json";
-}
-
-class SyncResult<M extends IJSON> extends IJSON {
-	final List<Event<M>> events;
-	final List<Event<M>> deletes;
-	final SyncInfo syncInfo;
-	SyncResult(this.events, this.deletes, this.syncInfo);
-
-	factory SyncResult.empty() => SyncResult([], [], SyncInfo.zero());
-
-	JSON toJson() => {
-		"events": listj(events),
-		"deletes": listj(deletes),
-		"syncInfo": syncInfo,
-	};
-
-	SyncResult.fromJSON(JSON json) :
-		syncInfo = SyncInfo.fromJson(json["syncInfo"]),
-		events = jlist_map(json["events"], eventFromJSON as Reviver<Event<M>>),
-		deletes = jlist_map(json["deletes"], eventFromJSON as Reviver<Event<M>>);
-
 }
 
 abstract class EventModelHandle<M extends IJSON> {
@@ -169,10 +149,10 @@ class EventModel<M extends IJSON> {
 
 	}
 
-	SyncResult<M> getNewerData(SyncInfo lastSync) {
+	SyncMsg<M> getNewer(SyncInfo lastSync) {
 		var evs = _events.iteratorInsertion.skip(lastSync.evLen).toList();
 		var dls = deletes.skip(lastSync.delLen).toList();
-		return SyncResult(evs, dls, syncState);
+		return SyncMsg(evs, dls);
 	}
 
 	SyncInfo get syncState => SyncInfo(_events.length, deletes.length);

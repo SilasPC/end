@@ -151,11 +151,12 @@ class _SettingsPageState extends State<SettingsPage> {
 							onTap: () => conn.yieldRemote(),
 						),
 						ListTile(
+							leading: const Icon(Icons.download),
 							title: const Text("Load model..."),
 							onTap: () => loadModel(context),
 						),
 					],
-					// TODO: this has to be different
+					// UI: this has to be different
 					const ListTile(
 						title: Text("Peers"),
 						dense: true,
@@ -185,8 +186,17 @@ class _SettingsPageState extends State<SettingsPage> {
 					await m.addSync(demoInitEvent(nowUNIX()+300));
 				} else {
 					var meet = meets.firstWhere((e) => e.name == name);
-					var evs = await meet.loadEvents();
-					await m.addSync(evs);
+					try {
+						var evs = await meet.loadEvents();
+						await m.addSync(evs);						
+					} catch (e, s) {
+						print(e);
+						print(s);
+						ScaffoldMessenger.of(context)
+							.showSnackBar(const SnackBar(
+								content: Text("Failed to load from Equipe"),
+							));
+					}
 				}
 			}
 		);

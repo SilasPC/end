@@ -18,7 +18,11 @@ class VariousStatesProvider extends StatelessWidget {
 			child: StreamedProxyProvider<LocalModel, PeerStates, Peer>(
 				create: (lm) => PeerStates(lm.manager),
 				stream: (lm) => lm.manager.peerStateChanges,
-				child: child
+				child: StreamedProxyProvider<LocalModel, SessionState, int>(
+					create: (lm) => SessionState(lm.manager),
+					stream: (lm) => lm.manager.sessionStream,
+					child: child,
+				)
 			),
 		);
 	
@@ -49,4 +53,13 @@ class PeerStates {
 	final PeerManager manager;
 	PeerStates(this.manager);
 
+}
+
+class SessionState {
+	
+	int get sessionId => manager.sessionId;
+
+	final PeerManager manager;
+	SessionState(this.manager);
+	
 }

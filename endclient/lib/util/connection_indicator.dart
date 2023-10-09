@@ -22,10 +22,8 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	@override
 	Widget build(BuildContext context) {
 		var conn = context.watch<ServerConnection>();
-		// UI: add desync chip on icon
 		var now = DateTime.now();
 		if (conn.connected) _lastConn = now;
-		// UI: not pretty
 		return IconButton(
 			color: conn.connected
 				? (conn.state?.isSync ?? false ? Colors.green : Colors.amber)
@@ -48,21 +46,22 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	Widget _syncMenu(BuildContext context) {
 		// var nearby = context.watch<NearbyManager>();
 		var ppm = context.watch<LocalModel>();
+		var ses = context.watch<SessionState>().sessionId;
 		return Dialog(
 			child: ListView(
 				children: [
 					ListTile(
 						dense: true,
-						title: Text("SessionId: ${ppm.manager.sessionId}")
+						title: Text("SessionId: $ses")
 					),
 					ListTile(
 						title: const Text("Server"),
-						subtitle: Text(ppm.master?.state.name ?? "Disconnected"),
+						subtitle: Text(ppm.master?.connected ?? false ? ppm.master!.state.name : "Disconnected"),
 					),
-					ListTile(
+					/* ListTile(
 						title: Text("Android device"),
 						subtitle: Text("13 event(s) old")
-					)
+					) */
 				],
 			)
 		);

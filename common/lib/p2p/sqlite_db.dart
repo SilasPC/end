@@ -45,7 +45,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async {
 		var peer = await _db.query("peers", where: "peerId = ?", whereArgs: [peerId]);
 		if (peer.isEmpty) return null;
-		var psm = PreSyncMsg.fromJson(peer.first);
+		var psm = PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...peer.first}); // TODO: hack
 		var si = SyncInfo.fromJson(peer.first);
 		return Tuple(psm, si);
 	}
@@ -77,7 +77,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
 		var self = (data[2]! as List)
-			.map((d) => PreSyncMsg.fromJson(d..["protocolVersion"] = SyncProtocol.VERSION)) // TODO: hack
+			.map((d) => PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...d})) // TODO: hack
 			.firstOrNull;
 		return Tuple(SyncMsg(evs, dels), self);
 	}
@@ -114,11 +114,10 @@ class SqliteDatabase extends EventDatabase<Model> {
 	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) {
 		var row = state.toJson()..addEntries(syncInfo.toJson().entries);
 		row.remove("protocolVersion");
-		return _db.update(
+		return _db.insert(
 			"peers",
 			row,
-			where: "peerId = ?",
-			whereArgs: [state.peerId]
+			conflictAlgorithm: ConflictAlgorithm.replace
 		);
 	}
 
