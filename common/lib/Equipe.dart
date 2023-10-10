@@ -50,14 +50,14 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	for (var day in days) {
 		for (var cl in day["meeting_classes"]) {
 
-			var tup = _parseCategory(cl, m);
+			var tup = await _parseCategory(cl, m);
 			if (tup == null) continue;
 			var cat = tup.a;
 			var dist = tup.b;
 
 			try {
 
-				var cls = await _loadJSON("api/v1/class_sections/${cat.equipeId!}");
+				var cls = tup.c;
 				var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
 				var catDist = cat.distance();
@@ -91,11 +91,17 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 
 }
 
-Tuple<Category, int?>? _parseCategory(dynamic meeting_class, Model model) {
+Future<Tuple3<Category, int?, dynamic>?> _parseCategory(dynamic meeting_class, Model model) async {
 	String name = meeting_class["name"];
 	var class_sections = meeting_class["class_sections"] as List;
 	if (class_sections.isEmpty) return null;
 	var equipeId = class_sections.first["id"];
+
+	var cls = await _loadJSON("api/v1/class_sections/${equipeId!}");
+	if (nullOrEmpty((cls["starts"] as List).firstOrNull?["start_no"])) {
+		return null;
+	}
+
 	int? dist = maybe(rgxDist.firstMatch(name)?[1], int.parse);
 	String lvl = rgxCatLvl.firstMatch(name)?[0] ?? name;
 
@@ -123,7 +129,7 @@ Tuple<Category, int?>? _parseCategory(dynamic meeting_class, Model model) {
 			..minSpeed = minSpeed
 			..maxSpeed = maxSpeed;
 
-	return Tuple(cat, dist);
+	return Tuple3(cat, dist, cls);
 }
 
 void _guessCategoryLoops(Category cat, int dist) {
@@ -144,6 +150,11 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 	bool hasResults = false;
 	Map<Equipage, int> startTimes = {};
 	for (var eq in equipages) {
+		if (nullOrEmpty(eq["start_no"])) {
+			// should be ignored by _parseCategory in such a case
+			print("no eid for ${eq["rider_name"]} ${cat.name}");
+			continue;
+		}
 		var eid = int.parse(eq["start_no"]);
 		Equipage e = Equipage(
 			eid,
@@ -168,7 +179,7 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 						bool passed = nullOrEmpty(res["reason"]);
 						bool retire = results[i+1]["reason"] == "RET";
 
-						loopDists?.add(double.parse(res["distance"]).floor());
+						loopDists?.add(res["distance"].floor());
 						if (nullOrEmpty(res["start_time"])) break;
 						var expDep = hmsToUNIX(res["start_time"]);
 						cat.startTime = min(cat.startTime, expDep);
