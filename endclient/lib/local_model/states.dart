@@ -33,6 +33,7 @@ class ServerConnection {
 	PeerState? get state => pmm.master?.state;
 	bool get connected => pmm.master?.connected ?? false;
 	int? get sessionId => pmm.master?.sessionId;
+	bool get inSync => state == PeerState.SYNC;
 
 	final LocalModel pmm;
 	ServerConnection(this.pmm);

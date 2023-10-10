@@ -26,6 +26,7 @@ class ModelProvider extends StatelessWidget {
 			create: (_) => LocalModel(),
 			update: (_, set, mod) {
 				mod!.setServerUri(set.serverURI);
+				mod.autoYield = set.autoYield;
 				return mod;
 			},
 			child: child,

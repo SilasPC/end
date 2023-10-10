@@ -44,7 +44,6 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 
 	// UI: new sync indicator
 	Widget _syncMenu(BuildContext context) {
-		// var nearby = context.watch<NearbyManager>();
 		var ppm = context.watch<LocalModel>();
 		var ses = context.watch<SessionState>().sessionId;
 		return Dialog(
@@ -57,6 +56,13 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 					ListTile(
 						title: const Text("Server"),
 						subtitle: Text(ppm.master?.connected ?? false ? ppm.master!.state.name : "Disconnected"),
+						trailing: ppm.master?.state.isConflict ?? false
+							? IconButton(
+								icon: const Icon(Icons.cloud_download),
+								onPressed: () {
+									ppm.manager.yieldTo(ppm.master!);
+								},
+							) : null,
 					),
 					/* ListTile(
 						title: Text("Android device"),

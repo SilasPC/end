@@ -1,7 +1,10 @@
 
+import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'settings_provider.dart';
 
 class NearbyProvider extends StatefulWidget {
 
@@ -21,6 +24,11 @@ class _NearbyProviderState extends State<NearbyProvider> {
 	void initState() {
 		super.initState();
 		_nearbyMan = NearbyManager();
+		_nearbyMan.addListener(() {
+			/* var newDevs = devices.difference(_nearbyMan.devices.toSet());
+			context.read<LocalModel>().manager.peers.
+ */
+		});
 	}
 
 	@override
@@ -30,10 +38,15 @@ class _NearbyProviderState extends State<NearbyProvider> {
 	}
 
 	@override
-	Widget build(BuildContext context) =>
-		ChangeNotifierProvider.value(
+	Widget build(BuildContext context) {
+		var useP2p = context.select<Settings, bool>((s) => s.useP2P);
+		var inSync = context.select<ServerConnection, bool>((c) => c.inSync);
+		_nearbyMan.enabled = useP2p;
+		_nearbyMan.autoConnect = !inSync;
+		return ChangeNotifierProvider.value(
 			value: _nearbyMan,
 			child: widget.child,
 		);
+	}
 
 }

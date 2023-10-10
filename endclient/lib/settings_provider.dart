@@ -89,7 +89,7 @@ class Settings extends IJSON {
 		darkTheme = false,
 		showAdmin = false,
 		sendNotifs = Platform.isAndroid || Platform.isIOS,
-		autoYield = false,
+		autoYield = true,
 		useP2P = true;
 
 	// IGNORED: TODO: this is not very nice
@@ -99,7 +99,7 @@ class Settings extends IJSON {
 		darkTheme = false;
 		showAdmin = false;
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
-		autoYield = false;
+		autoYield = true;
 		useP2P = true;
 	}
 

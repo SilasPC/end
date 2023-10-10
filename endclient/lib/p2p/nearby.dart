@@ -2,10 +2,8 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:common/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:location/location.dart';
 import 'package:mutex/mutex.dart';
@@ -68,7 +66,7 @@ class NearbyManager with ChangeNotifier {
 
 	static const String SERVICE_ID = "com.example.endclient";
 
-	late final Nearby? _bt;
+	Nearby? _bt;
 	final Map<String, Device> _devs = {};
 	final String localName = Platform.localHostname;
 	final Mutex _mutex = Mutex();
@@ -77,7 +75,7 @@ class NearbyManager with ChangeNotifier {
 
 	final bool available = Platform.isAndroid | Platform.isIOS;
 
-	bool _enabled = true;
+	bool _enabled = false;
 	bool get enabled => _enabled;
 	set enabled (bool enable) {
 		_mutex.protect(() async {

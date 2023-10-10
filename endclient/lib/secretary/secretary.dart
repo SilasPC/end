@@ -114,59 +114,63 @@ class SecretaryPageState extends State<SecretaryPage> {
 		],
 	);
 
-	bool isInit = false;
+	@override
+	void initState() {
+		super.initState();
+		_getNewlyFinished(context.read<LocalModel>());
+	}
+
+	List<Category> _getNewlyFinished(LocalModel model) {
+			var newFin = model.model.categories
+				.values
+				.where((cat) => cat.isEnded() && !_finishedCats.contains(cat))
+				.toList();
+			_finishedCats.addAll(newFin);
+			return newFin;
+	}
 
 	@override
-	Widget build(BuildContext context) =>
-		Consumer<LocalModel>(
-			builder: (context, model, child) {
-				
-				var showAdmin = context.watch<Settings>().showAdmin;
-				
-				var newFin = model.model.categories
-					.values
-					.where((cat) => cat.isEnded() && !_finishedCats.contains(cat))
-					.toList();
+	Widget build(BuildContext context) {
 
-				_finishedCats.addAll(newFin);
-				if (isInit && context.read<Settings>().sendNotifs) {
-					for (var cat in newFin) {
-						Locally(
-							context: context,
-							pageRoute: MaterialPageRoute(builder: (_) => widget),
-							payload: "wutisdis",
-							appIcon: "mipmap/ic_launcher",
-						).show(title: "Category finished", message: cat.name);
-					}
+			var model = context.watch<LocalModel>();
+			var set = context.watch<Settings>();
+			
+			if (set.sendNotifs) {
+				for (var cat in _getNewlyFinished(model)) {
+					Locally(
+						context: context,
+						pageRoute: MaterialPageRoute(builder: (_) => widget),
+						payload: "wutisdis",
+						appIcon: "mipmap/ic_launcher",
+					).show(title: "Category finished", message: cat.name);
 				}
-				isInit = true;
+			}
 
-				return DefaultTabController(
-					length: 1 + model.model.categories.length + (showAdmin ? 2 : 0),
-					child: Scaffold(
-							appBar: AppBar(
-								actions: const [ConnectionIndicator()],
-								title: const Text("Secretary"),
-								bottom: TabBar(
-									isScrollable: true,
-									tabs: viewTabs(model.model.categories, showAdmin),
-								),
+			return DefaultTabController(
+				length: 1 + model.model.categories.length + (set.showAdmin ? 2 : 0),
+				child: Scaffold(
+						appBar: AppBar(
+							actions: const [ConnectionIndicator()],
+							title: const Text("Secretary"),
+							bottom: TabBar(
+								isScrollable: true,
+								tabs: viewTabs(model.model.categories, set.showAdmin),
 							),
-							body: Stack(
-								children: [
-									Container(
-										decoration: const BoxDecoration(
-											image: DecorationImage(
-												image: AssetImage("assets/horse.jpg"),
-												fit: BoxFit.cover
-											),
+						),
+						body: Stack(
+							children: [
+								Container(
+									decoration: const BoxDecoration(
+										image: DecorationImage(
+											image: AssetImage("assets/horse.jpg"),
+											fit: BoxFit.cover
 										),
 									),
-									tabView(model.model, showAdmin),
-								],
-							)
-					)
-				);
-			}
-		);
+								),
+								tabView(model.model, set.showAdmin),
+							],
+						)
+				)
+			);
+		}
 }

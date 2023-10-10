@@ -27,16 +27,17 @@ class _SettingsPageState extends State<SettingsPage> {
 	final TextEditingController _author = TextEditingController();
 
 	late Settings set;
-	bool isInit = false;
+
+	@override
+	void initState() {
+		super.initState();
+		set = context.read<Settings>().clone();
+		_servAddr.text = set.serverURI;
+		_author.text = set.author;
+	}
 
 	@override
 	Widget build(BuildContext context) {
-		if (!isInit) {
-			set = context.read<Settings>().clone();
-			_servAddr.text = set.serverURI;
-			_author.text = set.author;
-			isInit = true;
-		}
 		var model = context.read<LocalModel>();
 		var conn = context.watch<ServerConnection>();
 		context.watch<PeerStates>();
@@ -142,7 +143,15 @@ class _SettingsPageState extends State<SettingsPage> {
 							leading: const Icon(Icons.cancel),
 							title: const Text("New session"),
 							subtitle: Text("Current: ${model.manager.sessionId}"),
-							onTap: () => model.manager.resetSession(),
+							onTap: () {
+								if (set.autoYield) {
+									setState((){
+										set..autoYield = false
+											..save();
+									});
+								}
+								model.manager.resetSession();
+							}
 						),
 						ListTile(
 							leading: const Icon(Icons.cloud_upload),
