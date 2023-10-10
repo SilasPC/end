@@ -145,7 +145,6 @@ class CategoryCard extends StatelessWidget {
 			child: Column(
 				children: [
 					cardHeader(context, category.name, color: const Color.fromARGB(255, 98, 85, 115)),
-					// Text("8-16 km/h"),
 					Padding(
 						padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
 						child: Row(
@@ -156,7 +155,7 @@ class CategoryCard extends StatelessWidget {
 										chips: [
 											if (category.clearRound)
 												const Chip(
-													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													backgroundColor: Color.fromARGB(255, 146, 119, 68),
 													label: Text("Clearround")
 												),
 											if (category.idealSpeed != null)
@@ -183,8 +182,8 @@ class CategoryCard extends StatelessWidget {
 										],
 									),
 								),
-								// if (category.isEnded())
 								IconButton(
+									color: category.isEnded() ? Colors.green : null,
 									icon: const Icon(MyIcons.trophy),
                            onPressed: () {
                               Navigator.of(context)

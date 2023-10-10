@@ -12,8 +12,19 @@ class EquipageTile extends StatelessWidget {
 	final Widget? leading;
 	final List<Widget> trailing;
 	final Color? color;
+	final bool noStatus;
 
-	const EquipageTile(this.equipage, {super.key, this.onTap, this.onLongPress, this.leading, this.trailing = const [], this.color});
+	const EquipageTile(
+		this.equipage, {
+			super.key,
+			this.onTap,
+			this.onLongPress,
+			this.leading,
+			this.trailing = const [],
+			this.color,
+			this.noStatus = false
+		}
+	);
 
 	@override
 	Widget build(BuildContext context) => 
@@ -43,15 +54,17 @@ class EquipageTile extends StatelessWidget {
 							),
 						),
 						//const Spacer(),
-						Column(
-							mainAxisAlignment: MainAxisAlignment.center,
-							children: [
-								Text(equipage.status.name),
-								if (equipage.currentLoop != null)
-								Text("Loop ${equipage.currentLoop! + 1}")
-							],
-						),
-						const SizedBox(width: 10),
+						if (!noStatus) ...[
+							Column(
+								mainAxisAlignment: MainAxisAlignment.center,
+								children: [
+									Text(equipage.status.name),
+									if (equipage.currentLoop != null)
+									Text("Loop ${equipage.currentLoop! + 1}")
+								],
+							),
+							const SizedBox(width: 10),
+						],
 						...trailing
 					],
 				)

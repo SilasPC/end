@@ -22,13 +22,18 @@ class ResultsPage extends StatelessWidget {
          ),
          body: ListView(
             children: [
+					ListTile(
+						dense: true,
+						title: Text("Finished ($fin/${ranks.length})"),
+					),
                for (var entry in ranks.take(fin))
                EquipageTile(
                   entry.key,
                   leading: CircleAvatar(
                      backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-                     child: Text(entry.value.toString()),
+                     child: Text(entry.value.toString(), style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),
                   ),
+						noStatus: true,
 						trailing: [
 							// UI: better container
 							CircleAvatar(
@@ -37,16 +42,16 @@ class ResultsPage extends StatelessWidget {
 						],
                ),
 					if (ranks.length > fin)
-					const ListTile(
+					ListTile(
 						dense: true,
-						title: Text("Unfinished"),
+						title: Text("Unfinished (${ranks.length - fin}/${ranks.length})"),
 					),
 					for (var entry in ranks.skip(fin))
 					EquipageTile(
                   entry.key,
                   leading: CircleAvatar(
                      backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-                     child: Text(entry.value.toString()),
+                     child: Text(entry.value.toString(), style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
                   )
                )
             ],
