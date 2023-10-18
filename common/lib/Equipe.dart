@@ -46,43 +46,44 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	if ((schd as JSON).containsKey("days")) {
 		days = schd["days"];
 	}
+
+   var classes = days
+      .expand((day) => day["meetings_classes"])
+      .map((cl) => _parseCategory(cl, m));
 	
-	for (var day in days) {
-		for (var cl in day["meeting_classes"]) {
+	await for (var tup in futStream(classes)) {
+      
+      if (tup == null) continue;
+      var cat = tup.a;
+      var dist = tup.b;
 
-			var tup = await _parseCategory(cl, m);
-			if (tup == null) continue;
-			var cat = tup.a;
-			var dist = tup.b;
+      try {
 
-			try {
+         var cls = tup.c;
+         var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
-				var cls = tup.c;
-				var startTimes = _parseEquipages(cls["starts"], cat, mevs);
+         var catDist = cat.distance();
+         if (catDist == 0) {
+            _guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
+         } else if (catDist != dist && dist != null) {
+            print("distance mismatch ${cat.name}: $catDist != $dist");
+         }
 
-				var catDist = cat.distance();
-				if (catDist == 0) {
-					_guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
-				} else if (catDist != dist && dist != null) {
-               print("distance mismatch ${cat.name}: $catDist != $dist");
+         if (startTimes.isNotEmpty) {
+            cat.startTime = startTimes.values.reduce(min);
+            for (var eq in startTimes.entries) {
+               eq.key.startOffsetSecs = eq.value - cat.startTime;
             }
+         }
 
-				if (startTimes.isNotEmpty) {
-					cat.startTime = startTimes.values.reduce(min);
-					for (var eq in startTimes.entries) {
-						eq.key.startOffsetSecs = eq.value - cat.startTime;
-					}
-				}
-
-				for (var eq in cat.equipages) {
-					m.equipages[eq.eid] = eq;
-				}
-				
-			} catch (e, st) {
-				print(e);
-				print(st);
-			}
-		}
+         for (var eq in cat.equipages) {
+            m.equipages[eq.eid] = eq;
+         }
+         
+      } catch (e, st) {
+         print(e);
+         print(st);
+      }
 	}
 
 	mevs.sort();

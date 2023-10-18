@@ -53,7 +53,7 @@ class StrModel extends IJSON {
 	
 }
 
-class Handle extends EventModelHandle<StrModel> {
+class StrHandle extends EventModelHandle<StrModel> {
 	StrModel revive(JSON json) => StrModel.fromJson(json);
 	StrEv reviveEvent(JSON json) => StrEv.fromJson(json);
 	StrModel createModel() => StrModel();

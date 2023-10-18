@@ -1,15 +1,12 @@
 
 import 'dart:async';
-import 'dart:io';
-import 'package:common/EnduranceEvent.dart';
+import 'package:common/models/MetaModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
-File backupFile = File("../backup.events.json");
 
 Future<void> main() async {
 
@@ -19,9 +16,7 @@ Future<void> main() async {
 	var man = PeerManager<Model>(
 		"root-server",
 		SqliteDatabase.create,
-		Model.fromJson,
-		EnduranceEvent.fromJson,
-		Model.new,
+      MetaModel(),
 	);
 
 	Server io = Server();

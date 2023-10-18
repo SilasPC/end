@@ -12,9 +12,7 @@ void main() {
 	var manager = (String id, int sessionId) => PeerManager<StrModel>(
 		id,
 		() => NullDatabase<StrModel>(id, sessionId),
-		StrModel.fromJson,
-		StrEv.fromJson,
-		() => StrModel(),
+      StrHandle(),
 	)..autoConnect = true;
 
 	test("two way", () async {

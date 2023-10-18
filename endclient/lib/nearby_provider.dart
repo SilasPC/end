@@ -1,4 +1,5 @@
 
+import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +26,10 @@ class _NearbyProviderState extends State<NearbyProvider> {
 		super.initState();
 		_nearbyMan = NearbyManager();
 		_nearbyMan.addListener(() {
-			/* var newDevs = devices.difference(_nearbyMan.devices.toSet());
-			context.read<LocalModel>().manager.peers.
- */
+         var lm = context.read<LocalModel>();
+         for (var p in _nearbyMan.devices) {
+            lm.manager.addPeer(p);
+         }
 		});
 	}
 
@@ -43,6 +45,7 @@ class _NearbyProviderState extends State<NearbyProvider> {
 		var inSync = context.select<ServerConnection, bool>((c) => c.inSync);
 		_nearbyMan.enabled = useP2p;
 		_nearbyMan.autoConnect = !inSync;
+
 		return ChangeNotifierProvider.value(
 			value: _nearbyMan,
 			child: widget.child,

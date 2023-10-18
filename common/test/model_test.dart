@@ -3,7 +3,6 @@ import 'package:common/EventModel.dart';
 import 'package:test/test.dart';
 import 'str.dart';
 
-
 void main() {
 	var dig = StrEv.dig;
 	test("empty model", () {
@@ -123,5 +122,5 @@ void main() {
 }
 
 class Model extends EventModel<StrModel> {
-	Model(): super(Handle());
+	Model(): super(StrHandle());
 }

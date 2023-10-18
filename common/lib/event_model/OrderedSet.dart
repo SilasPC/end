@@ -81,3 +81,35 @@ class ReadOnlyOrderedSet<T> {
 	T operator[] (int idx) => _byOrd[idx].a;
 
 }
+
+/* class OrderedSetCursor<T> extends Iterator<T> {
+
+	final OrderedSet<T> _set;
+	int _i = 0;
+
+	final bool _byIns;
+
+	int currentCmpIndex() =>
+		_byIns
+			? _set.findOrdIndex(current)!
+			: _i;
+
+	int currentInsertionIndex() =>
+		_byIns
+			? _i
+			: _set._byOrd[_i].b;
+	
+	OrderedSetCursor.byIns(this._set): _byIns = true;
+	OrderedSetCursor.byCmp(this._set): _byIns = false;
+
+	@override
+	T get current => _byIns ? _set._byIns[_i] : _set._byOrd[_i].a;
+
+	@override
+	bool moveNext() {
+		if (_i >= this._set.length) return false;
+		_i++;
+		return true;
+	}
+
+} */

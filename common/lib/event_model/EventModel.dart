@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/p2p/Manager.dart';
-import '../EnduranceEvent.dart';
 import '../util.dart';
 import 'Event.dart';
 

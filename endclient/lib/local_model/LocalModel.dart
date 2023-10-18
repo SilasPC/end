@@ -3,9 +3,9 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
+import 'package:common/models/MetaModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
@@ -29,7 +29,12 @@ class ModelProvider extends StatelessWidget {
 				mod.autoYield = set.autoYield;
 				return mod;
 			},
-			child: child,
+			child: ProxyProvider<LocalModel, MetaModel>(
+            lazy: false,
+            create: (context) => context.read<LocalModel>().metaModel,
+            update: (_, __, mm) => mm!,
+            child: child,
+         ),
 		);
 }
 
@@ -46,6 +51,8 @@ class LocalModel with ChangeNotifier {
 		_autoYield = value;
 	}
 
+   final MetaModel metaModel = MetaModel() ;
+
 	late PeerManager<Model> manager;
 	ServerPeer? master;
 	StreamSubscription? _masterConnectSub, _stateChangeSub;
@@ -56,9 +63,7 @@ class LocalModel with ChangeNotifier {
 		manager = PeerManager(
 			Platform.localHostname,
 			SqliteDatabase.create,
-			Model.fromJson,
-			EnduranceEvent.fromJson,
-			Model.new,
+         metaModel,
 		);
 		manager.updateStream.listen((_) => notifyListeners());
 	}

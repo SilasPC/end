@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+export 'util/unix.dart';
 
 typedef JSON = Map<String, dynamic>;
 typedef Reviver<T> = T Function(JSON);
@@ -12,7 +13,7 @@ typedef VoidCallback = void Function();
 abstract class IJSON {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
-   List<int> toJsonBin() => toJsonString().codeUnits;
+	List<int> toJsonBin() => toJsonString().codeUnits;
 	static JSON fromBin(List<int> bin) =>
 		jsonDecode(String.fromCharCodes(bin));
 }
@@ -24,33 +25,6 @@ T unimpl<T>([msg]) => throw UnimplementedError(msg);
 P? maybe<T,P>(T? t, P? Function(T) f) =>
 	t == null ? null : f(t);
 
-const UNIX_FUTURE = 32503676400; // year 3000
-
-String toHMS(DateTime t) => t.toIso8601String().substring(11,19);
-int toUNIX(DateTime t) => (t.millisecondsSinceEpoch / 1000).floor();
-String unixHMS(int unix) => toHMS(fromUNIX(unix));
-DateTime fromUNIX(int unix) =>
-	DateTime.fromMillisecondsSinceEpoch(unix * 1000);
-int nowUNIX() => toUNIX(DateTime.now());
-int hmsToUNIX(String hms) {
-	var dt = DateTime.now();
-	var midnight = toUNIX(dt) - dt.hour * 3600 - dt.minute * 60 - dt.second;
-	List<int> hms0 = hms.split(":").map(int.parse).toList();
-	return midnight + 3600 * hms0[0] + 60 * hms0[1] + hms0[2];
-}
-DateTime fromHMS(int h, int m, int s) {
-	var dt = DateTime.now();
-	var midnight = toUNIX(dt) - dt.hour * 3600 - dt.minute * 60 - dt.second;
-	return fromUNIX(midnight + 3600 * h + 60 * m + s);
-}
-String unixDifToMS(int dif, [bool addPlus = false, bool addMinus = true]) {
-	int m = (dif.abs() / 60).floor();
-	int s = dif % 60;
-	String ms = m > 9 ? "$m" : "0$m";
-	String ss = s > 9 ? "$s" : "0$s";
-	return (dif < 0 && addMinus) ? "-$ms:$ss" : (addPlus ? "+$ms:$ss" : "$ms:$ss" );
-}
-
 /** Optionally map a dictionary key */
 T? jmap<T>(JSON m, String k, T Function(JSON) f) {
 	if (!m.containsKey(k)) return null;
@@ -59,15 +33,9 @@ T? jmap<T>(JSON m, String k, T Function(JSON) f) {
 	return f(v);
 }
 
-/*JSON mapj<K,IJSON>(Map<K,IJSON> m) =>
-	m.map((K key, IJSON value) => MapEntry(key.toString(), value.toJSON()));*/
-
 /** Revive elements using f */
 List<T> jlist_map<T,P>(List<dynamic> json, T Function(P) f) =>
 	json.map((e) => f(e as P)).toList();
-
-/** Revive elements by casting */
-List<T> jlist_cast<T>(List<dynamic> json) => jlist_map(json, (e) => e as T);
 
 /** Convert list to JSON */
 List<dynamic> listj(List<IJSON> l) => l.map((e) => e.toJson()).toList();
@@ -81,17 +49,17 @@ class Tuple<A,B> {
 	final A a;
 	final B b;
 	Tuple(this.a,this.b);
-  @override
-  String toString() => "Tuple($a, $b)";
+	@override
+	String toString() => "Tuple($a, $b)";
 }
 
 class Tuple3<A,B,C> {
-  final A a;
-  final B b;
-  final C c;
-  Tuple3(this.a,this.b,this.c);
-  @override
-  String toString() => "Tuple3($a, $b, $c)";
+	final A a;
+	final B b;
+	final C c;
+	Tuple3(this.a,this.b,this.c);
+	@override
+	String toString() => "Tuple3($a, $b, $c)";
 }
 
 /**
@@ -143,7 +111,7 @@ List<T> swap<T>(int i, int j, List<T> lst) {
 }
 
 /// Returns an index mapping `map`, such that the index of `list[i]`,
-/// where it to be sorted, would be `list[map[i]]`.
+/// were it to be sorted, would be `map[i]`.
 /// 
 /// Thus the map provides the actual index the elements would recieve if sorted.
 List<int> sortIndexMap<T>(List<T> list, Comparator<T> cmp) {
@@ -154,4 +122,21 @@ List<int> sortIndexMap<T>(List<T> list, Comparator<T> cmp) {
 		map[indices[i]] = i;
 	}
 	return map;
+}
+
+Stream<T> futStream<T>(Iterable<Future<T>> ts) {
+   var stream = StreamController<T>();
+   int i = 1;
+   for (var t in ts) {
+      i++;
+      t
+         .then((value) => stream.add(value))
+         .whenComplete(() {
+            if (--i == 0) {
+               stream.close();
+            } 
+         });
+   }
+   i--;
+   return stream.stream;
 }
