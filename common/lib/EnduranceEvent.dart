@@ -11,7 +11,7 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part 'EnduranceEvent.g.dart';
 
-sealed class EnduranceEvent extends Event<Model> {
+abstract class EnduranceEvent extends Event<Model> {
 	EnduranceEvent(super.time, super.kind, super.author);
 
 	@override

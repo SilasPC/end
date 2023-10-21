@@ -75,9 +75,10 @@ class EventModel<M extends IJSON> {
 	}
 
 	void createSavepoint() {
+		if (_maxBuildTime != null) return;
 		int? lastEventTime = _events.isEmpty ? null : _events.last.time;
 		savepoints.add(Savepoint(
-			SyncInfo(_events.length, deletes.length),
+			syncState,
 			model,
 			_events.lastInsertionIndex,
 			lastEventTime,

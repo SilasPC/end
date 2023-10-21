@@ -11,7 +11,8 @@ class EquipeMeeting {
 	final String name;
 	final int id;
 
-	static Future<List<EquipeMeeting>> loadRecent() => _loadRecentMeetings();
+	static Future<List<EquipeMeeting>> loadRecent() => _loadMeetings("api/v1/meetings/recent");
+	static Future<List<EquipeMeeting>> loadMany() => _loadMeetings("api/v1/meetings");
 
 	EquipeMeeting(this.name, this.id);
 
@@ -21,8 +22,8 @@ class EquipeMeeting {
 
 }
 
-Future<List<EquipeMeeting>> _loadRecentMeetings() async {
-	dynamic res = await _loadJSON("api/v1/meetings/recent");
+Future<List<EquipeMeeting>> _loadMeetings(String uri) async {
+	dynamic res = await _loadJSON(uri);
 	List<dynamic> recent = res as List;
 	recent.retainWhere((e) => e["discipline"] == "endurance");
 	return recent
@@ -48,7 +49,7 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	}
 
    var classes = days
-      .expand((day) => day["meetings_classes"])
+      .expand((day) => day["meetings_classes"] ?? [])
       .map((cl) => _parseCategory(cl, m));
 	
 	await for (var tup in futStream(classes)) {

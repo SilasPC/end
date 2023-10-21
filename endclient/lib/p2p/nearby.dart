@@ -128,8 +128,10 @@ class NearbyManager with ChangeNotifier {
 			if (_enabled == enable) return;
 			if (enable && available) {
 				await _startDiscovery();
+				await _startAdvertising();
 			} else {
-				await _bt?.stopDiscovery();
+				await _bt?.stopDiscovery().catchError(print);
+				await _bt?.stopAdvertising().catchError(print);
 			}
 			_enabled = enable;
 		});
@@ -178,7 +180,7 @@ class NearbyManager with ChangeNotifier {
 			onConnectionResult: _onRes,
 			onDisconnected: _onDisconnect,
 			serviceId: SERVICE_ID,
-		) ?? false;
+		).catchError((e) {print(e);return false;}) ?? false;
 
 	Future<bool> _startDiscovery() async =>
 		await _bt?.startDiscovery(
@@ -187,7 +189,7 @@ class NearbyManager with ChangeNotifier {
 			onEndpointFound: _onFound,
 			onEndpointLost: _onLost,
 			serviceId: SERVICE_ID,
-		) ?? false;
+		).catchError((e) {print(e);return false;}) ?? false;
 
 	Future<void> _setup() async {
 		await _bt?.stopDiscovery();

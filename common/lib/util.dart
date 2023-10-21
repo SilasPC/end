@@ -130,13 +130,18 @@ Stream<T> futStream<T>(Iterable<Future<T>> ts) {
    for (var t in ts) {
       i++;
       t
-         .then((value) => stream.add(value))
+         .then(
+				(value) => stream.add(value),
+				onError: (e) => stream.addError(e),
+			)
          .whenComplete(() {
             if (--i == 0) {
                stream.close();
             } 
          });
    }
-   i--;
+   if (--i == 0) {
+		stream.close();
+	} 
    return stream.stream;
 }

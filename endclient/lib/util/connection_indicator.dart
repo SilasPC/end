@@ -46,6 +46,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	Widget _syncMenu(BuildContext context) {
 		var ppm = context.watch<LocalModel>();
 		var ses = context.watch<SessionState>().sessionId;
+		var peers = context.watch<PeerStates>().peers;
 		return Dialog(
 			child: ListView(
 				children: [
@@ -64,10 +65,19 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 								},
 							) : null,
 					),
-					/* ListTile(
-						title: Text("Android device"),
-						subtitle: Text("13 event(s) old")
-					) */
+					for (var p in peers)
+					if (p != ppm.master)
+					ListTile(
+						title: Text(p.id ?? "-"),
+						subtitle: Text(p.connected ? p.state.name : "Disconnected"),
+						trailing: p.state.isConflict
+							? IconButton(
+								icon: const Icon(Icons.cloud_download),
+								onPressed: () {
+									ppm.manager.yieldTo(p);
+								},
+							) : null,
+					)
 				],
 			)
 		);

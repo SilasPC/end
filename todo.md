@@ -5,6 +5,9 @@
 
  - more icons (?)
 
+# Presentation
+ - TODO
+
 # Production concerns
  - data integrity
  - security
@@ -23,5 +26,4 @@
  - Device auth
  - Security
  - Auto events
- - Peer to peer
  - Checkpoints

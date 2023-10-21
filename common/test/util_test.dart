@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:common/util.dart';
 import 'package:test/test.dart';
 
@@ -63,5 +65,25 @@ void main() {
 			expect(reorder(1, 0, lst()), [1,0,2,3]);
 			expect(reorder(3, 0, lst()), [3,0,1,2]);
 		});
+	
+	
 	});
+	
+	test("futStream", () async {
+		var ns = List.generate(5, (n) => n);
+		var futs = ns.map((n) => Future.delayed(Duration(milliseconds: n * 50), () => n)).toList();
+		futs.shuffle(Random(0));
+		futs.insert(0, Future.error("An error"));
+		futs.add(Future.error("Another error"));
+
+		var output = <int>[];
+		var caught = 0;
+		await for (var n in futStream(futs).handleError((_) => caught++)) {
+			output.add(n);
+		}
+
+		expect(caught, 2);
+		expect(output, [0,1,2,3,4]);
+	});
+
 }
