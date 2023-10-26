@@ -2,10 +2,45 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:common/util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+/* 
+class SettingsService {
 
+	ValueNotifier<Settings> _current = ValueNotifier(Settings.defaults(this));
+	ValueListenable<Settings> get it => _current;
+
+	SettingsService() {
+		_load();
+	}
+
+	Future<void> _save() async {
+		var prefs = await SharedPreferences.getInstance();
+		await prefs.setString("settings", _current.value.toJsonString());
+	}
+
+	Future<void> _load() async {
+		var prefs = await SharedPreferences.getInstance();
+		var val = prefs.getString("settings");
+		if (val == null) return;
+		try {
+			set(Settings.fromJsonString(val, this));
+		} catch (_) {
+			print("loading settings failed");
+			_save();
+		}
+	}
+
+	void set(Settings value) {
+		_current.value = value;
+		print("settings = ${_current.value.toJsonString()}");
+		_save();
+	}
+
+}
+ */
 class SettingsProvider extends StatefulWidget {
 	const SettingsProvider({super.key, required this.child});
 

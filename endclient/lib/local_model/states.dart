@@ -28,7 +28,7 @@ class VariousStatesProvider extends StatelessWidget {
 	
 }
 
-class ServerConnection {
+class ServerConnection /* extends ChangeNotifier */ {
 
 	PeerState? get state => pmm.master?.state;
 	bool get connected => pmm.master?.connected ?? false;
@@ -36,7 +36,11 @@ class ServerConnection {
 	bool get inSync => state == PeerState.SYNC;
 
 	final LocalModel pmm;
-	ServerConnection(this.pmm);
+	ServerConnection(this.pmm) {
+		/* pmm.serverUpdateStream.stream.listen((_) {
+			notifyListeners();
+		}); */
+	}
 
 	int get desyncCount => pmm.desyncCount;
 
@@ -47,20 +51,28 @@ class ServerConnection {
 
 }
 
-class PeerStates {
+class PeerStates extends ChangeNotifier {
 
 	List<Peer> get peers => manager.peers;
 
 	final PeerManager manager;
-	PeerStates(this.manager);
+	PeerStates(this.manager) {
+		manager.peerStateChanges.listen((_) {
+			notifyListeners();
+		});
+	}
 
 }
 
-class SessionState {
+class SessionState extends ChangeNotifier {
 	
 	int get sessionId => manager.sessionId;
 
 	final PeerManager manager;
-	SessionState(this.manager);
+	SessionState(this.manager) {
+		manager.sessionStream.listen((_) {
+			notifyListeners();
+		});
+	}
 	
 }

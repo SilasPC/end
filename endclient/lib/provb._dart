@@ -1,0 +1,58 @@
+
+
+import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/states.dart';
+import 'package:esys_client/p2p/nearby.dart';
+import 'package:esys_client/settings_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
+void doIt() {
+
+	var b = ProviderBuilder();
+
+	b.registerService(SettingsService());
+	b.registerDerivedListenable<SettingsService, Settings>((s) => s.it);
+
+	b.registerService(LocalModel());
+
+	b.pipeChanges<Settings, LocalModel>((s, lm) {
+		lm.setServerUri(s.serverURI);
+		lm.autoYield = s.autoYield;
+	});
+
+	b.registerService(NearbyManager());
+	b.pipeChanges<NearbyManager, LocalModel>((nm, lm) {
+		for (var p in nm.devices) {
+			lm.manager.addPeer(p);
+		}
+	});
+	
+	b.registerDependentService(ServerConnection.new);
+	b.registerDependentService<LocalModel, PeerStates>(
+		(m) => PeerStates(m.manager)
+	);
+	b.registerDependentService<LocalModel, SessionState>(
+		(m) => SessionState(m.manager)
+	);
+
+}
+
+class ProviderBuilder {
+
+	void registerService<T>(T t) {
+		if (t is ChangeNotifier) {
+			ChangeNotifierProvider.value(value: t);
+		}
+	}
+	void registerDependentService<S, T>(T Function(S) f) {}
+	void registerDerivedStream<T, S>(Stream<S> Function(T) f) {}
+	void registerDerivedListenable<T, S>(ValueListenable<S> Function(T) f) {}
+	void pipeChanges<S1, S2>(void Function(S1, S2) f) {}
+
+	Widget build(Widget child) {
+
+	}
+
+}
