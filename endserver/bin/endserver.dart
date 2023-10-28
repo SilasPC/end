@@ -1,6 +1,5 @@
 
 import 'dart:async';
-import 'package:common/models/MetaModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
@@ -42,11 +41,11 @@ class SocketPeer extends Peer {
 	SocketPeer(this.socket) {
 		socket.on("connect", (_) {
 			print("connect $id");
-			connectStatus.add(true);
+			setConnected(true);
 		});
 		socket.on("disconnect", (_) {
 			print("disconnect $id");
-			connectStatus.add(false);
+			setConnected(false);
 		});
 		for (var ev in SyncProtocol.events) {
 			socket.on(ev, (data) => _handler(ev, data));

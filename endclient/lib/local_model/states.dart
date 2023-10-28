@@ -3,6 +3,7 @@ import 'package:common/p2p/Manager.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class VariousStatesProvider extends StatelessWidget {
 
@@ -15,12 +16,12 @@ class VariousStatesProvider extends StatelessWidget {
 		StreamedProxyProvider<LocalModel, ServerConnection, void>(
 			create: (lm) => ServerConnection(lm),
 			stream: (lm) => lm.serverUpdateStream.stream,
-			child: StreamedProxyProvider<LocalModel, PeerStates, Peer>(
-				create: (lm) => PeerStates(lm.manager),
-				stream: (lm) => lm.manager.peerStateChanges,
-				child: StreamedProxyProvider<LocalModel, SessionState, int>(
-					create: (lm) => SessionState(lm.manager),
-					stream: (lm) => lm.manager.sessionStream,
+			child: ChangeNotifierProxyProvider<LocalModel, PeerStates>(
+				create: (ctx) => PeerStates(ctx.read<LocalModel>().manager),
+				update: (_, __, val) => val!,
+				child: ChangeNotifierProxyProvider<LocalModel, SessionState>(
+					create: (ctx) => SessionState(ctx.read<LocalModel>().manager),
+					update: (_, __, val) => val!,
 					child: child,
 				)
 			),
@@ -58,6 +59,7 @@ class PeerStates extends ChangeNotifier {
 	final PeerManager manager;
 	PeerStates(this.manager) {
 		manager.peerStateChanges.listen((_) {
+			// PERF: dispose
 			notifyListeners();
 		});
 	}
@@ -71,6 +73,7 @@ class SessionState extends ChangeNotifier {
 	final PeerManager manager;
 	SessionState(this.manager) {
 		manager.sessionStream.listen((_) {
+			// PERF: dispose
 			notifyListeners();
 		});
 	}

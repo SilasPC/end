@@ -55,7 +55,8 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 						title: Text("SessionId: $ses")
 					),
 					ListTile(
-						title: const Text("Server"),
+					title: const Text("Server"),
+						tileColor: ppm.master?.connected ?? false ? Colors.green : Colors.red,
 						subtitle: Text(ppm.master?.connected ?? false ? ppm.master!.state.name : "Disconnected"),
 						trailing: ppm.master?.state.isConflict ?? false
 							? IconButton(
@@ -69,7 +70,15 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 					if (p != ppm.master)
 					ListTile(
 						title: Text(p.id ?? "-"),
+						tileColor: p.connected ? Colors.green : Colors.red,
 						subtitle: Text(p.connected ? p.state.name : "Disconnected"),
+						onLongPress: () {
+							if (p.connected) {
+								p.disconnect();
+							} else {
+								p.connect();
+							}
+						},
 						trailing: p.state.isConflict
 							? IconButton(
 								icon: const Icon(Icons.cloud_download),

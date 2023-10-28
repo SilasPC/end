@@ -23,10 +23,10 @@ class ServerPeer extends Peer {
 		);
 
 		_socket.onConnect((_) {
-			connectStatus.add(true);
+			setConnected(true);
 		});
 		_socket.onDisconnect((_) {
-			connectStatus.add(false);
+			setConnected(false);
 		});
 
 		for (var ev in SyncProtocol.events) {

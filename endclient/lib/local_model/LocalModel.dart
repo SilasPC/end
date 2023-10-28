@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
-import 'package:common/models/MetaModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
@@ -76,8 +75,6 @@ class LocalModel with ChangeNotifier {
 		master = ServerPeer(uri);
 		_masterConnectSub?.cancel();
 		_stateChangeSub?.cancel();
-		_masterConnectSub = master!.connectStatus
-			.listen((value) => serverUpdateStream.add(null));
 		_stateChangeSub = manager.peerStateChanges
 			.listen((peer) {
 				if (peer != master) return;

@@ -32,22 +32,26 @@ class Device extends Peer {
 
 	bool get unavailable => status.value == DevStatus.UNAVAILABLE;
 	bool get available => status.value != DevStatus.UNAVAILABLE;
-	// bool get connected => status.value == DevStatus.CONNECTED;
-	bool get disconnected => status.value != DevStatus.CONNECTED;
 	
-	Device._(this._man, this.devId, this.name, this._outGoing);
+	Device._(this._man, this.devId, this.name, this._outGoing) {
+		status.addListener(() {
+			setConnected(status.value == DevStatus.CONNECTED);
+		});
+	}
 
    @override
 	Future<bool> connect() async {
 		if (unavailable) return false;
 		if (connected) return true;
-		return _man._bt!.requestConnection(
+		var suc = await _man._bt!.requestConnection(
 			_man.localName,
 			devId,
 			onConnectionInitiated: _man._onInit,
 			onConnectionResult: _man._onRes, 
 			onDisconnected: _man._onDisconnect, 
-		);
+		); // FIXME: already connected throws
+		if (suc) setConnected(true);
+		return suc;
 	}
 
    @override
@@ -57,6 +61,7 @@ class Device extends Peer {
 		if (available) {
 			status.value = DevStatus.AVAILABLE;
 		}
+		setConnected(false);
 	}
 
    final Int32List _seq = Int32List.fromList([0]);
@@ -126,12 +131,13 @@ class NearbyManager with ChangeNotifier {
 	set enabled (bool enable) {
 		_mutex.protect(() async {
 			if (_enabled == enable) return;
+				print("enable $enable");
 			if (enable && available) {
-				await _startDiscovery();
+				await _getPerms();
 				await _startAdvertising();
+				await _startDiscovery();
 			} else {
-				await _bt?.stopDiscovery().catchError(print);
-				await _bt?.stopAdvertising().catchError(print);
+				await _kill();
 			}
 			_enabled = enable;
 		});
@@ -141,6 +147,7 @@ class NearbyManager with ChangeNotifier {
 	bool get autoConnect => _autoConnect;
 	set autoConnect (val) {
 		if (val && val != _autoConnect) {
+			print("autocon $val");
 			for (var dev in _devs.values) {
 				if (dev.status.value == DevStatus.AVAILABLE) {
 					dev.connect();
@@ -160,7 +167,7 @@ class NearbyManager with ChangeNotifier {
 		_bt = Nearby();
 		_mutex.protect(() async {
 			await _getPerms();
-			return _setup();
+			return _kill();
 		});
 	}
 
@@ -191,14 +198,10 @@ class NearbyManager with ChangeNotifier {
 			serviceId: SERVICE_ID,
 		).catchError((e) {print(e);return false;}) ?? false;
 
-	Future<void> _setup() async {
+	Future<void> _kill() async {
 		await _bt?.stopDiscovery();
 		await _bt?.stopAdvertising();
 		await _bt?.stopAllEndpoints();
-		await _startAdvertising();
-		if (enabled && autoConnect) {
-			await _startDiscovery();
-		}
 	}
 
 	static Future<void> _getPerms() async {
