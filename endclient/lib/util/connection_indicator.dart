@@ -58,6 +58,14 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 					title: const Text("Server"),
 						tileColor: ppm.master?.connected ?? false ? Colors.green : Colors.red,
 						subtitle: Text(ppm.master?.connected ?? false ? ppm.master!.state.name : "Disconnected"),
+						onLongPress: () {
+							if (ppm.master == null) return;
+							if (ppm.master!.connected) {
+								ppm.master!.disconnect();
+							} else {
+								ppm.master!.connect();
+							}
+						},
 						trailing: ppm.master?.state.isConflict ?? false
 							? IconButton(
 								icon: const Icon(Icons.cloud_download),

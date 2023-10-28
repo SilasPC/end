@@ -23,9 +23,11 @@ class ServerPeer extends Peer {
 		);
 
 		_socket.onConnect((_) {
+			print("server connect");
 			setConnected(true);
 		});
 		_socket.onDisconnect((_) {
+			print("server disconnect");
 			setConnected(false);
 		});
 

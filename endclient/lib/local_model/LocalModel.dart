@@ -54,7 +54,7 @@ class LocalModel with ChangeNotifier {
 
 	late PeerManager<Model> manager;
 	ServerPeer? master;
-	StreamSubscription? _masterConnectSub, _stateChangeSub;
+	StreamSubscription? _stateChangeSub;
 
 	StreamController<void> serverUpdateStream = StreamController.broadcast();
 
@@ -73,13 +73,12 @@ class LocalModel with ChangeNotifier {
 		}
 		master?.disconnect();
 		master = ServerPeer(uri);
-		_masterConnectSub?.cancel();
 		_stateChangeSub?.cancel();
 		_stateChangeSub = manager.peerStateChanges
-			.listen((peer) {
-				if (peer != master) return;
-				if (peer.state.isConflict && _autoYield) {
-					manager.yieldTo(master!);
+			.where((p) => p == master)
+			.listen((master) {
+				if (master.state.isConflict && _autoYield) {
+					manager.yieldTo(master);
 				}
 				serverUpdateStream.add(null);
 			});

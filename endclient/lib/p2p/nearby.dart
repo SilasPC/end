@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/msg_encoder.dart' as coding;
 import 'package:flutter/foundation.dart';
 import 'package:location/location.dart';
 import 'package:mutex/mutex.dart';
@@ -40,43 +41,49 @@ class Device extends Peer {
 	}
 
    @override
-	Future<bool> connect() async {
-		if (unavailable) return false;
-		if (connected) return true;
-		var suc = await _man._bt!.requestConnection(
-			_man.localName,
-			devId,
-			onConnectionInitiated: _man._onInit,
-			onConnectionResult: _man._onRes, 
-			onDisconnected: _man._onDisconnect, 
-		); // FIXME: already connected throws
-		if (suc) setConnected(true);
-		return suc;
+	void connect() async {
+		if (unavailable) return;
+		if (connected) return;
+		try {
+			await _man._bt!.requestConnection(
+				_man.localName,
+				devId,
+				onConnectionInitiated: _man._onInit,
+				onConnectionResult: _man._onRes, 
+				onDisconnected: _man._onDisconnect, 
+			);
+		}
+		catch (e) {
+			print(e);
+		}
 	}
 
    @override
-	Future<void> disconnect() async {
+	void disconnect() async {
 		if (disconnected) return;
-		await _man._bt!.disconnectFromEndpoint(devId);
-		if (available) {
-			status.value = DevStatus.AVAILABLE;
+		try {
+			await _man._bt!.disconnectFromEndpoint(devId);
 		}
-		setConnected(false);
+		finally {
+			if (available) {
+				status.value = DevStatus.AVAILABLE;
+			}
+			setConnected(false);
+		}
 	}
 
-   final Int32List _seq = Int32List.fromList([0]);
+   int _seqNr = 0;
    final Map<int, Completer<List<int>?>> _completers = {};
 
    @override
 	Future<List<int>?> send(String msg, List<int> data) async {
 		if (disconnected) return null;
 
-      var c = Completer<List<int>?>();
+      final c = Completer<List<int>?>();
 
-      var seqNr = _seq[0]++;
+		final seqNr = _seqNr++;
       _completers[seqNr] = c;
-      var seqBuf = _seq.buffer.asUint8List();
-		await _man._bt!.sendBytesPayload(devId, Uint8List.fromList([...seqBuf, 0, ...msg.codeUnits, 0, ...data]));
+		await _man._bt!.sendBytesPayload(devId, coding.encodeMsg(seqNr, msg, data));
 
       Timer(const Duration(seconds: 5), () {
          if (!c.isCompleted) {
@@ -89,25 +96,26 @@ class Device extends Peer {
 	}
 
    void _rcv(List<int> data) async {
-      var seqData = data.sublist(0,4);
-      var seq = Uint8List.fromList(seqData).buffer.asInt32List()[0];
-      var isReply = data[4] == 1;
+
+		final (
+			seqNr,
+			msg,
+			msgData,
+			isReply
+		) = coding.decodeMsg(data);
+
       if (isReply) {
-         var c = _completers.remove(seq);
+         var c = _completers.remove(seqNr);
          if (!(c?.isCompleted ?? true)) {
             c!.complete(data.sublist(5));
          }
       } else {
-         var i = data.indexOf(0, 5);
-         var msg = String.fromCharCodes(data.skip(5).take(i-5));
-         data = data.sublist(i+1);
-         var reply = await onRecieve(msg, data);
+         var reply = await onRecieve(msg, msgData);
          if (reply == null) return;
-		   _man._bt!.sendBytesPayload(devId, Uint8List.fromList([
-            ...seqData,
-            1,
-            ...reply
-         ]));
+		   _man._bt!.sendBytesPayload(
+				devId, 
+				coding.encodeReply(seqNr, reply)
+			);
       }
    }
 
@@ -131,7 +139,6 @@ class NearbyManager with ChangeNotifier {
 	set enabled (bool enable) {
 		_mutex.protect(() async {
 			if (_enabled == enable) return;
-				print("enable $enable");
 			if (enable && available) {
 				await _getPerms();
 				await _startAdvertising();
@@ -147,7 +154,6 @@ class NearbyManager with ChangeNotifier {
 	bool get autoConnect => _autoConnect;
 	set autoConnect (val) {
 		if (val && val != _autoConnect) {
-			print("autocon $val");
 			for (var dev in _devs.values) {
 				if (dev.status.value == DevStatus.AVAILABLE) {
 					dev.connect();
@@ -245,7 +251,7 @@ class NearbyManager with ChangeNotifier {
 
 	void _onFound(String devId, String name, String sid) {
 		if (sid != SERVICE_ID) return;
-		print("found $devId $name $sid");
+		// print("found $devId $name $sid");
 		var dev = _dev(devId, name);
 		if (dev.disconnected) {
 			dev.status.value = DevStatus.AVAILABLE;
@@ -256,7 +262,7 @@ class NearbyManager with ChangeNotifier {
 	}
 	
 	void _onLost(String? devId) {
-		print("lost $devId");
+		// print("lost $devId");
 		_devs[devId]?.status.value = DevStatus.UNAVAILABLE;
 	}
 
@@ -265,7 +271,6 @@ class NearbyManager with ChangeNotifier {
 		await _bt?.acceptConnection(
 			devId,
 			onPayLoadRecieved: (devId, data) {
-				print("rcv $devId ${data.type} ${data.bytes?.length}");
 				if (data.bytes != null) {
 					dev._rcv(data.bytes!);
 				}
@@ -274,11 +279,12 @@ class NearbyManager with ChangeNotifier {
 	}
 
 	void _onRes(String devId, Status state) {
-		print("res $devId $state");
+		// print("res $devId $state");
 		var dev = _devs[devId]!;
 		switch (state) {
 			case Status.CONNECTED:
 				dev.status.value = DevStatus.CONNECTED;
+				dev.setConnected(true);
 			case Status.ERROR:
 			case Status.REJECTED:
 				dev.status.value = DevStatus.AVAILABLE;
@@ -286,7 +292,7 @@ class NearbyManager with ChangeNotifier {
 	}
 
 	void _onDisconnect(String devId) {
-		print("disc $devId");
+		// print("disc $devId");
 		_devs[devId]!.status.value = DevStatus.AVAILABLE;
 	}
 

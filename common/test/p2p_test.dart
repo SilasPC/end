@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
+import 'package:common/p2p/msg_encoder.dart';
 import 'package:test/test.dart';
 
 import 'str.dart';
@@ -14,6 +15,63 @@ void main() {
 		() => NullDatabase<StrModel>(id, sessionId),
       StrHandle(),
 	)..autoConnect = true;
+
+	test("msg encoder", () {
+
+		final raw = encodeMsg(
+			0xdeadbeef,
+			"deadbeef",
+			[42],
+		);
+		
+		expect(raw, [
+			239, 190, 173, 222,
+			0, 
+			100, 101, 97, 100, 98, 101, 101, 102,
+			0,
+			42
+		]);
+
+		final (
+			seq,
+			msg,
+			data,
+			reply
+		) = decodeMsg(raw);
+
+		expect(seq.toRadixString(16), "deadbeef");
+		expect(msg, "deadbeef");
+		expect(data, [42]);
+		expect(reply, false);
+
+	});
+
+	test("msg reply encoder", () {
+
+		final raw = encodeReply(
+			0xcafebabe,
+			[0],
+		);
+
+		expect(raw, [
+			190, 186, 254, 202,
+			1,
+			0
+		]);
+
+		final (
+			seq,
+			msg,
+			data,
+			reply
+		) = decodeMsg(raw);
+		
+		expect(seq.toRadixString(16), "cafebabe");
+		expect(msg, "");
+		expect(data, [0]);
+		expect(reply, true);
+
+	});
 
 	test("two way", () async {
 

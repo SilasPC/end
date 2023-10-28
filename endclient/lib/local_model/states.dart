@@ -13,9 +13,9 @@ class VariousStatesProvider extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) =>
-		StreamedProxyProvider<LocalModel, ServerConnection, void>(
-			create: (lm) => ServerConnection(lm),
-			stream: (lm) => lm.serverUpdateStream.stream,
+		ChangeNotifierProxyProvider<LocalModel, ServerConnection>(
+			create: (ctx) => ServerConnection(ctx.read<LocalModel>()),
+			update: (_, __, val) => val!,
 			child: ChangeNotifierProxyProvider<LocalModel, PeerStates>(
 				create: (ctx) => PeerStates(ctx.read<LocalModel>().manager),
 				update: (_, __, val) => val!,
@@ -29,18 +29,19 @@ class VariousStatesProvider extends StatelessWidget {
 	
 }
 
-class ServerConnection /* extends ChangeNotifier */ {
+class ServerConnection extends ChangeNotifier {
 
 	PeerState? get state => pmm.master?.state;
 	bool get connected => pmm.master?.connected ?? false;
 	int? get sessionId => pmm.master?.sessionId;
-	bool get inSync => state == PeerState.SYNC;
+	bool get inSync => state?.isSync ?? false;
 
 	final LocalModel pmm;
 	ServerConnection(this.pmm) {
-		/* pmm.serverUpdateStream.stream.listen((_) {
+		pmm.serverUpdateStream.stream.listen((_) {
+			// PERF: dispose
 			notifyListeners();
-		}); */
+		});
 	}
 
 	int get desyncCount => pmm.desyncCount;

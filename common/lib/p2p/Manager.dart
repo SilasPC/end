@@ -88,7 +88,7 @@ abstract class Peer {
 	set _state (PeerState newState) {
 		if (__state != newState) {
 			_man?._onStateChange.add(this);
-			print("$id = $newState");
+			// print("$id = $newState");
 		}
 		__state = newState;
 	}
@@ -185,7 +185,7 @@ class PeerManager<M extends IJSON> {
 		peerStateChanges.listen(_stateChangeHandler);
 		_sessionId = Random().nextInt(1 << 30);
 		_onSessionUpdate.add(_sessionId);
-		print("$peerId ses = $_sessionId");
+		// print("$peerId ses = $_sessionId");
 		this.handle = Handle<M>(
 			() => _onUpdate.add(null),
          handle
@@ -203,7 +203,7 @@ class PeerManager<M extends IJSON> {
 				// TODO: _peerId = data.b!.peerId;
 				_resetCount = data.b!.resetCount;
 				_sessionId = data.b!.sessionId;
-				print("$peerId ses = $_sessionId");
+				// print("$peerId ses = $_sessionId");
 				_onSessionUpdate.add(_sessionId);
 			}
 			_lastDbSave = _em.syncState;
@@ -226,7 +226,7 @@ class PeerManager<M extends IJSON> {
 	Future<void> resetSession() async =>
 		_mutex.protect(() async {
 			await _reset(disconnect: false);
-			print("$peerId ses = $_sessionId");
+			// print("$peerId ses = $_sessionId");
 			for (var op in _peers) {
 				op._mutex.protect(() => _preSync(op));
 			}
@@ -234,7 +234,7 @@ class PeerManager<M extends IJSON> {
 	
 	/// mutex order manager -> peer
 	Future<void> resetModel() async {
-		print("reset $peerId");
+		// print("reset $peerId");
 		await _mutex.protect(() async {
 			await _db.clear(keepPeers: true);
 			_em.reset();
@@ -257,7 +257,7 @@ class PeerManager<M extends IJSON> {
 		}
 		await _db.savePeer(_curPreSyncMsg(), SyncInfo.zero());
 		_lastDbSave = curState;
-		print("saved $peerId");
+		// print("saved $peerId");
 	}
 
 	void _broadcastSync() {
@@ -265,19 +265,19 @@ class PeerManager<M extends IJSON> {
 	}
 
 	void _syncTo(Peer p) {
-		print("syncto ${p.id} ${p._state.name}");
+		// print("syncto ${p.id} ${p._state.name}");
 		p._mutex.protect(() async {
 			if (p._state != PeerState.SYNC) {
-				print("cannot sync to ${p.id} ${p._state.name}");
+				// print("cannot sync to ${p.id} ${p._state.name}");
 				return;
 			}
 			var ss = _em.syncState;
 			if (p._lastLocal == ss) {
-				print("nothing to sync with ${p.id}");
+				// print("nothing to sync with ${p.id}");
 				return;
 			}
 			var data = _em.getNewer(p._lastLocal);
-			print("send ${data.evs} to ${p.id}");
+			// print("send ${data.evs} to ${p.id}");
 			var res = await p.send(
 				SyncProtocol.SYNC,
 				data.toJsonBin()
@@ -309,7 +309,7 @@ class PeerManager<M extends IJSON> {
 			return;
 		}
 		p._connected = p._state.connected;
-		print("con $peerId -> ${p.id} = ${p._connected}");
+		// print("con $peerId -> ${p.id} = ${p._connected}");
 		if (p._state == PeerState.PRESYNC && p.isOutgoing()) {
 			p._mutex.protect(() => _preSync(p));
 		}
@@ -317,18 +317,18 @@ class PeerManager<M extends IJSON> {
 
 	/// must have peer lock
 	Future<void> _preSync(Peer p, [bool retry = true]) async {
-		print("presync to ${p.id}");
+		// print("presync to ${p.id}");
 		p._state = PeerState.PRESYNC;
 		var res = await p.send(SyncProtocol.PRE_SYNC, _curPreSyncMsg().toJsonBin());
 		if (res == null) {
-			print("no presync ack");
+			// print("no presync ack");
 			// TODO: no presync ack (retry?)
 			if (retry) return _preSync(p, false);
 			return;
 		}
 		await _handlePreSync(p, PreSyncMsg.fromBin(res));
 		if (p._state.isSync) {
-			print("send syncack => ${p.id}");
+			// print("send syncack => ${p.id}");
 			p.send(SyncProtocol.ACK_SYNC, []);
 			_syncTo(p);
 		}
@@ -344,10 +344,14 @@ class PeerManager<M extends IJSON> {
 	/// must have peer lock
 	Future<void> _handlePreSync(Peer p, PreSyncMsg ps) async {
 		if (ps.protocolVersion != ps.protocolVersion) {
-			print("protocol version conflict");
+			// print("protocol version conflict");
 			return;
 		}
-		// TODO: check for peer id conflicts
+		var conflict = _peers.where((p2) => p2.id == ps.peerId && p2 != p).firstOrNull;
+		if (conflict != null) {
+			_peers.remove(conflict);
+			// disconnect ?
+		}
 		if (p._lastKnownState == null) {
 			var state = await _db.loadPeer(ps.peerId);
 			p._lastKnownState = state?.a;
@@ -358,14 +362,14 @@ class PeerManager<M extends IJSON> {
 			// TODO: client changed peer id
 		}
 		p._lastKnownState = ps;
-		print("handle pre sync from ${ps.peerId}");
+		// print("handle pre sync from ${ps.peerId}");
 		if (ps.sessionId != sessionId) {
 			p._state = PeerState.CONFLICT;
-			print("conflict peer:${ps.sessionId} != this:${sessionId}");
+			// print("conflict peer:${ps.sessionId} != this:${sessionId}");
 			return;
 		}
 		if (last.resetCount != ps.resetCount || last.sessionId != ps.sessionId) {
-			print("discovered reset by ${ps.peerId}");
+			// print("discovered reset by ${ps.peerId}");
 			p._lastLocal = SyncInfo.zero();
 		}
 		p._state = PeerState.SYNC;
@@ -377,20 +381,20 @@ class PeerManager<M extends IJSON> {
 		p._mutex.protect(() async {
 			switch (msg) {
 				case SyncProtocol.ACK_SYNC:
-					print("syncack from ${p.id}");
+					// print("syncack from ${p.id}");
 					_syncTo(p);
 					return [];
 				case SyncProtocol.PRE_SYNC:
-					print("presync from ${p.id}");
+					// print("presync from ${p.id}");
 					_handlePreSync(p, PreSyncMsg.fromBin(data));
 					return _curPreSyncMsg().toJsonBin();
 				case SyncProtocol.SYNC:
 					if (p._state != PeerState.SYNC) {
-						print("rcv: not in sync yet");
+						// print("rcv: not in sync yet");
 						return null;
 					}
 					if (p._lastKnownState?.sessionId != _sessionId) {
-						print("sync incorrect session");
+						// print("sync incorrect session");
 						p._state = PeerState.CONFLICT;
 						return null;
 					}
@@ -404,7 +408,7 @@ class PeerManager<M extends IJSON> {
 					}
 					return SyncProtocol.OK;
 				default:
-					print("$msg ?");
+					// print("$msg ?");
 					return null;
 			}
 		});
@@ -413,7 +417,7 @@ class PeerManager<M extends IJSON> {
 	Future<bool> yieldTo(Peer p) =>
 		_mutex.protect(() =>
 			p._mutex.protect(() async {
-				print("yield to ${p.id} ${p._state.name} ${p._lastKnownState?.sessionId}");
+				// print("yield to ${p.id} ${p._state.name} ${p._lastKnownState?.sessionId}");
 				if (p.sessionId == sessionId) {
 					return false;
 				}
@@ -424,7 +428,7 @@ class PeerManager<M extends IJSON> {
 				_sessionId = p._lastKnownState!.sessionId;
 				_onSessionUpdate.add(_sessionId);
 				await _save();
-				print("$peerId ses = $_sessionId");
+				// print("$peerId ses = $_sessionId");
 				for (var op in _peers) {
 					op._mutex.protect(() => _preSync(op));
 				}
@@ -440,13 +444,13 @@ class PeerManager<M extends IJSON> {
 			.toList();
 		try {
 			await Future.wait(locks.map((l) => l.acquire()));
-			print("reset");
+			// print("reset");
 			if (!keepDatabase) {
 				await _db.clear(keepPeers: keepPeerData);
 			}
 			_em.reset();
 			_sessionId = Random().nextInt(1 << 30);
-			print("$peerId ses = $_sessionId");
+			// print("$peerId ses = $_sessionId");
 			_resetCount = Random().nextInt(1 << 30);
 			for (var p in _peers) {
 				if (disconnect) {
