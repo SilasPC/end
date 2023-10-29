@@ -151,11 +151,11 @@ class PeerManager<M extends IJSON> {
 		_autoConnect = val;
 	}
 
-	StreamController<void> _onUpdate = StreamController.broadcast();
+	StreamController<Null> _onUpdate = StreamController.broadcast();
 	StreamController<int> _onSessionUpdate = StreamController.broadcast();
 	StreamController<Peer> _onStateChange = StreamController.broadcast();
 	Stream<int> get sessionStream => _onSessionUpdate.stream;
-	Stream<void> get updateStream => _onUpdate.stream;
+	Stream<Null> get updateStream => _onUpdate.stream;
 	Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
 	final String peerId;
@@ -180,15 +180,15 @@ class PeerManager<M extends IJSON> {
 	PeerManager(
 		this.peerId,
 		AsyncProducer<EventDatabase<M>> createDb,
-      EventModelHandle<M> handle,
+      EventModelHandle<M> innerHandle,
 	) {
 		peerStateChanges.listen(_stateChangeHandler);
 		_sessionId = Random().nextInt(1 << 30);
 		_onSessionUpdate.add(_sessionId);
 		// print("$peerId ses = $_sessionId");
-		this.handle = Handle<M>(
+		handle = Handle<M>(
 			() => _onUpdate.add(null),
-         handle
+         innerHandle
 		);
 		_em = EventModel(handle);
 		_initDatabase(createDb);
@@ -318,6 +318,7 @@ class PeerManager<M extends IJSON> {
 	/// must have peer lock
 	Future<void> _preSync(Peer p, [bool retry = true]) async {
 		// print("presync to ${p.id}");
+		if (!p.connected) return;
 		p._state = PeerState.PRESYNC;
 		var res = await p.send(SyncProtocol.PRE_SYNC, _curPreSyncMsg().toJsonBin());
 		if (res == null) {
@@ -461,7 +462,9 @@ class PeerManager<M extends IJSON> {
 			_onSessionUpdate.add(_sessionId);
 			_onUpdate.add(null);
 		}
-		catch (_) {}
+		catch (e) {
+			print(e);
+		}
 		finally {
 			for (var l in locks) {
 				l.release();
