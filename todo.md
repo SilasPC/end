@@ -16,8 +16,6 @@
 
 # Immediate todos
  - todo's
- - Fix overflows
- - Post ride results
 
 # Future
  - Tablet layout

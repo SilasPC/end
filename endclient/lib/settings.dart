@@ -23,7 +23,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
-	final TextEditingController _servAddr = TextEditingController(); 
+	final TextEditingController _servAddr = TextEditingController();
 	final TextEditingController _author = TextEditingController();
 
 	late Settings set;
@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
 	Widget build(BuildContext context) {
 		var model = context.read<LocalModel>();
 		var conn = context.watch<ServerConnection>();
-		context.watch<PeerStates>();
+      var session = context.watch<SessionState>();
 		return Scaffold(
 			appBar: AppBar(
 				title: const Text("Settings"),
@@ -126,7 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
 					ListTile(
 						leading: const Icon(Icons.sync),
 						title: const Text("Resync"),
-						onTap: () => model.manager.resetModel(),
+						onTap: () => model.resetModel(),
 					),
 					ListTile(
 						leading: const Icon(Icons.data_array),
@@ -142,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						ListTile(
 							leading: const Icon(Icons.cancel),
 							title: const Text("New session"),
-							subtitle: Text("Current: ${model.manager.sessionId}"),
+							subtitle: Text("Current: ${session.sessionId}"),
 							onTap: () {
 								if (set.autoYield) {
 									setState((){
@@ -150,40 +150,27 @@ class _SettingsPageState extends State<SettingsPage> {
 											..save();
 									});
 								}
-								model.manager.resetSession();
+                        session.reset();
 							}
 						),
 						ListTile(
 							leading: const Icon(Icons.cloud_upload),
-							title: const Text("Yield remote"),
+							title: const Text("Upload session"),
 							subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
 							onTap: () => conn.yieldRemote(),
 						),
 						ListTile(
 							leading: const Icon(Icons.download),
 							title: const Text("Load model..."),
-							onTap: () => loadModel(context),
+							onTap: loadModel,
 						),
 					],
-					// UI: this has to be different
-					const ListTile(
-						title: Text("Peers"),
-						dense: true,
-					),
-					for (var p in model.manager.peers)
-					ListTile(
-						title: Text(p.id ?? "?"),
-						subtitle: Text(!p.connected ? "-" : p.state.name),
-						onTap: () {
-							model.manager.yieldTo(p);
-						},
-					)
 				],
 			),
 		);
 	}
 
-	static Future<void> loadModel(BuildContext context) async {
+	Future<void> loadModel() async {
 		var m = context.read<LocalModel>();
 		var meets = await EquipeMeeting.loadRecent();
 		// ignore: use_build_context_synchronously
@@ -197,7 +184,7 @@ class _SettingsPageState extends State<SettingsPage> {
 					var meet = meets.firstWhere((e) => e.name == name);
 					try {
 						var evs = await meet.loadEvents();
-						await m.addSync(evs);						
+						await m.addSync(evs);
 					} catch (e, s) {
 						print(e);
 						print(s);

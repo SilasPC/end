@@ -48,43 +48,41 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 		days = schd["days"];
 	}
 
-   var classes = days
-      .expand((day) => day["meetings_classes"] ?? [])
-      .map((cl) => _parseCategory(cl, m));
-	
+	var classes = days
+		.expand((day) => day["meetings_classes"] ?? [])
+		.map((cl) => _parseCategory(cl, m));
+
 	await for (var tup in futStream(classes)) {
-      
-      if (tup == null) continue;
-      var cat = tup.a;
-      var dist = tup.b;
 
-      try {
+		if (tup == null) continue;
+		var (cat, dist, cls) = tup!;
 
-         var cls = tup.c;
-         var startTimes = _parseEquipages(cls["starts"], cat, mevs);
+		try {
 
-         var catDist = cat.distance();
-         if (catDist == 0) {
-            _guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
-         } else if (catDist != dist && dist != null) {
-            print("distance mismatch ${cat.name}: $catDist != $dist");
-         }
+			var startTimes = _parseEquipages(cls["starts"], cat, mevs);
 
-         if (startTimes.isNotEmpty) {
-            cat.startTime = startTimes.values.reduce(min);
-            for (var eq in startTimes.entries) {
-               eq.key.startOffsetSecs = eq.value - cat.startTime;
-            }
-         }
+			var catDist = cat.distance();
+			if (catDist == 0) {
+				_guessCategoryLoops(cat, dist ?? 30 /* TODO: what to put here? */);
+			} else if (catDist != dist && dist != null) {
+				print("distance mismatch ${cat.name}: $catDist != $dist");
+			}
 
-         for (var eq in cat.equipages) {
-            m.equipages[eq.eid] = eq;
-         }
-         
-      } catch (e, st) {
-         print(e);
-         print(st);
-      }
+			if (startTimes.isNotEmpty) {
+				cat.startTime = startTimes.values.reduce(min);
+				for (var eq in startTimes.entries) {
+					eq.key.startOffsetSecs = eq.value - cat.startTime;
+				}
+			}
+
+			for (var eq in cat.equipages) {
+				m.equipages[eq.eid] = eq;
+			}
+
+		} catch (e, st) {
+			print(e);
+			print(st);
+		}
 	}
 
 	mevs.sort();
@@ -93,7 +91,7 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 
 }
 
-Future<Tuple3<Category, int?, dynamic>?> _parseCategory(dynamic meeting_class, Model model) async {
+Future<(Category, int?, dynamic)?> _parseCategory(dynamic meeting_class, Model model) async {
 	String name = meeting_class["name"];
 	var class_sections = meeting_class["class_sections"] as List;
 	if (class_sections.isEmpty) return null;
@@ -131,7 +129,7 @@ Future<Tuple3<Category, int?, dynamic>?> _parseCategory(dynamic meeting_class, M
 			..minSpeed = minSpeed
 			..maxSpeed = maxSpeed;
 
-	return Tuple3(cat, dist, cls);
+	return (cat, dist, cls);
 }
 
 void _guessCategoryLoops(Category cat, int dist) {
@@ -195,8 +193,8 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 						evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
 
 						if (nullOrEmpty(res["pulse_time"])) break;
-                  // FIXME: in ranum23, 404, MA, loop 1, this is null,
-                  //      : despite FTQ-GA for loop 1, thus the ftq is not registered
+						// FIXME: in ranum23, 404, MA, loop 1, this is null,
+						//      : despite FTQ-GA for loop 1, thus the ftq is not registered
 						var vetTime = hmsToUNIX(res["pulse_time"]);
 						evs.add(VetEvent("equipe", vetTime, eid, loop));
 						var vetdata = VetData(
@@ -213,7 +211,7 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 						}
 					}
 				}
-				
+
 				evs.add(ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
 				if (retirePreExam)
 					evs.add(RetireEvent("equipe", hmsToUNIX("00:00:03"), eid));
@@ -221,8 +219,8 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 				if (loopDists != null && loopDists.length > cat.loops.length) {
 					cat.loops = loopDists.map((d) => Loop(d, TYPICAL_REST_TIME)).toList();
 				}
-				
-				
+
+
 			} catch (e, st) {
 				print(e);
 				print(st);

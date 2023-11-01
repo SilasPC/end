@@ -3,6 +3,8 @@
 	"editor.tabSize": 3,
 	"editor.detectIndentation": false,
 	"editor.insertSpaces": false,
+	"editor.useTabStops": true,
+	"editor.stickyTabStops": true,
 	"todo-list.enableTelemetry": false,
 	"todo-list.expression": "(?:/{2,}\\s+)([A-Z]+):\\s+(.+)$",
 	"todo-list.include": "**/*.{ts,js,php,css,scss,html,dart}",

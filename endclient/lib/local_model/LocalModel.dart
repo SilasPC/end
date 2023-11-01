@@ -29,11 +29,11 @@ class ModelProvider extends StatelessWidget {
 				return mod;
 			},
 			child: ProxyProvider<LocalModel, MetaModel>(
-            lazy: false,
-            create: (context) => context.read<LocalModel>().metaModel,
-            update: (_, __, mm) => mm!,
-            child: child,
-         ),
+				lazy: false,
+				create: (context) => context.read<LocalModel>().metaModel,
+				update: (_, __, mm) => mm!,
+				child: child,
+			),
 		);
 }
 
@@ -50,7 +50,7 @@ class LocalModel with ChangeNotifier {
 		_autoYield = value;
 	}
 
-   final MetaModel metaModel = MetaModel() ;
+	final MetaModel metaModel = MetaModel() ;
 
 	late PeerManager<Model> manager;
 	ServerPeer? master;
@@ -62,7 +62,7 @@ class LocalModel with ChangeNotifier {
 		manager = PeerManager(
 			Platform.localHostname,
 			SqliteDatabase.create,
-         metaModel,
+			metaModel,
 		);
 		manager.updateStream.listen((_) => notifyListeners());
 	}
@@ -97,5 +97,7 @@ class LocalModel with ChangeNotifier {
 	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
 
 	Model get model => manager.model;
+
+	void resetModel() => manager.resetModel();
 
 }

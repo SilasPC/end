@@ -1,7 +1,8 @@
 
+import 'dart:async';
+
 import 'package:common/p2p/Manager.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +27,7 @@ class VariousStatesProvider extends StatelessWidget {
 				)
 			),
 		);
-	
+
 }
 
 class ServerConnection extends ChangeNotifier {
@@ -36,12 +37,19 @@ class ServerConnection extends ChangeNotifier {
 	int? get sessionId => pmm.master?.sessionId;
 	bool get inSync => state?.isSync ?? false;
 
+	late StreamSubscription _sub;
+
 	final LocalModel pmm;
 	ServerConnection(this.pmm) {
-		pmm.serverUpdateStream.stream.listen((_) {
-			// PERF: dispose
+		_sub = pmm.serverUpdateStream.stream.listen((_) {
 			notifyListeners();
 		});
+	}
+
+	@override
+	void dipose() {
+		_sub.cancel();
+		super.dispose();
 	}
 
 	int get desyncCount => pmm.desyncCount;
@@ -57,26 +65,42 @@ class PeerStates extends ChangeNotifier {
 
 	List<Peer> get peers => manager.peers;
 
+	late StreamSubscription _sub;
+
 	final PeerManager manager;
 	PeerStates(this.manager) {
-		manager.peerStateChanges.listen((_) {
-			// PERF: dispose
+		_sub = manager.peerStateChanges.listen((_) {
 			notifyListeners();
 		});
+	}
+
+	@override
+	void dipose() {
+		_sub.cancel();
+		super.dispose();
 	}
 
 }
 
 class SessionState extends ChangeNotifier {
-	
+
 	int get sessionId => manager.sessionId;
+
+	late StreamSubscription _sub;
 
 	final PeerManager manager;
 	SessionState(this.manager) {
-		manager.sessionStream.listen((_) {
-			// PERF: dispose
+		_sub = manager.sessionStream.listen((_) {
 			notifyListeners();
 		});
 	}
-	
+
+	void reset() => manager.resetSession();
+
+	@override
+	void dipose() {
+		_sub.cancel();
+		super.dispose();
+	}
+
 }

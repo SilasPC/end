@@ -19,11 +19,11 @@ enum EquipageStatus {
 	/// indicates equipage failed to complete competition
 	bool get isOut =>
 		this == EquipageStatus.DNF || this == EquipageStatus.RETIRED;
-	
+
 	/// indicates equipage successfully completed competition
 	bool get isFinished =>
 		this == EquipageStatus.FINISHED;
-		
+
 	/// indicates equipage no longer competing
 	bool get isEnded =>
 		this == EquipageStatus.DNF ||
@@ -38,7 +38,7 @@ enum EquipageStatus {
 
 @JsonSerializable(constructor: "raw")
 class Equipage extends IJSON {
-	
+
 	EquipageStatus status = EquipageStatus.WAITING;
 	int eid;
 	String rider;
@@ -49,7 +49,7 @@ class Equipage extends IJSON {
 	int? currentLoop;
 	String? dsqReason;
 	int startOffsetSecs = 0;
-	
+
 	@JsonKey(ignore: true)
 	late Category category;
 
@@ -104,7 +104,7 @@ class Equipage extends IJSON {
 		return dist * 3600 / time;
 	}
 
-	
+
 	int? idealFinishTime() => category.idealSpeed == null ? null :
 		category.startTime + startOffsetSecs + category.idealRideTime()! + category.totalRestTime();
 	int? minFinishTime() => category.minSpeed == null ? null :
@@ -124,12 +124,12 @@ class Equipage extends IJSON {
 	int compareEid(Equipage eq)
 		=> eid - eq.eid;
 
-   static int byRankAndEid(Equipage a, Equipage b)
-      => a.compareRankAndEid(b);
-   int compareRankAndEid(Equipage eq) {
-      int cmp = compareRank(eq);
-      return cmp != 0 ? cmp : eid - eq.eid;
-   }
+	static int byRankAndEid(Equipage a, Equipage b)
+		=> a.compareRankAndEid(b);
+	int compareRankAndEid(Equipage eq) {
+		int cmp = compareRank(eq);
+		return cmp != 0 ? cmp : eid - eq.eid;
+	}
 
 	static int byRank(Equipage a, Equipage b)
 		=> a.compareRank(b);
@@ -175,42 +175,10 @@ class Equipage extends IJSON {
 		if (l.expDeparture != eql.expDeparture)
 			// first expected departure
 			return (l.expDeparture ?? UNIX_FUTURE) - (eql.expDeparture ?? UNIX_FUTURE);
-		
+
 		return 0;
 	}
 
-	void updateStatus() {
-		if (currentLoop == null) {
-			if (preExam == null) {
-				// ommitted to allow manual WAITING -> VET transition
-				// status = EquipageStatus.VET;
-			} else {
-				if (!preExam!.passed)
-					status = EquipageStatus.DNF;
-				else
-					status = EquipageStatus.RESTING;
-			}
-		} else {
-			var l = loops[currentLoop!];
-			if (l.data != null) {
-				if (!l.data!.passed)
-					status = EquipageStatus.DNF;
-				else if (l == loops.last)
-					status = EquipageStatus.FINISHED;
-				else
-					status = EquipageStatus.RESTING;
-			}
-			else if (l.vet != null)
-				status = EquipageStatus.VET;
-			else if (l.arrival != null)
-				status = EquipageStatus.COOLING;
-			else if (l.departure != null)
-				status = EquipageStatus.RIDING;
-			else
-				status = EquipageStatus.RESTING;
-		}
-	}
-	
 	JSON toJson() => _$EquipageToJson(this);
 	factory Equipage.fromJson(JSON json) =>
 		_$EquipageFromJson(json);

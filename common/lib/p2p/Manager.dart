@@ -14,7 +14,7 @@ class PreSyncMsg extends IJSON {
 	final int sessionId;
 	final int resetCount;
 	PreSyncMsg(this.peerId, this.sessionId, this.resetCount, {this.protocolVersion = SyncProtocol.VERSION});
-	
+
 	JSON toJson() => {
 		"protocolVersion": protocolVersion,
 		"peerId": peerId,
@@ -33,7 +33,7 @@ class PreSyncMsg extends IJSON {
 }
 
 class SyncMsg<M extends IJSON> extends IJSON {
-	
+
 	final List<Event<M>> evs, dels;
 	SyncMsg(this.evs, this.dels);
 
@@ -159,9 +159,9 @@ class PeerManager<M extends IJSON> {
 	Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
 	final String peerId;
-	
+
 	late int _sessionId;
-	int get sessionId => _sessionId;	
+	int get sessionId => _sessionId;
 	int _resetCount = Random().nextInt(1 << 30);
 
 	late final EventDatabase<M> _db;
@@ -180,7 +180,7 @@ class PeerManager<M extends IJSON> {
 	PeerManager(
 		this.peerId,
 		AsyncProducer<EventDatabase<M>> createDb,
-      EventModelHandle<M> innerHandle,
+		EventModelHandle<M> innerHandle,
 	) {
 		peerStateChanges.listen(_stateChangeHandler);
 		_sessionId = Random().nextInt(1 << 30);
@@ -188,7 +188,7 @@ class PeerManager<M extends IJSON> {
 		// print("$peerId ses = $_sessionId");
 		handle = Handle<M>(
 			() => _onUpdate.add(null),
-         innerHandle
+			innerHandle
 		);
 		_em = EventModel(handle);
 		_initDatabase(createDb);
@@ -231,7 +231,7 @@ class PeerManager<M extends IJSON> {
 				op._mutex.protect(() => _preSync(op));
 			}
 		});
-	
+
 	/// mutex order manager -> peer
 	Future<void> resetModel() async {
 		// print("reset $peerId");
@@ -247,7 +247,7 @@ class PeerManager<M extends IJSON> {
 			}
 		});
 	}
-	
+
 	/// must have manager lock
 	Future<void> _save() async {
 		var data = _em.getNewer(_lastDbSave);
@@ -291,9 +291,9 @@ class PeerManager<M extends IJSON> {
 	}
 
 	Future<void> addPeer(Peer p) async {
-      if (peers.contains(p)) {
-         return;
-      }
+		if (peers.contains(p)) {
+			return;
+		}
 		p._man = this;
 		await _mutex.protect(() async {
 			_peers.add(p);
@@ -323,8 +323,8 @@ class PeerManager<M extends IJSON> {
 		var res = await p.send(SyncProtocol.PRE_SYNC, _curPreSyncMsg().toJsonBin());
 		if (res == null) {
 			// print("no presync ack");
-			// TODO: no presync ack (retry?)
 			if (retry) return _preSync(p, false);
+			p.disconnect();
 			return;
 		}
 		await _handlePreSync(p, PreSyncMsg.fromBin(res));
@@ -425,9 +425,7 @@ class PeerManager<M extends IJSON> {
 				if (p._state != PeerState.CONFLICT) {
 					return false;
 				}
-				await _reset(disconnect: false, ignoreLockFor: p);
-				_sessionId = p._lastKnownState!.sessionId;
-				_onSessionUpdate.add(_sessionId);
+				await _reset(disconnect: false, ignoreLockFor: p, newSession: p._lastKnownState!.sessionId);
 				await _save();
 				// print("$peerId ses = $_sessionId");
 				for (var op in _peers) {
@@ -438,7 +436,13 @@ class PeerManager<M extends IJSON> {
 		);
 
 	/// must have manager lock, will take all peer locks (except for ignoreLockFor)
-	Future<void> _reset({bool keepDatabase = false, bool disconnect = true, bool keepPeerData = true, Peer? ignoreLockFor}) async {
+	Future<void> _reset({
+		bool keepDatabase = false,
+		bool disconnect = true,
+		bool keepPeerData = true,
+		Peer? ignoreLockFor,
+		int? newSession
+	}) async {
 		var locks = _peers
 			.where((e) => e != ignoreLockFor)
 			.map((p) => p._mutex)
@@ -448,17 +452,18 @@ class PeerManager<M extends IJSON> {
 			// print("reset");
 			if (!keepDatabase) {
 				await _db.clear(keepPeers: keepPeerData);
+				_lastDbSave = SyncInfo.zero();
 			}
-			_em.reset();
-			_sessionId = Random().nextInt(1 << 30);
 			// print("$peerId ses = $_sessionId");
-			_resetCount = Random().nextInt(1 << 30);
 			for (var p in _peers) {
 				if (disconnect) {
 					p.disconnect();
 				}
 				p._lastLocal = SyncInfo.zero();
 			}
+			_em.reset();
+			_resetCount = Random().nextInt(1 << 30);
+			_sessionId = newSession ?? Random().nextInt(1 << 30);
 			_onSessionUpdate.add(_sessionId);
 			_onUpdate.add(null);
 		}
@@ -476,7 +481,7 @@ class PeerManager<M extends IJSON> {
 
 class Handle<M extends IJSON> extends EventModelHandle<M> {
 
-   final EventModelHandle<M> _handle;
+	final EventModelHandle<M> _handle;
 
 	final void Function() onUpdate;
 
@@ -491,15 +496,15 @@ class Handle<M extends IJSON> extends EventModelHandle<M> {
 
 	@override
 	void didUpdate() {
-      onUpdate();
-      _handle.didUpdate();
-   }
+		onUpdate();
+		_handle.didUpdate();
+	}
 
 	@override
 	void didReset() {
-      onUpdate();
-      _handle.didReset();
-   }
+		onUpdate();
+		_handle.didReset();
+	}
 
 }
 

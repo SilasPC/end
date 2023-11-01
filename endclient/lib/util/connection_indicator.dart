@@ -1,14 +1,13 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/local_model/states.dart';
-import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../local_model/LocalModel.dart';
 
 class ConnectionIndicator extends StatefulWidget {
-	
+
 	const ConnectionIndicator({super.key});
 
 	@override
@@ -45,7 +44,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 	// UI: new sync indicator
 	Widget _syncMenu(BuildContext context) {
 		var ppm = context.watch<LocalModel>();
-		var ses = context.watch<SessionState>().sessionId;
+		var ses = context.select<SessionState, int>((s) => s.sessionId);
 		var peers = context.watch<PeerStates>().peers;
 		return Dialog(
 			child: ListView(
