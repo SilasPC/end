@@ -74,6 +74,7 @@ class EquipagePageState extends State<EquipagePage> {
 		context.watch<LocalModel>();
 		checkStatusUpdate();
 		return Scaffold(
+			backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: const Text("Equipage"),
 			),
@@ -102,7 +103,7 @@ class EquipagePageState extends State<EquipagePage> {
 			child: CountingTimer(target: fromUNIX(target)),
 		);
 	}
-	
+
 	List<Widget> loopCards() {
 		var lps = widget.equipage.loops;
 		int? cl = widget.equipage.currentLoop;
@@ -222,7 +223,7 @@ Widget txtCol(List<String> strs) =>
 	Column(
 		children: strs.map((s) => Text(s)).toList(),
 	);
-	
+
 Widget wrapTxtCol(Widget w) =>
 	AspectRatio(
 		aspectRatio: 1,

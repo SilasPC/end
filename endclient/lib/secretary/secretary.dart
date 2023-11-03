@@ -43,7 +43,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 				child: Column(
 					children: [
 						cardHeader(context, cat.name, color: const Color.fromARGB(255, 146, 119, 68)),
-						
+
 						Container(
 							padding: const EdgeInsets.all(10),
 							child: Row(
@@ -134,7 +134,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 
 			var model = context.watch<LocalModel>();
 			var set = context.watch<Settings>();
-			
+
 			if (set.sendNotifs) {
 				for (var cat in _getNewlyFinished(model)) {
 					Locally(
@@ -149,27 +149,16 @@ class SecretaryPageState extends State<SecretaryPage> {
 			return DefaultTabController(
 				length: 1 + model.model.categories.length + (set.showAdmin ? 2 : 0),
 				child: Scaffold(
-						appBar: AppBar(
-							actions: const [ConnectionIndicator()],
-							title: const Text("Secretary"),
-							bottom: TabBar(
-								isScrollable: true,
-								tabs: viewTabs(model.model.categories, set.showAdmin),
-							),
+					backgroundColor: Colors.transparent,
+					appBar: AppBar(
+						actions: const [ConnectionIndicator()],
+						title: const Text("Secretary"),
+						bottom: TabBar(
+							isScrollable: true,
+							tabs: viewTabs(model.model.categories, set.showAdmin),
 						),
-						body: Stack(
-							children: [
-								Container(
-									decoration: const BoxDecoration(
-										image: DecorationImage(
-											image: AssetImage("assets/horse.jpg"),
-											fit: BoxFit.cover
-										),
-									),
-								),
-								tabView(model.model, set.showAdmin),
-							],
-						)
+					),
+					body: tabView(model.model, set.showAdmin),
 				)
 			);
 		}

@@ -17,6 +17,7 @@ class ResultsPage extends StatelessWidget {
       var ranks = cat.rankings();
 		var fin = ranks.takeWhile((e) => e.key.isFinished).length;
       return Scaffold(
+			backgroundColor: Colors.transparent,
          appBar: AppBar(
             title: Text("Results ${cat.name}"),
          ),
@@ -37,7 +38,7 @@ class ResultsPage extends StatelessWidget {
 						trailing: [
 							// UI: better container
 							CircleAvatar(
-								child: Text("${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h"),	
+								child: Text("${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h"),
 							),
 						],
                ),

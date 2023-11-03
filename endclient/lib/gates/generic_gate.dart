@@ -74,7 +74,7 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 					model.model.equipages.values
 						.where(widget.predicate)
 						.toSet();
-				
+
 				Set<Equipage> oldEquipages = equipages.toSet();
 
 				equipages.addAll(newEquipages.difference(oldEquipages));
@@ -90,6 +90,7 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 	@override
 	Widget build(BuildContext ctx) =>
 		Scaffold(
+			backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				actions: [
 					const ConnectionIndicator(),

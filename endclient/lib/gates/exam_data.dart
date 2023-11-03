@@ -48,6 +48,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	@override
 	Widget build(BuildContext context) =>
 		Scaffold(
+			backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: Text("${widget.equipage.eid} ${widget.equipage.rider}"),
 			),
@@ -81,15 +82,15 @@ class _ExamDataPageState extends State<ExamDataPage> {
 								numField(context, data.hr1,"Pulse 1", (n) => setState(() => data.hr1 = n)),
 								numField(context, data.hr2,"Pulse 2", (n) => setState(() => data.hr2 = n)),
 								letField(data.resp,"Respiration", (n) => setState(() => data.resp = n)),
-								
+
 								digField(data.mucMem,"Mucous Membranes", (n) => setState(() => data.mucMem = n)),
 								digField(data.cap,"Capilary refill", (n) => setState(() => data.cap = n)),
 								digField(data.jug,"Jugular refill", (n) => setState(() => data.jug = n)),
-								
+
 								digField(data.hydr,"Dehydration", (n) => setState(() => data.hydr = n)),
 								letField(data.gut,"Gut sounds", (n) => setState(() => data.gut = n)),
 								letField(data.sore,"Soreness", (n) => setState(() => data.sore = n)),
-								
+
 								letField(data.wounds,"Wounds", (n) => setState(() => data.wounds = n)),
 								letField(data.gait,"Gait", (n) => setState(() => data.gait = n)),
 								letField(data.attitude,"Attitude", (n) => setState(() => data.attitude = n)),
@@ -139,7 +140,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 				],
 			)
 		);
-	
+
 	Widget paddedChip(String label, [Color? color]) =>
 		Padding(
 			padding: const EdgeInsets.only(left: 10),

@@ -27,6 +27,7 @@ class _EventEditPageState extends State<EventEditPage> {
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
+			backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: const Text("Edit event"),
 				actions: [

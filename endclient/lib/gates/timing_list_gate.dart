@@ -63,12 +63,13 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 	Widget build(BuildContext ctx) =>
 		Consumer<LocalModel>(
 			builder: (context, model, child) {
-				
+
 				Set<Equipage> newEquipages = model.model.equipages.values.where(widget.predicate).toSet();
 				Set<Equipage> oldEquipages = equipages.toSet();
 				equipages.addAll(newEquipages.difference(oldEquipages));
 
 				return Scaffold(
+					backgroundColor: Colors.transparent,
 					appBar: AppBar(
 						actions: [
 							const ConnectionIndicator(),
