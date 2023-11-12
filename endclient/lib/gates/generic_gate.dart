@@ -90,7 +90,7 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 	@override
 	Widget build(BuildContext ctx) =>
 		Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				actions: [
 					const ConnectionIndicator(),

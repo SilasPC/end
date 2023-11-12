@@ -69,7 +69,7 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 				equipages.addAll(newEquipages.difference(oldEquipages));
 
 				return Scaffold(
-					backgroundColor: Colors.transparent,
+					// backgroundColor: Colors.transparent,
 					appBar: AppBar(
 						actions: [
 							const ConnectionIndicator(),

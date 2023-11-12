@@ -149,7 +149,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 			return DefaultTabController(
 				length: 1 + model.model.categories.length + (set.showAdmin ? 2 : 0),
 				child: Scaffold(
-					backgroundColor: Colors.transparent,
+					// backgroundColor: Colors.transparent,
 					appBar: AppBar(
 						actions: const [ConnectionIndicator()],
 						title: const Text("Secretary"),

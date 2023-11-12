@@ -7,11 +7,14 @@ part "EventError.g.dart";
 @JsonSerializable()
 class EventError extends IJSON {
 
-   EventError(this.causedBy, this.description);
+	EventError(this.causedBy, this.description);
 
-   /// The event index of the cause.
-   int causedBy;
-   String description;
+	/// The event index of the cause.
+	int causedBy;
+	String description;
+
+	@override
+	String toString() => "EventError($description)";
 
 	JSON toJson() => _$EventErrorToJson(this);
 	factory EventError.fromJson(JSON json) =>

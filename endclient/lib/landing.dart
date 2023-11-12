@@ -43,7 +43,7 @@ class LandingPageState extends State<LandingPage> {
 	@override
 	Widget build(BuildContext context) =>
 		Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: const Text("Endurance"),
 				actions: const [ConnectionIndicator()],

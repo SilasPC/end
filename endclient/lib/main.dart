@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
 			home: Stack(
 				children: [
 					Image.asset(
-						"assets/horse.png",
+						"assets/horse.jpg",
 						height: MediaQuery.of(context).size.height,
 						width: MediaQuery.of(context).size.width,
 						fit: BoxFit.cover,

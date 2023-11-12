@@ -48,7 +48,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	@override
 	Widget build(BuildContext context) =>
 		Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: Text("${widget.equipage.eid} ${widget.equipage.rider}"),
 			),

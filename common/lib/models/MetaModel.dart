@@ -15,10 +15,7 @@ class MetaModel extends EventModelHandle<Model> {
    bool isAccepted(EventError e) => _accepted.contains(e.causedBy);
 
 	Iterable<EventError> get unaccepted
-		=> model.model.errors.where((e) => !_accepted.contains(e.causedBy))
-			.followedBy(
-				model.model.warnings.where((e) => !_accepted.contains(e.causedBy))
-			);
+		=> model.model.errors.where((e) => !_accepted.contains(e.causedBy));
 
 	void accept(EventError error) {
 		_accepted.add(error.causedBy);

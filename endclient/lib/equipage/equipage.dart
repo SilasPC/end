@@ -74,7 +74,7 @@ class EquipagePageState extends State<EquipagePage> {
 		context.watch<LocalModel>();
 		checkStatusUpdate();
 		return Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: const Text("Equipage"),
 			),

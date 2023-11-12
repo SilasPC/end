@@ -60,7 +60,7 @@ class _EventViewState extends State<EventView> {
 					}),
 			),
 		);
-	
+
 	@override
 	Widget build(BuildContext context) =>
 		Consumer<LocalModel>(
@@ -68,9 +68,6 @@ class _EventViewState extends State<EventView> {
 
 				Map<Event, EventError> errs = {};
 				for (var err in value.model.errors) {
-					errs[value.events.byInsertionIndex(err.causedBy)] = err;
-				}
-				for (var err in value.model.warnings) {
 					errs[value.events.byInsertionIndex(err.causedBy)] = err;
 				}
 

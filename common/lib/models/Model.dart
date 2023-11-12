@@ -15,8 +15,7 @@ class Model extends IJSON {
 	@JsonKey(ignore: true)
 	Map<int, Equipage> equipages = {};
 	List<EventError> errors = [];
-	List<EventError> warnings = [];
-			
+
 	List<Equipage> vetGate() {
 		List<Equipage> eqs = [];
 		for (Equipage e in equipages.values) {

@@ -17,7 +17,7 @@ class ResultsPage extends StatelessWidget {
       var ranks = cat.rankings();
 		var fin = ranks.takeWhile((e) => e.key.isFinished).length;
       return Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
          appBar: AppBar(
             title: Text("Results ${cat.name}"),
          ),

@@ -18,6 +18,9 @@ class EquipeMeeting {
 
 	Future<List<Event<Model>>> loadEvents() => _loadModelEvents(id);
 
+	@override
+	String toString() => "Meeting($name)";
+
 	// FEAT: upload to equipe
 
 }
@@ -49,13 +52,13 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	}
 
 	var classes = days
-		.expand((day) => day["meetings_classes"] ?? [])
+		.expand((day) => day["meeting_classes"] ?? [])
 		.map((cl) => _parseCategory(cl, m));
 
 	await for (var tup in futStream(classes)) {
 
 		if (tup == null) continue;
-		var (cat, dist, cls) = tup!;
+		var (cat, dist, cls) = tup;
 
 		try {
 
@@ -92,13 +95,17 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 }
 
 Future<(Category, int?, dynamic)?> _parseCategory(dynamic meeting_class, Model model) async {
+	if (meeting_class["name"] == null) {
+		return null;
+	}
 	String name = meeting_class["name"];
-	var class_sections = meeting_class["class_sections"] as List;
+	var class_sections = (meeting_class["class_sections"] ?? []) as List;
 	if (class_sections.isEmpty) return null;
 	var equipeId = class_sections.first["id"];
 
 	var cls = await _loadJSON("api/v1/class_sections/${equipeId!}");
 	if (nullOrEmpty((cls["starts"] as List).firstOrNull?["start_no"])) {
+		print("skip cat $name");
 		return null;
 	}
 
@@ -164,7 +171,7 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 		);
 		cat.equipages.add(e);
 
-		List results = eq["results"] as List;
+		List results = (eq["results"] ?? []);
 		if (results.isNotEmpty) {
 			hasResults = true;
 			try {

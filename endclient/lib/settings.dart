@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
 		var conn = context.watch<ServerConnection>();
       var session = context.watch<SessionState>();
 		return Scaffold(
-			backgroundColor: Colors.transparent,
+			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				title: const Text("Settings"),
 				actions: const [

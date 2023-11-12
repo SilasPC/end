@@ -13,14 +13,10 @@ Model _$ModelFromJson(Map<String, dynamic> json) => Model()
   )
   ..errors = (json['errors'] as List<dynamic>)
       .map((e) => EventError.fromJson(e as Map<String, dynamic>))
-      .toList()
-  ..warnings = (json['warnings'] as List<dynamic>)
-      .map((e) => EventError.fromJson(e as Map<String, dynamic>))
       .toList();
 
 Map<String, dynamic> _$ModelToJson(Model instance) => <String, dynamic>{
       'rideName': instance.rideName,
       'categories': instance.categories,
       'errors': instance.errors,
-      'warnings': instance.warnings,
     };

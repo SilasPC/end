@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-/* 
+/*
 class SettingsService {
 
 	ValueNotifier<Settings> _current = ValueNotifier(Settings.defaults(this));
@@ -73,7 +73,6 @@ class SettingsProviderState extends State<SettingsProvider> {
 		try {
 			set(Settings.fromJsonString(val, this));
 		} catch (_) {
-			print("loading settings failed");
 			_save();
 		}
 	}
@@ -82,7 +81,6 @@ class SettingsProviderState extends State<SettingsProvider> {
 		if (!mounted) return;
 		setState(() {
 			_current = value;
-			print("settings = ${_current.toJsonString()}");
 		});
 		_save();
 	}
@@ -107,13 +105,13 @@ class Settings extends IJSON {
 	bool sendNotifs;
 	bool autoYield;
 	bool useP2P;
-	
+
 	Settings(
-		this._provider, 
-		this.serverURI, 
-		this.author, 
-		this.darkTheme, 
-		this.showAdmin, 
+		this._provider,
+		this.serverURI,
+		this.author,
+		this.darkTheme,
+		this.showAdmin,
 		this.sendNotifs,
 		this.autoYield,
 		this.useP2P,
