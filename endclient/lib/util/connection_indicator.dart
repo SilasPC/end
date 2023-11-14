@@ -1,6 +1,5 @@
 
-import 'package:common/util.dart';
-import 'package:esys_client/local_model/states.dart';
+import 'package:common/p2p/Manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,13 +15,9 @@ class ConnectionIndicator extends StatefulWidget {
 
 class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 
-	static DateTime _lastConn = DateTime.now();
-
 	@override
 	Widget build(BuildContext context) {
 		var conn = context.watch<ServerConnection>();
-		var now = DateTime.now();
-		if (conn.connected) _lastConn = now;
 		return IconButton(
 			color: conn.connected
 				? (conn.state?.isSync ?? false ? Colors.green : Colors.amber)
@@ -43,7 +38,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 
 	// UI: new sync indicator
 	Widget _syncMenu(BuildContext context) {
-		var ppm = context.watch<LocalModel>();
+		var conn = context.watch<ServerConnection>();
 		var ses = context.select<SessionState, int>((s) => s.sessionId);
 		var peers = context.watch<PeerStates>().peers;
 		return Dialog(
@@ -53,55 +48,35 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 						dense: true,
 						title: Text("SessionId: $ses")
 					),
-					ListTile(
-					title: const Text("Server"),
-						tileColor: ppm.master?.connected ?? false ? Colors.green : Colors.red,
-						subtitle: Text(ppm.master?.connected ?? false ? ppm.master!.state.name : "Disconnected"),
-						onLongPress: () {
-							if (ppm.master == null) return;
-							if (ppm.master!.connected) {
-								ppm.master!.disconnect();
-							} else {
-								ppm.master!.connect();
-							}
-						},
-						trailing: ppm.master?.state.isConflict ?? false
-							? IconButton(
-								icon: const Icon(Icons.cloud_download),
-								onPressed: () {
-									ppm.manager.yieldTo(ppm.master!);
-								},
-							) : null,
-					),
+					if (conn.peer case Peer p)
+						_peerTile(p, "Server"),
 					for (var p in peers)
-					if (p != ppm.master)
-					ListTile(
-						title: Text(p.id ?? "-"),
-						tileColor: p.connected ? Colors.green : Colors.red,
-						subtitle: Text(p.connected ? p.state.name : "Disconnected"),
-						onLongPress: () {
-							if (p.connected) {
-								p.disconnect();
-							} else {
-								p.connect();
-							}
-						},
-						trailing: p.state.isConflict
-							? IconButton(
-								icon: const Icon(Icons.cloud_download),
-								onPressed: () {
-									ppm.manager.yieldTo(p);
-								},
-							) : null,
-					)
+						if (p != conn.peer)
+							_peerTile(p)
 				],
 			)
 		);
 	}
 
-	String _connDif() {
-		var dif = DateTime.now().difference(_lastConn);
-		return unixDifToMS(dif.inSeconds, false, false);
-	}
+	Widget _peerTile(Peer p, [String? name]) =>
+		ListTile(
+			title: Text(name ?? p.id ?? "-"),
+			// tileColor: p.connected ? Colors.green : Colors.red,
+			subtitle: Text(p.connected ? p.state.name : "Disconnected"),
+			onLongPress: () {
+				if (p.connected) {
+					p.disconnect();
+				} else {
+					p.connect();
+				}
+			},
+			trailing: p.state.isConflict
+				? IconButton(
+					icon: const Icon(Icons.cloud_download),
+					onPressed: () {
+						context.read<LocalModel>().manager.yieldTo(p);
+					},
+				) : null,
+		);
 
 }

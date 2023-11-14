@@ -70,3 +70,25 @@ class TimerList {
 	DateTime operator [](int i) => times[i];
 
 }
+
+class BackgroundStack extends StatelessWidget {
+
+	final Widget child;
+
+	const BackgroundStack(this.child, {super.key});
+
+	@override
+	Widget build(BuildContext context) =>
+		Stack(
+			children: [
+				Image.asset(
+					"assets/horse.jpg",
+					height: MediaQuery.sizeOf(context).height,
+					width: MediaQuery.sizeOf(context).width,
+					fit: BoxFit.cover,
+				),
+				child,
+			]
+		);
+		
+}

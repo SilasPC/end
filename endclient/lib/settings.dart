@@ -5,7 +5,6 @@ import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,5 @@
 
+import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 
 import 'settings.dart';
@@ -48,14 +49,16 @@ class LandingPageState extends State<LandingPage> {
 				title: const Text("Endurance"),
 				actions: const [ConnectionIndicator()],
 			),
-			body: Center(
-				child: Column(
-					mainAxisAlignment: MainAxisAlignment.center,
-					crossAxisAlignment: CrossAxisAlignment.center,
-					children: [
-						for (int i = 0; i < buttons.length; i++)
-						buildLinkButton(i),
-					],
+			body: BackgroundStack(
+				Center(
+					child: Column(
+						mainAxisAlignment: MainAxisAlignment.center,
+						crossAxisAlignment: CrossAxisAlignment.center,
+						children: [
+							for (int i = 0; i < buttons.length; i++)
+							buildLinkButton(i),
+						],
+					)
 				)
 			)
 		);

@@ -1,6 +1,5 @@
 
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/p2p/nearby.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

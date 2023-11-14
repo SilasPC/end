@@ -19,7 +19,7 @@ class GenericGate extends StatefulWidget {
 	final Widget Function(Equipage, bool) builder;
 	final GateController? controller;
 
-	GenericGate({
+	const GenericGate({
 		super.key,
 		required this.title,
 		required this.comparator,
@@ -59,33 +59,32 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 		refresh();
 	}
 
-	Widget buildList(BuildContext ctx) =>
-		Consumer<LocalModel>(
-			builder: (context, model, child) {
+	Widget buildList(BuildContext context) {
+		var model = context.watch<LocalModel>();
 
-				// no custom hash impl, refresh to point to new objects
-				// representing the equipages for ptr hash/eq
-				// maybe use id instead (but what about widget.predicate /.comparator?)
-				equipages = equipages
-					.map((e) => model.model.equipages[e.eid]!)
-					.toList();
+		// no custom hash impl, refresh to point to new objects
+		// representing the equipages for ptr hash/eq
+		// maybe use id instead (but what about widget.predicate /.comparator?)
+		equipages = equipages
+			.map((e) => model.model.equipages[e.eid]!)
+			.toList();
 
-				Set<Equipage> newEquipages =
-					model.model.equipages.values
-						.where(widget.predicate)
-						.toSet();
+		Set<Equipage> newEquipages =
+			model.model.equipages.values
+				.where(widget.predicate)
+				.toSet();
 
-				Set<Equipage> oldEquipages = equipages.toSet();
+		Set<Equipage> oldEquipages = equipages.toSet();
 
-				equipages.addAll(newEquipages.difference(oldEquipages));
+		equipages.addAll(newEquipages.difference(oldEquipages));
 
-				return ListView(
-               children:
-                  equipages.map((e) => widget.builder(e, widget.predicate(e)))
-                  .toList()
-				);
-			}
+		return ListView(
+			children:
+				equipages.map((e) => widget.builder(e, widget.predicate(e)))
+				.toList()
 		);
+
+	}
 
 	@override
 	Widget build(BuildContext ctx) =>

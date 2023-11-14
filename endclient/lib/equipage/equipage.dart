@@ -11,6 +11,7 @@ import '../secretary/category.dart';
 import '../settings_provider.dart';
 import '../util/chip_strip.dart';
 import '../util/timer.dart';
+import '../util/util.dart';
 import 'equipage_tile.dart';
 
 import '../local_model/LocalModel.dart';
@@ -79,16 +80,18 @@ class EquipagePageState extends State<EquipagePage> {
 				title: const Text("Equipage"),
 			),
 			bottomNavigationBar: bottomBar(),
-			body: Container(
-				padding: const EdgeInsets.all(10),
-				child: ListView(
-					children: [
-						Card(
-							child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 98, 85, 115)),
-						),
-                  CategoryCard(category: widget.equipage.category),
-						...loopCards(),
-					],
+			body: BackgroundStack(
+				Container(
+					padding: const EdgeInsets.all(10),
+					child: ListView(
+						children: [
+							Card(
+								child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 98, 85, 115)),
+							),
+							CategoryCard(category: widget.equipage.category),
+							...loopCards(),
+						],
+					)
 				)
 			)
 		);

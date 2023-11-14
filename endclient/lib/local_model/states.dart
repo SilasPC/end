@@ -1,10 +1,5 @@
 
-import 'dart:async';
-
-import 'package:common/p2p/Manager.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+part of 'LocalModel.dart';
 
 class VariousStatesProvider extends StatelessWidget {
 
@@ -32,30 +27,29 @@ class VariousStatesProvider extends StatelessWidget {
 
 class ServerConnection extends ChangeNotifier {
 
-	PeerState? get state => pmm.master?.state;
-	bool get connected => pmm.master?.connected ?? false;
-	int? get sessionId => pmm.master?.sessionId;
+	ServerPeer? get peer => _pmm._master;
+	PeerState? get state => peer?.state;
+	bool get connected => peer?.connected ?? false;
+	int? get sessionId => peer?.sessionId;
 	bool get inSync => state?.isSync ?? false;
 
 	late StreamSubscription _sub;
 
-	final LocalModel pmm;
-	ServerConnection(this.pmm) {
-		_sub = pmm.serverUpdateStream.stream.listen((_) {
+	final LocalModel _pmm;
+	ServerConnection(this._pmm) {
+		_sub = _pmm.serverUpdateStream.stream.listen((_) {
 			notifyListeners();
 		});
 	}
 
-	@override
 	void dipose() {
 		_sub.cancel();
-		super.dispose();
 	}
 
-	int get desyncCount => pmm.desyncCount;
+	int get desyncCount => _pmm.desyncCount;
 
 	Future<bool> yieldRemote() async {
-		var res = await pmm.master?.send("yield", []);
+		var res = await peer?.send("yield", []);
 		return res?.firstOrNull == 1;
 	}
 
@@ -74,10 +68,8 @@ class PeerStates extends ChangeNotifier {
 		});
 	}
 
-	@override
 	void dipose() {
 		_sub.cancel();
-		super.dispose();
 	}
 
 }
@@ -97,10 +89,8 @@ class SessionState extends ChangeNotifier {
 
 	void reset() => manager.resetSession();
 
-	@override
 	void dipose() {
 		_sub.cancel();
-		super.dispose();
 	}
 
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:common/models/glob.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
@@ -158,7 +159,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 							tabs: viewTabs(model.model.categories, set.showAdmin),
 						),
 					),
-					body: tabView(model.model, set.showAdmin),
+					body: BackgroundStack(tabView(model.model, set.showAdmin)),
 				)
 			);
 		}

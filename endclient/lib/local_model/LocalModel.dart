@@ -13,6 +13,8 @@ import 'package:esys_client/settings_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
+part 'states.dart';
+
 class ModelProvider extends StatelessWidget {
 	const ModelProvider({super.key, required this.child});
 
@@ -43,8 +45,8 @@ class LocalModel with ChangeNotifier {
 	bool get autoYield => _autoYield;
 	set autoYield (bool value) {
 		if (!_autoYield && value) {
-			if (master?.state.isConflict ?? false) {
-				manager.yieldTo(master!);
+			if (_master?.state.isConflict ?? false) {
+				manager.yieldTo(_master!);
 			}
 		}
 		_autoYield = value;
@@ -53,7 +55,7 @@ class LocalModel with ChangeNotifier {
 	final MetaModel metaModel = MetaModel() ;
 
 	late PeerManager<Model> manager;
-	ServerPeer? master;
+	ServerPeer? _master;
 	StreamSubscription? _stateChangeSub;
 
 	StreamController<void> serverUpdateStream = StreamController.broadcast();
@@ -68,21 +70,21 @@ class LocalModel with ChangeNotifier {
 	}
 
 	void setServerUri(String uri) {
-		if (master?.uri == uri) {
+		if (_master?.uri == uri) {
 			return;
 		}
-		master?.disconnect();
-		master = ServerPeer(uri);
+		_master?.disconnect();
+		_master = ServerPeer(uri);
 		_stateChangeSub?.cancel();
 		_stateChangeSub = manager.peerStateChanges
-			.where((p) => p == master)
-			.listen((master) {
-				if (master.state.isConflict && _autoYield) {
-					manager.yieldTo(master);
+			.where((p) => p == _master)
+			.listen((_master) {
+				if (_master.state.isConflict && _autoYield) {
+					manager.yieldTo(_master);
 				}
 				serverUpdateStream.add(null);
 			});
-		manager.addPeer(master!);
+		manager.addPeer(_master!);
 		notifyListeners();
 		serverUpdateStream.add(null);
 	}
@@ -92,7 +94,7 @@ class LocalModel with ChangeNotifier {
 
 	Set<Event<Model>> get deletes => manager.deletes;
 
-	int get desyncCount => master?.desyncCount ?? 0;
+	int get desyncCount => _master?.desyncCount ?? 0;
 
 	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
 

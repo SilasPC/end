@@ -212,3 +212,58 @@ class _ExamDataPageState extends State<ExamDataPage> {
 		);
 
 }
+
+// PERF: use this instead
+class InputField extends StatefulWidget {
+		
+	final String name;
+	final VetFieldType fieldType;
+
+	const InputField({super.key, required this.name, required this.fieldType});
+	
+	@override
+	State<InputField> createState() => InputFieldState();
+
+}
+
+class InputFieldState extends State<InputField> {
+
+	int? val;
+
+	@override
+	Widget build(BuildContext context) =>
+		ElevatedButton(
+			onLongPress: () => setState(() => val = null),
+			onPressed: () {
+				switch (widget.fieldType) {
+					case VetFieldType.NUMBER:
+						showIntPicker(
+							context,
+							(n) {
+								setState(() => val = n);
+								Navigator.pop(context);
+							}
+						);
+						break;
+					default:
+						val = (val ?? 0) + 1;
+						if (val == 4) val == null;
+				}
+				
+			},
+			child: Column(
+				mainAxisAlignment: MainAxisAlignment.center,
+				children: [
+					Text(_stringValue(), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+					Text(widget.name),
+				],
+			),
+		);
+
+	String _stringValue() =>
+		switch (widget.fieldType) {
+			VetFieldType.LETTER when val is int => String.fromCharCode(64 + val!),
+			_ => val?.toString() ?? "-",
+		};
+
+}

@@ -29,42 +29,41 @@ class CategoryView extends StatefulWidget {
 class CategoryViewState extends State<CategoryView> {
 
 	@override
-	Widget build(BuildContext context) =>
-		Consumer<LocalModel>(
-			builder: (context, model, child) {
-				var eqs = widget.cat.equipages;
-            var rankOf = Map.fromEntries(widget.cat.rankings());
-				return Container(
-					padding: const EdgeInsets.all(10),
-					child: Column(
-						children: [
-							CategoryCard(category: widget.cat),
-							Expanded(
-								child: ListView.builder(
-									itemCount: eqs.length,
-									itemBuilder: (context, i) {
-										var eq = eqs[i];
-										return Card(
-											child: EquipageTile(
-													eq,
-													onTap: () =>
-														Navigator.push(context, MaterialPageRoute(
-															builder: (_) => EquipagePage(eq)
-														)),
-													leading: CircleAvatar(
-														child: eq.isOut ? const Text("DNF") : Text(" ${rankOf[eq]}."),
-													),
-													trailing: [createEquipagePopupMenu(eq, context)],
-												),
-										);
-									},
-								)
-							)
-						],
-					),
-				);
-			}
+	Widget build(BuildContext context) {
+		context.watch<LocalModel>();
+
+		var eqs = widget.cat.equipages;
+		var rankOf = Map.fromEntries(widget.cat.rankings());
+		return Container(
+			padding: const EdgeInsets.all(10),
+			child: Column(
+				children: [
+					CategoryCard(category: widget.cat),
+					Expanded(
+						child: ListView.builder(
+							itemCount: eqs.length,
+							itemBuilder: (context, i) {
+								var eq = eqs[i];
+								return Card(
+									child: EquipageTile(
+											eq,
+											onTap: () =>
+												Navigator.push(context, MaterialPageRoute(
+													builder: (_) => EquipagePage(eq)
+												)),
+											leading: CircleAvatar(
+												child: eq.isOut ? const Text("DNF") : Text(" ${rankOf[eq]}."),
+											),
+											trailing: [createEquipagePopupMenu(eq, context)],
+										),
+								);
+							},
+						)
+					)
+				],
+			),
 		);
+	}
 
 	Widget createEquipagePopupMenu(Equipage eq, BuildContext context) =>
 		PopupMenuButton<String>(

@@ -62,93 +62,92 @@ class _EventViewState extends State<EventView> {
 		);
 
 	@override
-	Widget build(BuildContext context) =>
-		Consumer<LocalModel>(
-			builder: (context, value, child) {
+	Widget build(BuildContext context) {
 
-				Map<Event, EventError> errs = {};
-				for (var err in value.model.errors) {
-					errs[value.events.byInsertionIndex(err.causedBy)] = err;
-				}
+		var model = context.watch<LocalModel>();
 
-				var evs = filterFn != null ? value.events.iterator.where(filterFn!).toList() : value.events.iterator.toList();
+		Map<Event, EventError> errs = {};
+		for (var err in model.model.errors) {
+			errs[model.events.byInsertionIndex(err.causedBy)] = err;
+		}
 
-				return Container(
-					padding: const EdgeInsets.all(10),
-					child: Column(
-						children: [
-							header(value),
-							Expanded(
-								child: Card(
-									child: ListView.separated(
-										itemCount: evs.length,
-										separatorBuilder: (context, _) => const Divider(),
-										itemBuilder: (context, i) {
-                                 var evIdx = evs.length - 1 - i;
-											var e = evs[evIdx];
-											var err = errs[e];
-											bool deleted = value.deletes.contains(e);
-											return ListTile(
-												onLongPress: () {
-													showChoicesModal(
-														context,
-														["Edit", "Delete", "Move"],
-														(s) {
-															switch (s) {
-																case "Edit":
-																	Navigator.of(context)
-																		.push(MaterialPageRoute(
-																			builder: (context) => EventEditPage(event: e),
-																		));
-																	break;
-																case "Delete":
-																	value.addSync([], [e]);
-																	break;
-																case "Move":
-																	showHMSPicker(
-																		context,
-																		fromUNIX(e.time),
-																		(dt) {
-																			// TODO: this is a hack
-																			var json = jsonDecode(e.toJsonString());
-																			json["time"] = toUNIX(dt);
-																			var e2 = eventFromJSON(json);
-																			value.addSync([e2], [e]);
-																		}
-																	);
-																	break;
-																default:
-																	break;
-															}
-														}
-													);
-												},
-												leading: Column(
-                                       mainAxisAlignment: MainAxisAlignment.center,
-                                       children: [
-                                          Text(unixHMS(e.time)),
-                                          Text(e.author, style: const TextStyle(color: Colors.grey)),
-                                       ]
-                                    ),
-												title: Text(e.runtimeType.toString()),
-												subtitle: Text(e.toString(), overflow: TextOverflow.fade),
-												trailing: err != null
-													? Text(err.description)
-													: (
-														deleted
-															? const Icon(Icons.delete)
-															: null
-													)
+		var evs = filterFn != null ? model.events.iterator.where(filterFn!).toList() : model.events.iterator.toList();
+
+		return Container(
+			padding: const EdgeInsets.all(10),
+			child: Column(
+				children: [
+					header(model),
+					Expanded(
+						child: Card(
+							child: ListView.separated(
+								itemCount: evs.length,
+								separatorBuilder: (context, _) => const Divider(),
+								itemBuilder: (context, i) {
+									var evIdx = evs.length - 1 - i;
+									var e = evs[evIdx];
+									var err = errs[e];
+									bool deleted = model.deletes.contains(e);
+									return ListTile(
+										onLongPress: () {
+											showChoicesModal(
+												context,
+												["Edit", "Delete", "Move"],
+												(s) {
+													switch (s) {
+														case "Edit":
+															Navigator.of(context)
+																.push(MaterialPageRoute(
+																	builder: (context) => EventEditPage(event: e),
+																));
+															break;
+														case "Delete":
+															model.addSync([], [e]);
+															break;
+														case "Move":
+															showHMSPicker(
+																context,
+																fromUNIX(e.time),
+																(dt) {
+																	// TODO: this is a hack
+																	var json = jsonDecode(e.toJsonString());
+																	json["time"] = toUNIX(dt);
+																	var e2 = eventFromJSON(json);
+																	model.addSync([e2], [e]);
+																}
+															);
+															break;
+														default:
+															break;
+													}
+												}
 											);
 										},
-									),
-								),
-							)
-						],
+										leading: Column(
+											mainAxisAlignment: MainAxisAlignment.center,
+											children: [
+												Text(unixHMS(e.time)),
+												Text(e.author, style: const TextStyle(color: Colors.grey)),
+											]
+										),
+										title: Text(e.runtimeType.toString()),
+										subtitle: Text(e.toString(), overflow: TextOverflow.fade),
+										trailing: err != null
+											? Text(err.description)
+											: (
+												deleted
+													? const Icon(Icons.delete)
+													: null
+											)
+									);
+								},
+							),
+						),
 					)
-				);
-			}
+				],
+			)
 		);
+	}
 }
 
 bool adminOnly(Event e) =>

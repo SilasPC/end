@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:esys_client/local_model/states.dart';
 import 'package:esys_client/nearby_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -49,17 +48,7 @@ class MyApp extends StatelessWidget {
 			title: 'Endurance',
 			debugShowCheckedModeBanner: false,
 			darkTheme: ThemeData.dark(),
-			home: Stack(
-				children: [
-					Image.asset(
-						"assets/horse.jpg",
-						height: MediaQuery.of(context).size.height,
-						width: MediaQuery.of(context).size.width,
-						fit: BoxFit.cover,
-					),
-					const LandingPage(),
-				]
-			)
+			home: const LandingPage(),
 		);
 	}
 
