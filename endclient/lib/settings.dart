@@ -8,6 +8,7 @@ import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'util/input_modals.dart';
@@ -75,12 +76,23 @@ class _SettingsPageState extends State<SettingsPage> {
 						)
 					),
 					ListTile(
-						leading: const Icon(Icons.admin_panel_settings),
+						leading: const Icon(Icons.notifications),
 						title: const Text("Enable notifications"),
 						trailing: Switch(
 							value: set.sendNotifs,
 							onChanged: (val) => setState((){
 								set.sendNotifs = val;
+								set.save();
+							}),
+						),
+					),
+					ListTile(
+						leading: const Icon(Icons.screenshot_outlined),
+						title: const Text("Gates keep screen alive"),
+						trailing: Switch(
+							value: set.useWakeLock,
+							onChanged: (val) => setState((){
+								set.useWakeLock = val;
 								set.save();
 							}),
 						),
@@ -165,9 +177,24 @@ class _SettingsPageState extends State<SettingsPage> {
 							onTap: loadModel,
 						),
 					],
+					if (_loadPackageInfo() case PackageInfo info) ...[
+						ListTile(
+							title: const Text("Version"),
+							subtitle: Text("${info.version}+${info.buildNumber}"),
+						)
+					]
 				],
 			),
 		);
+	}
+
+	PackageInfo? _packageInfo;
+	PackageInfo? _loadPackageInfo() {
+		if (_packageInfo != null) return _packageInfo;
+		PackageInfo.fromPlatform()
+			.then((i) => setState(() => _packageInfo = i))
+			.catchError((_) {});
+		return null;
 	}
 
 	Future<void> loadModel() async {

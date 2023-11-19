@@ -4,7 +4,6 @@ import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/gates/generic_gate.dart';
 import 'package:esys_client/util/timer.dart';
-import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/time_lock.dart';
 import 'package:flutter/material.dart';
 import 'package:common/models/glob.dart';
@@ -37,7 +36,7 @@ class _DeparturePageState extends State<DeparturePage> {
 	@override
 	Widget build(BuildContext ctx) =>
       GenericGate(
-         title: TextClock.withPrefix("Departure gate | "),
+         title: const Text("Departure gate"),
          comparator: comparator,
          predicate: (e) => e.status == EquipageStatus.RESTING,
          onSubmit: () => submit(ctx),

@@ -32,13 +32,20 @@ class ResultsPage extends StatelessWidget {
                   entry.key,
                   leading: CircleAvatar(
                      backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-                     child: Text(entry.value.toString(), style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),),
+                     child: Text(
+								entry.value.toString(),
+								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+							),
                   ),
 						noStatus: true,
 						trailing: [
 							// UI: better container
 							CircleAvatar(
-								child: Text("${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h"),
+								backgroundColor: const Color.fromARGB(255, 98, 85, 115),
+								child: Text(
+									"${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h",
+									style: const TextStyle(color: Colors.white),
+								),
 							),
 						],
                ),
@@ -52,7 +59,10 @@ class ResultsPage extends StatelessWidget {
                   entry.key,
                   leading: CircleAvatar(
                      backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-                     child: Text(entry.value.toString(), style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                     child: Text(
+								entry.value.toString(),
+								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)
+							),
                   )
                )
             ],

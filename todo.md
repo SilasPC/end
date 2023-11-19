@@ -5,16 +5,22 @@
  - more icons (?)
 
 # Presentation
- - TODO
+ - P2P shared state
+	- data integrity
+	- offline
+	- state/real world mismatch
+ - Event based
+	- Force unexpected events
+ - Equipe
+ - Security unimplemented
+ - Tablet/layout
+ - Checkpoints
 
 # Production concerns
  - data integrity
  - security
  - performance
  - uncaught exceptions
-
-# Immediate todos
- - todo's
 
 # Future
  - Tablet layout

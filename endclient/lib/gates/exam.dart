@@ -3,7 +3,6 @@ import 'package:common/util.dart';
 import 'package:esys_client/gates/exam_data.dart';
 import 'package:esys_client/gates/gate_controller.dart';
 import 'package:esys_client/gates/generic_gate.dart';
-import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/util/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:common/models/glob.dart';
@@ -24,7 +23,7 @@ class _ExamPageState extends State<ExamPage> {
 	@override
 	Widget build(BuildContext context) =>
       GenericGate(
-         title: TextClock.withPrefix("Exam gate | "),
+         title: const Text("Exam gate"),
          comparator: comparator,
          predicate: (eq) => eq.status == EquipageStatus.VET,
          onSubmit: null,

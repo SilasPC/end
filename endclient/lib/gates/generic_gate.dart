@@ -1,8 +1,11 @@
 
+import 'package:esys_client/util/text_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:wakelock/wakelock.dart';
+import '../settings_provider.dart';
 import 'gate_controller.dart';
 import '../util/connection_indicator.dart';
 import '../util/equipage_selector_drawer.dart';
@@ -35,6 +38,12 @@ class GenericGate extends StatefulWidget {
 }
 
 class _GenericGateState extends State<GenericGate> implements GateState {
+
+	@override
+	void dispose() {
+		super.dispose();
+		Wakelock.disable();
+	}
 
 	@override
 	void initState() {
@@ -80,15 +89,27 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 
 		return ListView(
 			children:
-				equipages.map((e) => widget.builder(e, widget.predicate(e)))
+				<Widget>[
+					FittedBox(
+						child: Padding(
+							padding: const EdgeInsets.symmetric(horizontal: 8),
+							child: TextClock(),
+						)
+					)
+				].followedBy(
+					equipages.map((e) => widget.builder(e, widget.predicate(e)))
+				)
 				.toList()
 		);
 
 	}
 
 	@override
-	Widget build(BuildContext ctx) =>
-		Scaffold(
+	Widget build(BuildContext context) {
+		if (context.read<Settings>().useWakeLock) {
+			Wakelock.enable();
+		}
+		return Scaffold(
 			// backgroundColor: Colors.transparent,
 			appBar: AppBar(
 				actions: [
@@ -99,13 +120,13 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 					),
 					if (widget.onSubmit != null)
 					SubmitButton(
-						onPressed: () => submit(ctx),
+						onPressed: () => submit(context),
 						disabled: widget.submitDisabled,
 					)
 				],
 				title: widget.title,
 			),
-			body: buildList(ctx),
+			body: buildList(context),
 			bottomNavigationBar: EquipageSelectorDrawer(
 				onTab: (eq) {
 					if (!equipages.contains(eq)) {
@@ -114,5 +135,6 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 				}
 			),
 		);
+	}
 
 }

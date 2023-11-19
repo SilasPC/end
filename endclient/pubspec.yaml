@@ -33,6 +33,7 @@ dependencies:
   nearby_connections: ^4.0.1
   permission_handler: ^11.0.0
   location: ^5.0.3
+  package_info_plus: ^3.1.2
 
 dev_dependencies:
   flutter_test:

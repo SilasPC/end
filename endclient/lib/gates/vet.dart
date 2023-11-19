@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../local_model/LocalModel.dart';
 import '../settings_provider.dart';
-import '../util/text_clock.dart';
 
 class VetPage extends StatelessWidget {
 	const VetPage({super.key});
@@ -16,7 +15,7 @@ class VetPage extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) =>
 		TimingListGate(
-			title: TextClock.withPrefix("Vet gate | "),
+			title: const Text("Vet gate"),
 			predicate: (e) => e.status == EquipageStatus.COOLING,
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
 				var author = context.read<Settings>().author;

@@ -4,15 +4,18 @@ import 'dart:math';
 
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/settings_provider.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/equipage_selector_drawer.dart';
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
+import 'package:wakelock/wakelock.dart';
 
 import '../local_model/LocalModel.dart';
 import '../util/submit_button.dart';
+import '../util/text_clock.dart';
 import '../util/timing_list.dart';
 import 'gate_controller.dart';
 
@@ -40,6 +43,12 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 	TimerList timerList = TimerList();
 
 	@override
+	void dispose() {
+		super.dispose();
+		Wakelock.disable();
+	}
+	
+	@override
 	void initState() {
 		super.initState();
 		widget.controller?.state = this;
@@ -61,6 +70,9 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 
 	@override
 	Widget build(BuildContext context) {
+		if (context.read<Settings>().useWakeLock) {
+			Wakelock.enable();
+		}
 		var model = context.watch<LocalModel>();
 
 		Set<Equipage> newEquipages = model.model.equipages.values.where(widget.predicate).toSet();
@@ -87,33 +99,45 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 				],
 				title: widget.title,
 			),
-			body: TimingList(
-				timers: timerList.times,
-				onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
-				onReorder: (i,j) => setState(() => reorder(i,j,equipages)),
-				onReorderRow: (i,dt) => setState(() {
-					timerList.times.removeAt(i);
-					int j = timerList.times.indexWhere((t) => dt.isBefore(t));
-					if (j == -1) j = timerList.times.length;
-					timerList.times.insert(j, dt);
-					swap(i, j, equipages);
-				}),
-				height: EquipageTile.height,
+			body: ListView(
 				children: [
-					for (Equipage eq in equipages)
-					Padding(
-						key: ValueKey("EID${eq.eid}"),
-						padding: const EdgeInsets.only(right: 24),
-						child: EquipageTile(
-							eq,
-							onTap: () {
-								if (timerList.length < equipages.length) {
-									setState(() {
-										swap(equipages.indexOf(eq), timerList.length, equipages);
-										timerList.addNow();
-									});
-								}
-							},
+					FittedBox(
+						child: Padding(
+							padding: const EdgeInsets.symmetric(horizontal: 8),
+							child: TextClock(),
+						)
+					),
+					Expanded(
+						child: TimingList(
+							timers: timerList.times,
+							onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
+							onReorder: (i,j) => setState(() => reorder(i,j,equipages)),
+							onReorderRow: (i,dt) => setState(() {
+								timerList.times.removeAt(i);
+								int j = timerList.times.indexWhere((t) => dt.isBefore(t));
+								if (j == -1) j = timerList.times.length;
+								timerList.times.insert(j, dt);
+								swap(i, j, equipages);
+							}),
+							height: EquipageTile.height,
+							children: [
+								for (Equipage eq in equipages)
+								Padding(
+									key: ValueKey("EID${eq.eid}"),
+									padding: const EdgeInsets.only(right: 24),
+									child: EquipageTile(
+										eq,
+										onTap: () {
+											if (timerList.length < equipages.length) {
+												setState(() {
+													swap(equipages.indexOf(eq), timerList.length, equipages);
+													timerList.addNow();
+												});
+											}
+										},
+									),
+								)
+							]
 						),
 					)
 				]

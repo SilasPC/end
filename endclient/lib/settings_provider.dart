@@ -105,6 +105,7 @@ class Settings extends IJSON {
 	bool sendNotifs;
 	bool autoYield;
 	bool useP2P;
+	bool useWakeLock;
 
 	Settings(
 		this._provider,
@@ -115,6 +116,7 @@ class Settings extends IJSON {
 		this.sendNotifs,
 		this.autoYield,
 		this.useP2P,
+		this.useWakeLock,
 	);
 	Settings.defaults(this._provider):
 		serverURI = "https://kastanie.ddns.net/esys",
@@ -123,7 +125,8 @@ class Settings extends IJSON {
 		showAdmin = false,
 		sendNotifs = Platform.isAndroid || Platform.isIOS,
 		autoYield = true,
-		useP2P = true;
+		useP2P = true,
+		useWakeLock = true;
 
 	// IGNORED: TODO: this is not very nice
 	void setDefaults() {
@@ -134,6 +137,7 @@ class Settings extends IJSON {
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
 		autoYield = true;
 		useP2P = true;
+		useWakeLock = true;
 	}
 
 	void save() {
@@ -149,6 +153,7 @@ class Settings extends IJSON {
 		sendNotifs,
 		autoYield,
 		useP2P,
+		useWakeLock
 	);
 
 	@override
@@ -160,6 +165,7 @@ class Settings extends IJSON {
 		'sendNotifs': sendNotifs,
 		'autoYield': autoYield,
 		'useP2P': useP2P,
+		'useWakeLock': useWakeLock
 	};
 
 	factory Settings.fromJson(JSON json, SettingsProviderState provider) =>
@@ -172,6 +178,7 @@ class Settings extends IJSON {
 			json['sendNotifs'] as bool,
 			json['autoYield'] as bool,
 			json['useP2P'] as bool,
+			json['useWakeLock'] as bool,
 		);
 
 	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>

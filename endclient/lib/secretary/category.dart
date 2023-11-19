@@ -152,6 +152,12 @@ class CategoryCard extends StatelessWidget {
 								Expanded(
 									child: ChipStrip(
 										chips: [
+											Chip(
+												backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+												label: Text(
+													category.loops.map((c) => "${c.distance} km").join(" | ")
+												)
+											),
 											if (category.clearRound)
 												const Chip(
 													backgroundColor: Color.fromARGB(255, 146, 119, 68),
@@ -172,12 +178,6 @@ class CategoryCard extends StatelessWidget {
 													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
 													label: Text("Max. ${category.maxSpeed} km/h")
 												),
-											Chip(
-												backgroundColor: const Color.fromARGB(255, 146, 119, 68),
-												label: Text(
-													category.loops.map((c) => "${c.distance} km").join(" | ")
-												)
-											),
 										],
 									),
 								),
