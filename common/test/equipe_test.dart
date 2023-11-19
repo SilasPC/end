@@ -1,5 +1,4 @@
 
-import 'package:common/EnduranceEvent.dart';
 import 'package:common/Equipe.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/MetaModel.dart';

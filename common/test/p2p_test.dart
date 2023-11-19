@@ -1,6 +1,4 @@
 
-import 'dart:async';
-
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/p2p/msg_encoder.dart';

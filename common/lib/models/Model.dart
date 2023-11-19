@@ -42,6 +42,30 @@ class Model extends IJSON {
 		return eqs;
 	}
 
+	void addCategories(Iterable<Category> cats) {
+		for (var cat in cats) {
+			if (categories.containsKey(cat.name)) {
+				throw StateError("Duplicate category name ${cat.name}");
+			}
+			categories[cat.name] = cat;
+		}
+	}
+
+	void addEquipages(Iterable<Equipage> eqs) {
+		for (var e in eqs) {
+			if (!categories.containsValue(e.category)) {
+				throw StateError("Category ${e.category} not in model");
+			}
+			if (equipages.containsKey(e.eid)) {
+				throw StateError("Duplicate eid ${e.eid}");
+			}
+			if (!e.category.equipages.contains(e)) {
+				e.category.equipages.add(e);
+			}
+			equipages[e.eid] = e;
+		}
+	}
+
 	Model();
 	JSON toJson() => _$ModelToJson(this);
 	factory Model.fromJson(JSON json) {

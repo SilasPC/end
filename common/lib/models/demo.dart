@@ -31,20 +31,12 @@ Model demoModel() {
 
 		Equipage(21, "Erik", "Enhjørningen", c3),
 		Equipage(22, "Freja", "Felix", c3),
-	]
-	..forEach((e) => e.category.equipages.add(e));
+	];
 
-	var eqsMap = Map.fromEntries(
-		eqs.map((e) => MapEntry(e.eid, e))
-	);
-	var catMap = Map.fromEntries(
-		[c1,c2,c3].map((c) => MapEntry(c.name, c))
-	);
-	
 	var m = Model()
 		..rideName = "Demo ridt"
-		..categories = catMap
-		..equipages = eqsMap;
+		..addCategories([c1,c2,c3])
+		..addEquipages(eqs);
 	return m;
 	
 }

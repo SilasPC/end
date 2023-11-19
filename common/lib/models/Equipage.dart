@@ -112,7 +112,7 @@ class Equipage extends IJSON {
 	int? maxFinishTime() => category.maxSpeed == null ? null :
 		category.startTime + startOffsetSecs + category.maxRideTime()! + category.totalRestTime();
 
-	static int byClassAndEid(Equipage a, Equipage b)
+	static int byClassDistanceAndEid(Equipage a, Equipage b)
 		=> a.compareClassAndEid(b);
 	int compareClassAndEid(Equipage eq) {
 		int c = eq.category.distance() - category.distance();
