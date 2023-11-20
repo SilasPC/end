@@ -42,11 +42,13 @@ class ServerConnection extends ChangeNotifier {
 		});
 	}
 
-	void dipose() {
+	@override
+	void dispose() {
+		super.dispose();
 		_sub.cancel();
 	}
 
-	int get desyncCount => _pmm.desyncCount;
+	int get desyncCount => peer?.desyncCount ?? 0;
 
 	Future<bool> yieldRemote() async {
 		var res = await peer?.send("yield", []);
@@ -68,7 +70,9 @@ class PeerStates extends ChangeNotifier {
 		});
 	}
 
-	void dipose() {
+	@override
+	void dispose() {
+		super.dispose();
 		_sub.cancel();
 	}
 
@@ -89,7 +93,9 @@ class SessionState extends ChangeNotifier {
 
 	void reset() => manager.resetSession();
 
-	void dipose() {
+	@override
+	void dispose() {
+		super.dispose();
 		_sub.cancel();
 	}
 

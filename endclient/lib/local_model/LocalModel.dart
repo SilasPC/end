@@ -67,6 +67,20 @@ class LocalModel with ChangeNotifier {
 			metaModel,
 		);
 		manager.updateStream.listen((_) => notifyListeners());
+		_stateChangeSub = manager.peerStateChanges
+			.where((p) => p == _master)
+			.listen((master) {
+				if (master.state.isConflict && _autoYield) {
+					manager.yieldTo(master);
+				}
+				serverUpdateStream.add(null);
+			});
+	}
+
+	@override
+	void dispose() {
+		super.dispose();
+		_stateChangeSub?.cancel();
 	}
 
 	void setServerUri(String uri) {
@@ -75,15 +89,6 @@ class LocalModel with ChangeNotifier {
 		}
 		_master?.disconnect();
 		_master = ServerPeer(uri);
-		_stateChangeSub?.cancel();
-		_stateChangeSub = manager.peerStateChanges
-			.where((p) => p == _master)
-			.listen((_master) {
-				if (_master.state.isConflict && _autoYield) {
-					manager.yieldTo(_master);
-				}
-				serverUpdateStream.add(null);
-			});
 		manager.addPeer(_master!);
 		notifyListeners();
 		serverUpdateStream.add(null);
@@ -93,8 +98,6 @@ class LocalModel with ChangeNotifier {
 		=> manager.add(evs, dels);
 
 	Set<Event<Model>> get deletes => manager.deletes;
-
-	int get desyncCount => _master?.desyncCount ?? 0;
 
 	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
 
