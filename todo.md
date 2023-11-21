@@ -1,5 +1,5 @@
  - ftq/dsq ga me ...
-
+ - dividers / row coloring in gates
  - confirm closing with unsaved data
 
  - more icons (?)

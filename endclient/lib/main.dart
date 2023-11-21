@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:esys_client/landing2.dart';
 import 'package:esys_client/nearby_provider.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'landing.dart';
@@ -22,11 +25,15 @@ Future<void> main() async {
 	}
 
 	runApp(
-		const SettingsProvider(
+		SettingsProvider(
 			child: ModelProvider(
 				child: VariousStatesProvider(
 					child: NearbyProvider(
-						child: MyApp(),
+						child: ChangeNotifierProvider<IdentityService>(
+							lazy: false,
+							create: (_) => IdentityService(),
+							child: MyApp(),
+						),
 					)
 				)
 			)
@@ -45,10 +52,10 @@ class MyApp extends StatelessWidget {
 		);
 		return MaterialApp(
 			theme: ThemeData(colorScheme: cs),
-			title: 'Endurance',
+			title: 'eSys Endurance',
 			debugShowCheckedModeBanner: false,
 			darkTheme: ThemeData.dark(),
-			home: const LandingPage(),
+			home: const Landing2(),
 		);
 	}
 

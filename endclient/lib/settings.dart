@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						title: const Text("Save CSV"),
 						onTap: () => saveCSV(context),
 					),
-					if (set.author.startsWith("admin"))
+					if (set.showAdmin)
 					...[
 						const ListTile(
 							title: Text("Administration"),
@@ -177,6 +177,10 @@ class _SettingsPageState extends State<SettingsPage> {
 							onTap: loadModel,
 						),
 					],
+					const ListTile(
+						title: Text("About"),
+						dense: true,
+					),
 					if (_loadPackageInfo() case PackageInfo info) ...[
 						ListTile(
 							title: const Text("Version"),
