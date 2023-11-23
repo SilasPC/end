@@ -45,8 +45,8 @@ class LocalModel with ChangeNotifier {
 	bool get autoYield => _autoYield;
 	set autoYield (bool value) {
 		if (!_autoYield && value) {
-			if (_master?.state.isConflict ?? false) {
-				manager.yieldTo(_master!);
+			if (_master case Peer master when master.state.isConflict) {
+				manager.yieldTo(master);
 			}
 		}
 		_autoYield = value;
@@ -88,8 +88,7 @@ class LocalModel with ChangeNotifier {
 			return;
 		}
 		_master?.disconnect();
-		_master = ServerPeer(uri);
-		manager.addPeer(_master!);
+		manager.addPeer(_master = ServerPeer(uri));
 		notifyListeners();
 		serverUpdateStream.add(null);
 	}

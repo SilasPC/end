@@ -25,8 +25,8 @@ class SubmitButtonState extends State<SubmitButton> {
 		});
 		await Future.any([
 			widget.onPressed(),
-			if (widget.maxWait != null)
-				Future.delayed(widget.maxWait!)
+			if (widget.maxWait case Duration maxWait)
+				Future.delayed(maxWait)
 		]);
 		if (!mounted) return;
 		setState(() {

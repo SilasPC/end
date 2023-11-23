@@ -6,8 +6,25 @@ import 'glob.dart';
 
 part "LoopData.g.dart";
 
+enum LoopGate {
+
+	DEPARTURE(0),
+	ARRIVAL(1),
+	VET(2),
+	EXAM(3);
+
+	final int _disc;
+	const LoopGate(this._disc);
+
+	bool isBefore(LoopGate other) => _disc < other._disc;
+
+}
+
 @JsonSerializable(constructor: "raw")
 class LoopData extends IJSON {
+
+	@JsonKey(ignore: true)
+	LoopGate? nextGate;
 
 	int? expDeparture;
 	int? departure;
@@ -18,7 +35,15 @@ class LoopData extends IJSON {
 	@JsonKey(ignore: true)
 	late Loop loop;
 
-	LoopData(this.loop);
+	LoopData(this.loop) {
+		nextGate = switch (this) {
+			LoopData(data: VetData _) => null,
+			LoopData(vet: int _) => LoopGate.EXAM,
+			LoopData(arrival: int _) => LoopGate.VET,
+			LoopData(departure: int _) => LoopGate.ARRIVAL,
+			_ => LoopGate.DEPARTURE
+		};
+	}
 	LoopData.raw();
 
 	double? speed({bool finish = false}) {

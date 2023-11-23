@@ -7,7 +7,7 @@ part of 'EnduranceEvent.dart';
 // **************************************************************************
 
 InitEvent _$InitEventFromJson(Map<String, dynamic> json) => InitEvent(
-		json['time'] as int,
+      json['time'] as int,
       json['author'] as String,
       Model.fromJson(json['model'] as Map<String, dynamic>),
     );
@@ -73,7 +73,7 @@ ExamEvent _$ExamEventFromJson(Map<String, dynamic> json) => ExamEvent(
       json['time'] as int,
       json['eid'] as int,
       VetData.fromJson(json['data'] as Map<String, dynamic>),
-      json['loop'] as int?,
+      json['loopHint'] as int?,
     );
 
 Map<String, dynamic> _$ExamEventToJson(ExamEvent instance) {
@@ -90,7 +90,7 @@ Map<String, dynamic> _$ExamEventToJson(ExamEvent instance) {
     }
   }
 
-  writeNotNull('loop', instance.loop);
+  writeNotNull('loopHint', instance.loopHint);
   val['data'] = instance.data;
   return val;
 }
@@ -99,32 +99,51 @@ VetEvent _$VetEventFromJson(Map<String, dynamic> json) => VetEvent(
       json['author'] as String,
       json['time'] as int,
       json['eid'] as int,
-      json['loop'] as int,
+      json['loopHint'] as int?,
     );
 
-Map<String, dynamic> _$VetEventToJson(VetEvent instance) => <String, dynamic>{
-      'kind': instance.kind,
-      'time': instance.time,
-      'author': instance.author,
-      'eid': instance.eid,
-      'loop': instance.loop,
-    };
+Map<String, dynamic> _$VetEventToJson(VetEvent instance) {
+  final val = <String, dynamic>{
+    'kind': instance.kind,
+    'time': instance.time,
+    'author': instance.author,
+    'eid': instance.eid,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('loopHint', instance.loopHint);
+  return val;
+}
 
 ArrivalEvent _$ArrivalEventFromJson(Map<String, dynamic> json) => ArrivalEvent(
       json['author'] as String,
       json['time'] as int,
       json['eid'] as int,
-      json['loop'] as int,
+      json['loopHint'] as int?,
     );
 
-Map<String, dynamic> _$ArrivalEventToJson(ArrivalEvent instance) =>
-    <String, dynamic>{
-      'kind': instance.kind,
-      'time': instance.time,
-      'author': instance.author,
-      'loop': instance.loop,
-      'eid': instance.eid,
-    };
+Map<String, dynamic> _$ArrivalEventToJson(ArrivalEvent instance) {
+  final val = <String, dynamic>{
+    'kind': instance.kind,
+    'time': instance.time,
+    'author': instance.author,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('loopHint', instance.loopHint);
+  val['eid'] = instance.eid;
+  return val;
+}
 
 StartClearanceEvent _$StartClearanceEventFromJson(Map<String, dynamic> json) =>
     StartClearanceEvent(
@@ -147,14 +166,23 @@ DepartureEvent _$DepartureEventFromJson(Map<String, dynamic> json) =>
       json['author'] as String,
       json['time'] as int,
       json['eid'] as int,
-      json['loop'] as int,
+      json['loopHint'] as int?,
     );
 
-Map<String, dynamic> _$DepartureEventToJson(DepartureEvent instance) =>
-    <String, dynamic>{
-      'kind': instance.kind,
-      'time': instance.time,
-      'author': instance.author,
-      'eid': instance.eid,
-      'loop': instance.loop,
-    };
+Map<String, dynamic> _$DepartureEventToJson(DepartureEvent instance) {
+  final val = <String, dynamic>{
+    'kind': instance.kind,
+    'time': instance.time,
+    'author': instance.author,
+    'eid': instance.eid,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('loopHint', instance.loopHint);
+  return val;
+}

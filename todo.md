@@ -1,8 +1,27 @@
- - ftq/dsq ga me ...
- - dividers / row coloring in gates
- - confirm closing with unsaved data
 
+# Immediate
+ - tablet ui
+ - ui improvements
+ - cryto security
+ - dividers / row coloring in gates
+ - test gate skipping (more)
+
+# Other
+ - ftq/dsq ga me ...
+ - confirm closing with unsaved data
  - more icons (?)
+
+# UI guidelines
+ - simple to use/understand
+	- avoid gesture control
+	- avoid hidden menues
+	- prefer text descriptions alongside icons
+ - change tolerant
+	- interactive elements should not move on data updates
+
+# System design guidelines
+ - error tolerant
+	- prefer warnings to hard errors
 
 # Presentation
  - P2P shared state

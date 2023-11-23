@@ -21,7 +21,7 @@ class VetPage extends StatelessWidget {
 				var author = context.read<Settings>().author;
 				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {
-					evs.add(VetEvent(author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop!));
+					evs.add(VetEvent(author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop));
 				}
 				await context.read<LocalModel>().addSync(evs);
 			}

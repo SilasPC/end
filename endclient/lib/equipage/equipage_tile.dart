@@ -39,8 +39,8 @@ class EquipageTile extends StatelessWidget {
 				child: Row(
 					mainAxisAlignment: MainAxisAlignment.start,
 					children: [
-						if (leading != null)
-							leading!,
+						if (leading case Widget leading)
+							leading,
 						const SizedBox(width: 10),
 						Flexible(
 							fit: FlexFit.tight,
@@ -59,8 +59,8 @@ class EquipageTile extends StatelessWidget {
 								mainAxisAlignment: MainAxisAlignment.center,
 								children: [
 									Text(equipage.status.name),
-									if (equipage.currentLoop != null)
-									Text("Loop ${equipage.currentLoop! + 1}")
+									if (equipage.currentLoop case int currentLoop)
+									Text("Loop ${currentLoop + 1}")
 								],
 							),
 							const SizedBox(width: 10),

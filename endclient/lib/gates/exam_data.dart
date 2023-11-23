@@ -64,8 +64,8 @@ class _ExamDataPageState extends State<ExamDataPage> {
 								scrollDirection: Axis.horizontal,
 								children: [
 									paddedChip("Loop ${1 + (widget.equipage.currentLoop ?? -1)}/${widget.equipage.category.loops.length}"),
-									if (widget.equipage.currentLoopData?.recoveryTime != null)
-										paddedChip("Recovery ${unixDifToMS(widget.equipage.currentLoopData!.recoveryTime!)}"),
+									if (widget.equipage.currentLoopData?.recoveryTime case int recovery)
+										paddedChip("Recovery ${unixDifToMS(recovery)}"),
 									for (VetFieldValue remark in widget.equipage.previousLoopData?.data?.remarks(true) ?? const [])
 										paddedChip("${remark.field.name} ${remark.toString()}", Colors.amber)
 								],
@@ -174,11 +174,11 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	Widget digField(int? val, String display, void Function(int? n) f) =>
 		ElevatedButton(
 			onPressed: (){
-				if (val == null) {
-					val = 1;
-				} else {
-					val = (val! + 1) % 4;
+				if (val case int value) {
+					val = (value + 1) % 4;
 					if (val == 0) val = null;
+				} else {
+					val = 1;
 				}
 				f(val);
 			},
@@ -193,12 +193,12 @@ class _ExamDataPageState extends State<ExamDataPage> {
 
 	Widget letField(int? val, String display, void Function(int? n) f) =>
 		ElevatedButton(
-			onPressed: (){
-				if (val == null) {
-					val = 1;
-				} else {
-					val = (val! + 1) % 4;
+			onPressed: () {
+				if (val case int value) {
+					val = (value + 1) % 4;
 					if (val == 0) val = null;
+				} else {
+					val = 1;
 				}
 				f(val);
 			},
@@ -261,8 +261,8 @@ class InputFieldState extends State<InputField> {
 		);
 
 	String _stringValue() =>
-		switch (widget.fieldType) {
-			VetFieldType.LETTER when val is int => String.fromCharCode(64 + val!),
+		switch ((widget.fieldType, val)) {
+			(VetFieldType.LETTER, int val) => String.fromCharCode(64 + val),
 			_ => val?.toString() ?? "-",
 		};
 

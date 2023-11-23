@@ -44,17 +44,34 @@ class Equipage extends IJSON {
 	String rider;
 	String horse;
 	VetData? preExam;
-	/// empty until cleared for start
 	List<LoopData> loops = [];
 	int? currentLoop;
 	String? dsqReason;
 	int startOffsetSecs = 0;
 
 	@JsonKey(ignore: true)
-	late Category category;
+	late Category _category;
+	@JsonKey(ignore: true)
+	Category get category => _category;
+	set category(Category cat) {
+		_category = cat;
+		loops = cat.loops.map((l) => LoopData(l)).toList();
+	}
 
-	Equipage(this.eid, this.rider,this.horse, this.category);
+	Equipage(this.eid, this.rider,this.horse, this._category);
 	Equipage.raw(this.eid, this.rider,this.horse);
+
+	bool skipLoop() {
+		if (isFinalLoop) return false;
+		if (currentLoop == null) return false;
+		if (currentLoopData case LoopData ld) {
+			if (ld.vet case int vet) {
+				loops[currentLoop!+1].expDeparture = vet + ld.loop.restTime * 60;
+			}
+		}
+		currentLoop = currentLoop! + 1;
+		return true;
+	}
 
 	LoopData? get currentLoopData =>
 		currentLoop == null ? null : loops[currentLoop!];

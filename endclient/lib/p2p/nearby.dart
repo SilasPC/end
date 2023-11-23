@@ -45,7 +45,7 @@ class Device extends Peer {
 		if (unavailable) return;
 		if (connected) return;
 		try {
-			await _man._bt!.requestConnection(
+			await _man._bt?.requestConnection(
 				_man.localName,
 				devId,
 				onConnectionInitiated: _man._onInit,
@@ -62,7 +62,7 @@ class Device extends Peer {
 	void disconnect() async {
 		if (disconnected) return;
 		try {
-			await _man._bt!.disconnectFromEndpoint(devId);
+			await _man._bt?.disconnectFromEndpoint(devId);
 		}
 		finally {
 			if (available) {
@@ -83,7 +83,7 @@ class Device extends Peer {
 
 		final seqNr = _seqNr++;
       _completers[seqNr] = c;
-		await _man._bt!.sendBytesPayload(devId, coding.encodeMsg(seqNr, msg, data));
+		await _man._bt?.sendBytesPayload(devId, coding.encodeMsg(seqNr, msg, data));
 
       Timer(const Duration(seconds: 5), () {
          if (!c.isCompleted) {
@@ -106,13 +106,13 @@ class Device extends Peer {
 
       if (isReply) {
          var c = _completers.remove(seqNr);
-         if (!(c?.isCompleted ?? true)) {
-            c!.complete(data.sublist(5));
+         if (c case Completer c when !c.isCompleted) {
+            c.complete(data.sublist(5));
          }
       } else {
          var reply = await onRecieve(msg, msgData);
          if (reply == null) return;
-		   _man._bt!.sendBytesPayload(
+		   _man._bt?.sendBytesPayload(
 				devId, 
 				coding.encodeReply(seqNr, reply)
 			);
@@ -271,8 +271,8 @@ class NearbyManager with ChangeNotifier {
 		await _bt?.acceptConnection(
 			devId,
 			onPayLoadRecieved: (devId, data) {
-				if (data.bytes != null) {
-					dev._rcv(data.bytes!);
+				if (data.bytes case Uint8List bytes) {
+					dev._rcv(bytes);
 				}
 			}
 		);
@@ -280,7 +280,8 @@ class NearbyManager with ChangeNotifier {
 
 	void _onRes(String devId, Status state) {
 		// print("res $devId $state");
-		var dev = _devs[devId]!;
+		var dev = _devs[devId];
+		if (dev == null) return;
 		switch (state) {
 			case Status.CONNECTED:
 				dev.status.value = DevStatus.CONNECTED;
@@ -293,7 +294,7 @@ class NearbyManager with ChangeNotifier {
 
 	void _onDisconnect(String devId) {
 		// print("disc $devId");
-		_devs[devId]!.status.value = DevStatus.AVAILABLE;
+		_devs[devId]?.status.value = DevStatus.AVAILABLE;
 	}
 
 	Device _dev(String devId, String name, [bool? outgoing]) {

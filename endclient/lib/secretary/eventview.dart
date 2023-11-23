@@ -53,8 +53,8 @@ class _EventViewState extends State<EventView> {
 							case "admin":
 								filterFn = adminOnly;
 								break;
-							default:
-								int eid = int.parse(value!);
+							case String value:
+								int eid = int.parse(value);
 								filterFn = (e) => (e as EnduranceEvent).affectsEquipage(eid);
 						}
 					}),
@@ -71,7 +71,10 @@ class _EventViewState extends State<EventView> {
 			errs[model.events.byInsertionIndex(err.causedBy)] = err;
 		}
 
-		var evs = filterFn != null ? model.events.iterator.where(filterFn!).toList() : model.events.iterator.toList();
+		var evs = switch (filterFn) {
+			null => model.events.iterator.toList(),
+			var fn => model.events.iterator.where(fn).toList(),
+		};
 
 		return Container(
 			padding: const EdgeInsets.all(10),
@@ -130,15 +133,18 @@ class _EventViewState extends State<EventView> {
 												Text(e.author, style: const TextStyle(color: Colors.grey)),
 											]
 										),
-										title: Text(e.runtimeType.toString()),
+										title: Text(
+											e.runtimeType.toString(),
+											style: deleted ? const TextStyle(
+												decoration: TextDecoration.lineThrough,
+												decorationColor: Colors.black,
+												decorationThickness: 5,
+											) : null
+										),
 										subtitle: Text(e.toString(), overflow: TextOverflow.fade),
 										trailing: err != null
 											? Text(err.description)
-											: (
-												deleted
-													? const Icon(Icons.delete)
-													: null
-											)
+											: null
 									);
 								},
 							),

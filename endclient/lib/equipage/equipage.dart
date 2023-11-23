@@ -59,7 +59,7 @@ class EquipagePageState extends State<EquipagePage> {
 				default:
 			}
 			if (msg != null && context.read<Settings>().sendNotifs) {
-				int loop = widget.equipage.currentLoop! + 1;
+				int loop = (widget.equipage.currentLoop ?? -1) + 1;
 				Locally(
 					context: context,
 					pageRoute: MaterialPageRoute(builder: (_) => widget),
@@ -98,6 +98,7 @@ class EquipagePageState extends State<EquipagePage> {
 	}
 
 	Widget? bottomBar() {
+		// UI: more info
 		if (widget.equipage.status != EquipageStatus.COOLING) {
 			return null;
 		}
@@ -113,8 +114,8 @@ class EquipagePageState extends State<EquipagePage> {
 		if (cl == null) return [];
 		return [
 			for (int l = cl; l >= 0; l--)
-				LoopCard(i: l + 1, ld: lps[l], finish: l == lps.length),
-			if (widget.equipage.preExam != null)
+				LoopCard(loopNr: l + 1, loopData: lps[l], isFinish: l == lps.length),
+			if (widget.equipage.preExam case VetData vd)
 				Card(
 					child: Column(
 						children: [
@@ -128,14 +129,14 @@ class EquipagePageState extends State<EquipagePage> {
 									),
 								),
 								height: 30,
-								child: Row(
+								child: const Row(
 									mainAxisAlignment: MainAxisAlignment.spaceBetween,
-									children: const [
+									children: [
 										Text("PRE-EXAM"),
 									],
 								)
 							),
-							LoopCard.remarksList(widget.equipage.preExam!.remarks())
+							LoopCard.remarksList(vd.remarks())
 						],
 					),
 				)
@@ -146,15 +147,15 @@ class EquipagePageState extends State<EquipagePage> {
 
 class LoopCard extends StatelessWidget {
 
-	const LoopCard({super.key, required this.i, required this.ld, required this.finish});
+	const LoopCard({super.key, required this.loopNr, required this.loopData, required this.isFinish});
 
-	final int i;
-	final LoopData ld;
-	final bool finish;
+	final int loopNr;
+	final LoopData loopData;
+	final bool isFinish;
 
 	@override
 	Widget build(BuildContext context) {
-		var remarks = ld.data?.remarks() ?? const [];
+		var remarks = loopData.data?.remarks() ?? const [];
 		return Card(
 			child: Column(
 				children: [
@@ -180,6 +181,11 @@ class LoopCard extends StatelessWidget {
 				Chip(
 					backgroundColor: color,
 					label: Text("${remark.field.name} ${remark.toString()}")
+				),
+				if (remarks.isEmpty)
+				const Chip(
+					backgroundColor: Colors.green,
+					label: Text("No remarks!")
 				)
 			],
 		);
@@ -198,8 +204,8 @@ class LoopCard extends StatelessWidget {
 			child: Row(
 				mainAxisAlignment: MainAxisAlignment.spaceBetween,
 				children: [
-					Text("LOOP $i"),
-					Text("${ld.loop.distance} km"),
+					Text("LOOP $loopNr"),
+					Text("${loopData.loop.distance} km"),
 				],
 			)
 		);
@@ -210,12 +216,12 @@ class LoopCard extends StatelessWidget {
 			child: GridView.count(
 				crossAxisCount: 3,
 				children: [
-					txtCol([maybe(ld.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
-					txtCol(["${ld.data?.hr1 ?? "-"}/${ld.data?.hr2 ?? "-"}","Heartrate"]),
-					txtCol([maybe(ld.speed(finish: finish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
-					txtCol([maybe(ld.expDeparture, unixHMS) ?? "-","Departure"]),
-					txtCol([maybe(ld.arrival, unixHMS) ?? "-","Arrival"]),
-					txtCol([maybe(ld.vet, unixHMS) ?? "-","Vet"]),
+					txtCol([maybe(loopData.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
+					txtCol(["${loopData.data?.hr1 ?? "-"}/${loopData.data?.hr2 ?? "-"}","Heartrate"]),
+					txtCol([maybe(loopData.speed(finish: isFinish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
+					txtCol([maybe(loopData.expDeparture, unixHMS) ?? "-","Departure"]),
+					txtCol([maybe(loopData.arrival, unixHMS) ?? "-","Arrival"]),
+					txtCol([maybe(loopData.vet, unixHMS) ?? "-","Vet"]),
 				].map(wrapTxtCol).toList(),
 			),
 		);

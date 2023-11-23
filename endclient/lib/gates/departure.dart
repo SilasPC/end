@@ -27,7 +27,7 @@ class _DeparturePageState extends State<DeparturePage> {
 		LocalModel m = ctx.read<LocalModel>();
 		var author = ctx.read<Settings>().author;
 		List<EnduranceEvent> evs = timers.entries
-			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]!.currentLoop!))
+			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]?.currentLoop))
 			.toList();
 		await m.addSync(evs);
 		timers.clear();
@@ -45,9 +45,10 @@ class _DeparturePageState extends State<DeparturePage> {
             EquipageTile(
                eq,
                trailing: [
+						if (eq.currentLoopData?.expDeparture case int expDep)
                   if (!timers.containsKey(eq.eid) && ok)
                   CountingTimer(
-                     target: fromUNIX(eq.currentLoopData!.expDeparture!)
+                     target: fromUNIX(expDep)
                   ),
                   TimeLock(
                      time: timers[eq.eid],

@@ -13,19 +13,20 @@ class TimeLock extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) =>
-		time == null
-			? IconButton(
+		switch (time) {
+			null => IconButton(
 				icon: const Icon(Icons.timer, color: Colors.green),
 				onPressed: () => onChanged(DateTime.now()),
-			)
-			: GestureDetector(
-				child: Text(toHMS(time!)),
+			),
+			var time => GestureDetector(
+				child: Text(toHMS(time)),
 				onTap: () {
 					showHMSPicker(
 						context,
-						time!,
+						time,
 						onChanged
 					);
 				}
-			);
+			)
+		};
 }
