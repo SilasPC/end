@@ -3,34 +3,52 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:common/util.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-/*
+
 class SettingsService {
 
-	ValueNotifier<Settings> _current = ValueNotifier(Settings.defaults(this));
-	ValueListenable<Settings> get it => _current;
+	late final ValueNotifier<Settings> _current;
 
-	SettingsService() {
-		_load();
+	ValueListenable<Settings> get current => _current;
+
+	SettingsService._() {
+		_current = ValueNotifier(Settings.defaults(this));
+	}
+	static Future<SettingsService> create() async {
+		var self = SettingsService._();
+
+		var prefs = await SharedPreferences.getInstance();
+		var val = prefs.getString("settings");
+		if (val == null) return self;
+		try {
+			self.set(Settings.fromJsonString(val, self));
+		} catch (_) {
+			print("loading settings failed");
+			self._save();
+		}
+		return self;
+	}
+
+	static SettingsService createSync() {
+		var self = SettingsService._();
+
+		SharedPreferences.getInstance()
+			.then((prefs) {
+				var val = prefs.getString("settings");
+				if (val == null) return;
+				try {
+					self.set(Settings.fromJsonString(val, self));
+				} catch (_) {
+					print("loading settings failed");
+					self._save();
+				}
+			});
+		return self;
 	}
 
 	Future<void> _save() async {
 		var prefs = await SharedPreferences.getInstance();
 		await prefs.setString("settings", _current.value.toJsonString());
-	}
-
-	Future<void> _load() async {
-		var prefs = await SharedPreferences.getInstance();
-		var val = prefs.getString("settings");
-		if (val == null) return;
-		try {
-			set(Settings.fromJsonString(val, this));
-		} catch (_) {
-			print("loading settings failed");
-			_save();
-		}
 	}
 
 	void set(Settings value) {
@@ -40,63 +58,10 @@ class SettingsService {
 	}
 
 }
- */
-class SettingsProvider extends StatefulWidget {
-	const SettingsProvider({super.key, required this.child});
-
-	final Widget child;
-
-	@override
-	SettingsProviderState createState() => SettingsProviderState();
-}
-
-class SettingsProviderState extends State<SettingsProvider> {
-
-	late Settings _current;
-
-	@override
-	void initState() {
-		super.initState();
-		_current = Settings.defaults(this);
-		_load();
-	}
-
-	Future<void> _save() async {
-		var prefs = await SharedPreferences.getInstance();
-		await prefs.setString("settings", _current.toJsonString());
-	}
-
-	Future<void> _load() async {
-		var prefs = await SharedPreferences.getInstance();
-		var val = prefs.getString("settings");
-		if (val == null) return;
-		try {
-			set(Settings.fromJsonString(val, this));
-		} catch (_) {
-			_save();
-		}
-	}
-
-	void set(Settings value) {
-		if (!mounted) return;
-		setState(() {
-			_current = value;
-		});
-		_save();
-	}
-
-	@override
-	Widget build(BuildContext context) =>
-		Provider.value(
-			value: _current,
-			child: widget.child,
-		);
-
-}
 
 class Settings extends IJSON {
 
-	final SettingsProviderState _provider;
+	final SettingsService _service;
 
 	String serverURI;
 	String author;
@@ -108,7 +73,7 @@ class Settings extends IJSON {
 	bool useWakeLock;
 
 	Settings(
-		this._provider,
+		this._service,
 		this.serverURI,
 		this.author,
 		this.darkTheme,
@@ -118,7 +83,7 @@ class Settings extends IJSON {
 		this.useP2P,
 		this.useWakeLock,
 	);
-	Settings.defaults(this._provider):
+	Settings.defaults(this._service):
 		serverURI = "https://kastanie.ddns.net/esys",
 		author = Platform.localHostname,
 		darkTheme = false,
@@ -141,11 +106,11 @@ class Settings extends IJSON {
 	}
 
 	void save() {
-		_provider.set(clone());
+		_service.set(clone());
 	}
 
 	Settings clone() => Settings(
-		_provider,
+		_service,
 		serverURI,
 		author,
 		darkTheme,
@@ -168,9 +133,9 @@ class Settings extends IJSON {
 		'useWakeLock': useWakeLock
 	};
 
-	factory Settings.fromJson(JSON json, SettingsProviderState provider) =>
+	factory Settings.fromJson(JSON json, SettingsService service) =>
 		Settings(
-			provider,
+			service,
 			json['serverURI'] as String,
 			json['author'] as String,
 			json['darkTheme'] as bool,
@@ -181,7 +146,7 @@ class Settings extends IJSON {
 			json['useWakeLock'] as bool,
 		);
 
-	factory Settings.fromJsonString(String json, SettingsProviderState provider) =>
-		Settings.fromJson(jsonDecode(json), provider);
+	factory Settings.fromJsonString(String json, SettingsService service) =>
+		Settings.fromJson(jsonDecode(json), service);
 
 }

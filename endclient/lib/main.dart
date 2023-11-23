@@ -1,14 +1,11 @@
 import 'dart:io';
 
+import 'package:esys_client/service_graph.dart';
 import 'package:esys_client/landing2.dart';
-import 'package:esys_client/nearby_provider.dart';
-import 'package:esys_client/services/identity.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
-import 'landing.dart';
 import 'local_model/LocalModel.dart';
+import 'p2p/nearby.dart';
 import 'settings_provider.dart';
 
 Future<void> main() async {
@@ -24,8 +21,16 @@ Future<void> main() async {
 		databaseFactory = databaseFactoryFfi;
 	}
 
+	var graph = defineServices();
+
+	await Future.delayed(const Duration(milliseconds: 50));
+
 	runApp(
-		SettingsProvider(
+		ServiceGraphProvider.value(
+			graph: graph,
+			child: const MyApp(),
+		)
+		/* SettingsProvider(
 			child: ModelProvider(
 				child: VariousStatesProvider(
 					child: NearbyProvider(
@@ -37,7 +42,7 @@ Future<void> main() async {
 					)
 				)
 			)
-		)
+		) */
 	);
 }
 
@@ -59,4 +64,35 @@ class MyApp extends StatelessWidget {
 		);
 	}
 
+}
+
+ServiceGraph defineServices() {
+	var b = ServiceGraph();
+
+	b.add(SettingsService.createSync());
+	b.deriveListenable<SettingsService, Settings>((s) => s.current);
+
+	b.addListenable(LocalModel());
+
+	b.pipe<Settings, LocalModel>((s, lm) {
+		lm.setServerUri(s.serverURI);
+		lm.autoYield = s.autoYield;
+	});
+
+	b.addListenable(NearbyManager());
+	b.pipe<NearbyManager, LocalModel>((nm, lm) {
+		for (var p in nm.devices) {
+			lm.manager.addPeer(p);
+		}
+	});
+	
+	b.addListenableDep(ServerConnection.new);
+	b.addListenableDep<LocalModel, PeerStates>(
+		(m) => PeerStates(m.manager)
+	);
+	b.addListenableDep<LocalModel, SessionState>(
+		(m) => SessionState(m.manager)
+	);
+
+	return b;
 }
