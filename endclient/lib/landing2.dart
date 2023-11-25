@@ -1,4 +1,6 @@
 
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+
 import 'package:esys_client/equipage/equipage.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/landing.dart';
@@ -7,6 +9,8 @@ import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/settings.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/util.dart';
+import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
+import 'package:esys_client/v2/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,104 +26,97 @@ class Landing2 extends StatelessWidget {
 
 		var inSession = model.model.rideName != "";
 
-		var body = Container(
-			constraints: const BoxConstraints(maxWidth: 400),
-			alignment: Alignment.center,
-			padding: const EdgeInsets.symmetric(
-				vertical: 40,
-				horizontal: 60
-			),
-			child: Column(
-				crossAxisAlignment: CrossAxisAlignment.center,
-				mainAxisAlignment: MainAxisAlignment.start,
+		return Material(
+			child: Wrap(
+				alignment: WrapAlignment.center,
+				runAlignment: WrapAlignment.center,
+				crossAxisAlignment: WrapCrossAlignment.center,
 				children: [
-					Text(
-						!inSession
-							? "No active session"
-							: model.model.rideName,
-						style: const TextStyle(
-							color: Colors.black,
-							fontSize: 20,
-							fontWeight: FontWeight.bold
-						)		
-					),
-					ElevatedButton(
-						style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
-						child: const Row(
-							mainAxisSize: MainAxisSize.min,
-							children: [
-								Text("LOGIN  "),
-								Icon(Icons.login),
-							],
-						),
-						onPressed: () {
-							Navigator.of(context)
-								.push(MaterialPageRoute(builder: (context) => const LandingPage()));
-						},
-					),
-					SizedBox(height: 10),
-					if (inSession) ...[
-						Container(
-							alignment: Alignment.center,
-							padding: const EdgeInsets.symmetric(vertical: 5),
-							decoration: BoxDecoration(
-								borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-								color: Colors.black38.withAlpha(200),
-							),
-							child: const Text(
-								"Equipages",
-								style: TextStyle(
-									color: Colors.white,
-									fontSize: 25,
-									fontWeight: FontWeight.bold,
-								)
+					SizedBox(
+						height: 200,
+						width: 400,
+						child: Card(
+							color: Colors.black26,
+							child: Column(
+								mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+								children: [
+									Container(
+										alignment: Alignment.center,
+										padding: const EdgeInsets.all(8),
+										child: Text(
+											inSession
+												? model.model.rideName
+												: "No active session",
+											style: TextStyle(
+												fontSize: 20
+											)
+										),
+									),
+									Divider(),
+									Center(
+										child: ElevatedButton(
+											style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
+											child: const Row(
+												mainAxisSize: MainAxisSize.min,
+												children: [
+													Text("LOGIN  "),
+													Icon(Icons.login),
+												],
+											),
+											onPressed: () {
+												Navigator.of(context)
+													.push(MaterialPageRoute(builder: (context) => const Dashboard()));
+											},
+										),
+									),
+								]
 							)
 						),
-						Expanded(
-							child: ListView(
-								children: [
-									for (var eq in model.model.equipages.values)
-									EquipageTile(
-										eq,
-										color: Colors.black38.withAlpha(200),
-										onTap: () {
-											Navigator.of(context)
-												.push(MaterialPageRoute(
-													builder: (context) => EquipagePage(eq)
-												));
-										},
-									),
-								],
-							),
-						),
-						/* Container(
-							padding: const EdgeInsets.symmetric(vertical: 5),
-							decoration: BoxDecoration(
-								borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-								color: Colors.black38.withAlpha(200),
-							),
-						), */
-					]
+					),
+					SizedBox(
+						height: MediaQuery.sizeOf(context).height - 250,
+						child: Card(
+							color: Colors.black26,
+							child: SizedBox(
+								width: 400,
+								child: Builder(
+									builder: (context) {
+										LocalModel model = context.watch();
+										return ListView(
+											children: [
+												Container(
+													alignment: Alignment.center,
+													padding: const EdgeInsets.all(8),
+													child: Text(
+														"Equipages",
+														style: TextStyle(
+															fontSize: 20
+														)
+													),
+												),
+												Divider(),
+												// UI: sort by eid
+												for (var (i, eq) in model.model.equipages.values.indexed)
+												EquipageTile(
+													eq,
+													trailing: [Icon(Icons.chevron_right)],
+													color: i % 2 == 0 ? Color.fromARGB(5, 255, 255, 255) : null,
+													/* onTap: () {
+														Navigator.of(context)
+															.push(MaterialPageRoute(
+																builder: (context) => EquipagePage(eq)
+															));
+													} */
+												)
+											],
+										);
+									}
+								)
+							)
+						)
+					)
 				],
 			)
-		);
-
-		return Scaffold(
-			appBar: AppBar(
-				actions: [
-					IconButton(
-						icon: const Icon(Icons.settings),
-						onPressed: () {
-							Navigator.of(context)
-								.push(MaterialPageRoute(
-									builder: (context) => const SettingsPage(),
-								));
-						},
-					),
-					const ConnectionIndicator(),
-				]
-			),
-			body: BackgroundStack(Center(child: body))
 		);
 
 	}

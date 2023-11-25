@@ -11,6 +11,7 @@ typedef AsyncProducer<T> = Producer<FutureOr<T>>;
 typedef VoidCallback = void Function();
 
 abstract class IJSON {
+	const IJSON();
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
 	List<int> toJsonBin() => toJsonString().codeUnits;

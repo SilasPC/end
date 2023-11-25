@@ -10,6 +10,7 @@
  - ftq/dsq ga me ...
  - confirm closing with unsaved data
  - more icons (?)
+ - make warnings visible
 
 # UI guidelines
  - simple to use/understand

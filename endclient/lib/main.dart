@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'landing.dart';
 import 'local_model/LocalModel.dart';
 import 'settings_provider.dart';
+import 'v2/dashboard/dashboard.dart';
 
 Future<void> main() async {
 
@@ -51,11 +51,39 @@ class MyApp extends StatelessWidget {
 			secondary: const Color.fromARGB(255, 146, 119, 68),
 		);
 		return MaterialApp(
-			theme: ThemeData(colorScheme: cs),
+			theme: ThemeData(
+				colorScheme: cs,
+				cardTheme: CardTheme.of(context).copyWith(
+					margin: const EdgeInsets.all(16),
+					shape: RoundedRectangleBorder(
+						borderRadius: BorderRadius.circular(20),
+					)
+				)
+			),
 			title: 'eSys Endurance',
 			debugShowCheckedModeBanner: false,
-			darkTheme: ThemeData.dark(),
-			home: const Landing2(),
+			darkTheme: ThemeData.dark().copyWith(
+				colorScheme: cs,
+				cardTheme: CardTheme.of(context).copyWith(
+					margin: const EdgeInsets.all(16),
+					shape: RoundedRectangleBorder(
+						borderRadius: BorderRadius.circular(20),
+					)
+				)
+			),
+			home: Builder(
+				builder: (context) {
+					MediaQueryData mq = MediaQuery.of(context);
+					// FEAT: scale everything ?
+					var factor = context.watch<Settings>().largeUI ? 1.2 : 1;
+					return MediaQuery(
+						data: mq.copyWith(
+							textScaleFactor: mq.textScaleFactor * factor,
+						),
+						child: const Landing2(),
+					);
+				}
+			)
 		);
 	}
 

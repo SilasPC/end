@@ -101,6 +101,7 @@ class Settings extends IJSON {
 	String serverURI;
 	String author;
 	bool darkTheme;
+	bool largeUI;
 	bool showAdmin;
 	bool sendNotifs;
 	bool autoYield;
@@ -112,6 +113,7 @@ class Settings extends IJSON {
 		this.serverURI,
 		this.author,
 		this.darkTheme,
+		this.largeUI,
 		this.showAdmin,
 		this.sendNotifs,
 		this.autoYield,
@@ -122,6 +124,7 @@ class Settings extends IJSON {
 		serverURI = "https://kastanie.ddns.net/esys",
 		author = Platform.localHostname,
 		darkTheme = false,
+		largeUI = false,
 		showAdmin = false,
 		sendNotifs = Platform.isAndroid || Platform.isIOS,
 		autoYield = true,
@@ -133,6 +136,7 @@ class Settings extends IJSON {
 		serverURI = "https://kastanie.ddns.net/esys";
 		author = Platform.localHostname;
 		darkTheme = false;
+		largeUI = false;
 		showAdmin = false;
 		sendNotifs = Platform.isAndroid || Platform.isIOS;
 		autoYield = true;
@@ -149,6 +153,7 @@ class Settings extends IJSON {
 		serverURI,
 		author,
 		darkTheme,
+		largeUI,
 		showAdmin,
 		sendNotifs,
 		autoYield,
@@ -174,6 +179,7 @@ class Settings extends IJSON {
 			json['serverURI'] as String,
 			json['author'] as String,
 			json['darkTheme'] as bool,
+			json['largeUI'] as bool,
 			json['showAdmin'] as bool,
 			json['sendNotifs'] as bool,
 			json['autoYield'] as bool,

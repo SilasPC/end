@@ -60,6 +60,7 @@ class EquipageTile extends StatelessWidget {
 								children: [
 									Text(equipage.status.name),
 									if (equipage.currentLoop case int currentLoop)
+									if (!equipage.isEnded)
 									Text("Loop ${currentLoop + 1}")
 								],
 							),
