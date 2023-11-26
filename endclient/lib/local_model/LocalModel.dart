@@ -1,6 +1,4 @@
 
-// ignore_for_file: constant_identifier_names
-
 import 'dart:async';
 import 'dart:io';
 import 'package:common/EventModel.dart';
@@ -9,35 +7,9 @@ import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
 import 'package:esys_client/p2p/ServerPeer.dart';
-import 'package:esys_client/settings_provider.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 
 part 'states.dart';
-
-class ModelProvider extends StatelessWidget {
-	const ModelProvider({super.key, required this.child});
-
-	final Widget child;
-
-	@override
-	Widget build(BuildContext context) =>
-		ChangeNotifierProxyProvider<Settings, LocalModel>(
-			lazy: false,
-			create: (_) => LocalModel(),
-			update: (_, set, mod) {
-				mod!.setServerUri(set.serverURI);
-				mod.autoYield = set.autoYield;
-				return mod;
-			},
-			child: ProxyProvider<LocalModel, MetaModel>(
-				lazy: false,
-				create: (context) => context.read<LocalModel>().metaModel,
-				update: (_, __, mm) => mm!,
-				child: child,
-			),
-		);
-}
 
 class LocalModel with ChangeNotifier {
 

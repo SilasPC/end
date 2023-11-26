@@ -123,7 +123,10 @@ class Service<T extends Object> extends ChangeNotifier {
 	}
 
 	Widget toProvider([Widget? child]) =>
-		Provider<T>.value(value: _value!, child: child);
+		AnimatedBuilder(
+			animation: this,
+			builder: (_, __) => Provider<T>.value(value: _value!, child: child),
+		);
 
 	void write(T value) {
 		if (_value == value) return;
@@ -158,8 +161,10 @@ class ListenableService<T extends Listenable> extends Service<T> {
 
 	@override
 	Widget toProvider([Widget? child]) =>
-		// TODO: propagate value updates into provider
-		ListenableProvider<T>.value(value: _value!, child: child,);
+		AnimatedBuilder(
+			animation: this,
+			builder: (_, __) => ListenableProvider<T>.value(value: _value!, child: child),
+		);
 
 	@override
 	void willChangeValue(T newValue) {
@@ -260,13 +265,9 @@ class ServiceGraphProvider extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		var prev = child;
-		print("build:");
 		for (var service in graph._services.values.cast<Service>()) {
-			print(prev.runtimeType);
 			prev = service.toProvider(prev);
 		}
-		print(prev.runtimeType);
-		print("built");
 		return prev;
 	}
 

@@ -86,28 +86,32 @@ class SqliteDatabase extends EventDatabase<Model> {
 		var path = join(await getDatabasesPath(), "events.db");
 		var db = await openDatabase(
 			path,
-			onUpgrade: (db, v0, v1) async {
-				await (db.batch()
-					..execute("DROP TABLE IF EXISTS deletes")
-					..execute("DROP TABLE IF EXISTS events")
-					..execute("DROP TABLE IF EXISTS peers")
-
-					..execute("CREATE TABLE IF NOT EXISTS deletes (time INT NOT NULL, json STRING NOT NULL)")
-					..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
-					..execute("""
-						CREATE TABLE IF NOT EXISTS peers (
-							peerId STRING NOT NULL PRIMARY KEY,
-							sessionId INT NOT NULL,
-							resetCount INT NOT NULL,
-							evLen INT NOT NULL,
-							delLen INT NOT NULL
-						)
-					"""))
-					.commit(noResult: true);
-			},
-			version: 8
+			onCreate: (db, _) => _resetDatabase(db),
+			onUpgrade: (db, _, __) => _resetDatabase(db),
+			onDowngrade: (db, _, __) => _resetDatabase(db),
+			version: 9
 		);
 		return db;
+	}
+
+	static Future<void> _resetDatabase(Database db) async {
+		await (db.batch()
+			..execute("DROP TABLE IF EXISTS deletes")
+			..execute("DROP TABLE IF EXISTS events")
+			..execute("DROP TABLE IF EXISTS peers")
+
+			..execute("CREATE TABLE IF NOT EXISTS deletes (time INT NOT NULL, json STRING NOT NULL)")
+			..execute("CREATE TABLE IF NOT EXISTS events (time INT NOT NULL, json STRING NOT NULL)")
+			..execute("""
+				CREATE TABLE IF NOT EXISTS peers (
+					peerId STRING NOT NULL PRIMARY KEY,
+					sessionId INT NOT NULL,
+					resetCount INT NOT NULL,
+					evLen INT NOT NULL,
+					delLen INT NOT NULL
+				)
+			"""))
+			.commit(noResult: true);
 	}
 	
 	@override

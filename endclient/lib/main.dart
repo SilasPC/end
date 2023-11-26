@@ -10,8 +10,12 @@ import 'settings_provider.dart';
 
 Future<void> main() async {
 
+	var graph = defineServices();
+	// await Future.delayed(const Duration(milliseconds: 50));
+
 	FlutterError.onError = (details) {
 		FlutterError.presentError(details);
+		// graph.get<ServerConnection>().value?.reportError();
 		// IGNORED: TODO: custom exception handler
 	};
 
@@ -21,28 +25,11 @@ Future<void> main() async {
 		databaseFactory = databaseFactoryFfi;
 	}
 
-	var graph = defineServices();
-
-	await Future.delayed(const Duration(milliseconds: 50));
-
 	runApp(
 		ServiceGraphProvider.value(
 			graph: graph,
 			child: const MyApp(),
 		)
-		/* SettingsProvider(
-			child: ModelProvider(
-				child: VariousStatesProvider(
-					child: NearbyProvider(
-						child: ChangeNotifierProvider<IdentityService>(
-							lazy: false,
-							create: (_) => IdentityService(),
-							child: MyApp(),
-						),
-					)
-				)
-			)
-		) */
 	);
 }
 
@@ -70,29 +57,32 @@ ServiceGraph defineServices() {
 	var b = ServiceGraph();
 
 	b.add(SettingsService.createSync());
-	b.deriveListenable<SettingsService, Settings>((s) => s.current);
+	b.deriveListenable((SettingsService s) => s.current);
 
 	b.addListenable(LocalModel());
 
-	b.pipe<Settings, LocalModel>((s, lm) {
-		lm.setServerUri(s.serverURI);
-		lm.autoYield = s.autoYield;
+	b.pipe((Settings set, LocalModel lm) {
+		lm.setServerUri(set.serverURI);
+		lm.autoYield = set.autoYield;
 	});
 
 	b.addListenable(NearbyManager());
-	b.pipe<NearbyManager, LocalModel>((nm, lm) {
+	b.pipe((NearbyManager nm, LocalModel lm) {
 		for (var p in nm.devices) {
 			lm.manager.addPeer(p);
 		}
 	});
+	b.pipe((Settings set, NearbyManager nm) {
+		nm.enabled = set.useP2P;
+	});
 	
 	b.addListenableDep(ServerConnection.new);
-	b.addListenableDep<LocalModel, PeerStates>(
-		(m) => PeerStates(m.manager)
-	);
-	b.addListenableDep<LocalModel, SessionState>(
-		(m) => SessionState(m.manager)
-	);
+	b.addListenableDep((LocalModel m) => PeerStates(m.manager));
+	b.addListenableDep((LocalModel m) => SessionState(m.manager));
+
+	b.pipe((ServerConnection conn, NearbyManager nm) {
+		nm.autoConnect = !conn.inSync;
+	});
 
 	return b;
 }

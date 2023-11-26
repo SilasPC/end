@@ -1,30 +1,6 @@
 
 part of 'LocalModel.dart';
 
-class VariousStatesProvider extends StatelessWidget {
-
-	const VariousStatesProvider({super.key, required this.child});
-
-	final Widget child;
-
-	@override
-	Widget build(BuildContext context) =>
-		ChangeNotifierProxyProvider<LocalModel, ServerConnection>(
-			create: (ctx) => ServerConnection(ctx.read<LocalModel>()),
-			update: (_, __, val) => val!,
-			child: ChangeNotifierProxyProvider<LocalModel, PeerStates>(
-				create: (ctx) => PeerStates(ctx.read<LocalModel>().manager),
-				update: (_, __, val) => val!,
-				child: ChangeNotifierProxyProvider<LocalModel, SessionState>(
-					create: (ctx) => SessionState(ctx.read<LocalModel>().manager),
-					update: (_, __, val) => val!,
-					child: child,
-				)
-			),
-		);
-
-}
-
 class ServerConnection extends ChangeNotifier {
 
 	ServerPeer? get peer => _pmm._master;
