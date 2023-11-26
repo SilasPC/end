@@ -6,7 +6,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
-import '../settings_provider.dart';
+import '../services/settings.dart';
 import '../util/input_modals.dart';
 import '../local_model/LocalModel.dart';
 

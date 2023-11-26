@@ -10,7 +10,7 @@ import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../local_model/LocalModel.dart';
-import '../settings_provider.dart';
+import '../services/settings.dart';
 
 class DeparturePage extends StatefulWidget {
 	const DeparturePage({super.key});

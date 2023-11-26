@@ -1,22 +1,16 @@
 
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:esys_client/equipage/equipage.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/landing.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/services/identity.dart';
-import 'package:esys_client/settings.dart';
-import 'package:esys_client/util/connection_indicator.dart';
-import 'package:esys_client/util/util.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Landing2 extends StatelessWidget {
+class Landing extends StatelessWidget {
 
-	const Landing2({super.key});
+	const Landing({super.key});
 
 	@override
 	Widget build(BuildContext context) {

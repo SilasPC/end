@@ -1,20 +1,22 @@
 import 'dart:io';
 
-import 'package:esys_client/landing2.dart';
-import 'package:esys_client/nearby_provider.dart';
-import 'package:esys_client/services/identity.dart';
+import 'package:esys_client/service_graph.dart';
+import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
 import 'local_model/LocalModel.dart';
-import 'settings_provider.dart';
-import 'v2/dashboard/dashboard.dart';
+import 'services/nearby.dart';
+import 'services/settings.dart';
 
 Future<void> main() async {
 
+	var graph = defineServices();
+	// await Future.delayed(const Duration(milliseconds: 50));
+
 	FlutterError.onError = (details) {
 		FlutterError.presentError(details);
+		// graph.get<ServerConnection>().value?.reportError();
 		// IGNORED: TODO: custom exception handler
 	};
 
@@ -25,18 +27,9 @@ Future<void> main() async {
 	}
 
 	runApp(
-		SettingsProvider(
-			child: ModelProvider(
-				child: VariousStatesProvider(
-					child: NearbyProvider(
-						child: ChangeNotifierProvider<IdentityService>(
-							lazy: false,
-							create: (_) => IdentityService(),
-							child: MyApp(),
-						),
-					)
-				)
-			)
+		ServiceGraphProvider.value(
+			graph: graph,
+			child: const MyApp(),
 		)
 	);
 }
@@ -80,11 +73,45 @@ class MyApp extends StatelessWidget {
 						data: mq.copyWith(
 							textScaleFactor: mq.textScaleFactor * factor,
 						),
-						child: const Landing2(),
+						child: const Landing(),
 					);
 				}
 			)
 		);
 	}
 
+}
+
+ServiceGraph defineServices() {
+	var b = ServiceGraph();
+
+	b.add(SettingsService.createSync());
+	b.deriveListenable((SettingsService s) => s.current);
+
+	b.addListenable(LocalModel());
+
+	b.pipe((Settings set, LocalModel lm) {
+		lm.setServerUri(set.serverURI);
+		lm.autoYield = set.autoYield;
+	});
+
+	b.addListenable(NearbyManager());
+	b.pipe((NearbyManager nm, LocalModel lm) {
+		for (var p in nm.devices) {
+			lm.manager.addPeer(p);
+		}
+	});
+	b.pipe((Settings set, NearbyManager nm) {
+		nm.enabled = set.useP2P;
+	});
+	
+	b.addListenableDep(ServerConnection.new);
+	b.addListenableDep((LocalModel m) => PeerStates(m.manager));
+	b.addListenableDep((LocalModel m) => SessionState(m.manager));
+
+	b.pipe((ServerConnection conn, NearbyManager nm) {
+		nm.autoConnect = !conn.inSync;
+	});
+
+	return b;
 }

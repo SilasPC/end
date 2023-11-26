@@ -7,7 +7,7 @@ import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util/unix.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/settings_provider.dart';
+import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';

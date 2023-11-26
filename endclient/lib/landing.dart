@@ -2,7 +2,6 @@
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 
-import 'settings.dart';
 import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
 import 'gates/arrival.dart';
@@ -25,7 +24,6 @@ class LandingPageState extends State<LandingPage> {
 		Text("Exam"),
 		Text("Vet"),
 		Text("Arrival"),
-		Text("Settings"),
 	];
 	static const List<Widget> pages = [
 		SecretaryPage(),
@@ -33,7 +31,6 @@ class LandingPageState extends State<LandingPage> {
 		ExamPage(),
 		VetPage(),
 		ArrivalPage(),
-		SettingsPage(),
 	];
 
 	@override

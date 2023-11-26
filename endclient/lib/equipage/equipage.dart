@@ -8,7 +8,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
 import '../secretary/category.dart';
-import '../settings_provider.dart';
+import '../services/settings.dart';
 import '../util/chip_strip.dart';
 import '../util/timer.dart';
 import '../util/util.dart';

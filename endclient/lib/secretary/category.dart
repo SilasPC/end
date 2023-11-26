@@ -3,7 +3,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/results.dart';
-import 'package:esys_client/settings_provider.dart';
+import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/MyIcons.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';

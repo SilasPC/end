@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:wakelock/wakelock.dart';
-import '../settings_provider.dart';
+import '../services/settings.dart';
 import 'gate_controller.dart';
 import '../util/connection_indicator.dart';
 import '../util/equipage_selector_drawer.dart';

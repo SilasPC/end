@@ -152,7 +152,7 @@ class NearbyManager with ChangeNotifier {
 
 	bool _autoConnect = false;
 	bool get autoConnect => _autoConnect;
-	set autoConnect (val) {
+	set autoConnect (bool val) {
 		if (val && val != _autoConnect) {
 			for (var dev in _devs.values) {
 				if (dev.status.value == DevStatus.AVAILABLE) {

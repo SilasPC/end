@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:common/models/glob.dart';
-import 'package:esys_client/settings_provider.dart';
+import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';

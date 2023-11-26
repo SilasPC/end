@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/settings_provider.dart';
+import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/equipage_selector_drawer.dart';
 import 'package:esys_client/util/util.dart';
