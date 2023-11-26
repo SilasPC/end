@@ -53,13 +53,22 @@ class LoopData extends IJSON {
 	}
 
 	int? get recoveryTime =>
-		arrival != null && vet != null ? vet! - arrival! : null;
+		switch ((arrival, vet)) {
+			(int arrival, int vet) => vet - arrival,
+			_ => null
+		};
 
 	int? get timeToVet =>
-		expDeparture != null && vet != null ? vet! - expDeparture! : null;
+		switch ((expDeparture, vet)) {
+			(int expDeparture, int vet) => vet - expDeparture,
+			_ => null
+		};
 		
 	int? get timeToArrival =>
-		expDeparture != null && arrival != null ? arrival! - expDeparture! : null;
+		switch ((expDeparture, arrival)) {
+			(int expDeparture, int arrival) => arrival - expDeparture,
+			_ => null
+		};
 	
 	JSON toJson() => _$LoopDataToJson(this);
 	factory LoopData.fromJson(JSON json) =>

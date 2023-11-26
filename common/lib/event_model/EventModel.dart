@@ -87,22 +87,34 @@ class EventModel<M extends IJSON> {
 
 	void setMaxTime(int? maxTime) {
 		if (maxTime == _maxBuildTime) return;
-		if (_maxBuildTime != null && (maxTime == null || maxTime > _maxBuildTime!)) {
-			// delete constraint
-			int buildFrom = _events.binarySearch((e) => e.time > _maxBuildTime!);
-			_maxBuildTime = maxTime;
+		int? oldMaxTime = _maxBuildTime;
+		_maxBuildTime = maxTime;
+
+		void fastForward(int oldMaxTime) {
+			int buildFrom = _events.binarySearch((e) => e.time > oldMaxTime);
 			if (buildFrom != -1) {
 				_handle.willUpdate();
 				_buildFromIndex(buildFrom);
 				_handle.didUpdate();
 			}
-		} else if (maxTime != null && (_maxBuildTime == null || _maxBuildTime! > maxTime)) {
-			// add constraint
-			_maxBuildTime = maxTime;
-			_handle.willUpdate();
-			_restoreFromSavepoint();
-			_handle.didUpdate();
 		}
+
+		switch ((oldMaxTime, maxTime)) {
+			case (int oldMaxTime, null):
+				fastForward(oldMaxTime);
+				break;
+			case (int oldMaxTime, int maxTime) when maxTime > oldMaxTime:
+				fastForward(oldMaxTime);
+				break;
+			case (null, int _):
+			case (int oldMaxTime, int maxTime) when maxTime < oldMaxTime:
+				// rollback
+				_handle.willUpdate();
+				_restoreFromSavepoint();
+				_handle.didUpdate();
+				break;
+		}
+
 	}
 
 	void reset() {
@@ -164,8 +176,8 @@ class EventModel<M extends IJSON> {
 
 	void _restoreFromSavepoint() {
 		Savepoint<M> sp;
-		if (_maxBuildTime != null) {
-			sp = savepoints.lastWhere((sp) => sp.lastTime == null || sp.lastTime! <= _maxBuildTime!);
+		if (_maxBuildTime case int maxTime) {
+			sp = savepoints.lastWhere((sp) => sp.lastTime == null || sp.lastTime! <= maxTime);
 		} else {
 			sp = savepoints.last;
 		}
@@ -181,9 +193,8 @@ class EventModel<M extends IJSON> {
 
 	void _buildFromIndex(int i) {
 		var it = _events.iterator.skip(i);
-		if (_maxBuildTime != null) {
-			var max = _maxBuildTime!;
-			it = it.takeWhile((ev) => ev.time <= max);
+		if (_maxBuildTime case int maxTime) {
+			it = it.takeWhile((ev) => ev.time <= maxTime);
 		}
       _buildIndex = i;
 		for (var ev in it) {

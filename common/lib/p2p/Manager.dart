@@ -419,13 +419,10 @@ class PeerManager<M extends IJSON> {
 		_mutex.protect(() =>
 			p._mutex.protect(() async {
 				// print("yield to ${p.id} ${p._state.name} ${p._lastKnownState?.sessionId}");
-				if (p.sessionId == sessionId) {
+				if (p.sessionId == null || p.sessionId == sessionId || p._state != PeerState.CONFLICT) {
 					return false;
 				}
-				if (p._state != PeerState.CONFLICT) {
-					return false;
-				}
-				await _reset(disconnect: false, ignoreLockFor: p, newSession: p._lastKnownState!.sessionId);
+				await _reset(disconnect: false, ignoreLockFor: p, newSession: p.sessionId!);
 				await _save();
 				// print("$peerId ses = $_sessionId");
 				for (var op in _peers) {

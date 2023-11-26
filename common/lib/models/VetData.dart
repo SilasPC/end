@@ -19,30 +19,30 @@ class VetData extends IJSON {
 
 	List<VetFieldValue> remarks([bool returnHr = false]) =>
 		[
-			if (hr1 != null && returnHr) 
-				VetField.HR1.withValue(hr1!),
-			if (hr2 != null && returnHr)
-				VetField.HR2.withValue(hr2!),
-			if (resp != null && resp != 1)
-				VetField.RESP.withValue(resp!),
-			if (mucMem != null && mucMem != 1)
-				VetField.MUC_MEM.withValue(mucMem!),
-			if (cap != null && cap != 1)
-				VetField.CAP.withValue(cap!),
-			if (jug != null && jug != 1)
-				VetField.JUG.withValue(jug!),
-			if (hydr != null && hydr != 1)
-				VetField.HYDR.withValue(hydr!),
-			if (gut != null && gut != 1)
-				VetField.GUT.withValue(gut!),
-			if (sore != null && sore != 1)
-				VetField.SORE.withValue(sore!),
-			if (wounds != null && wounds != 1)
-				VetField.WNDS.withValue(wounds!),
-			if (gait != null && gait != 1)
-				VetField.GAIT.withValue(gait!),
-			if (attitude != null && attitude != 1)
-				VetField.ATT.withValue(attitude!),
+			if (hr1 case int hr1)
+				VetField.HR1.withValue(hr1),
+			if (hr2 case int hr2)
+				VetField.HR2.withValue(hr2),
+			if (resp case int resp)
+				VetField.RESP.withValue(resp),
+			if (mucMem case int mucMem)
+				VetField.MUC_MEM.withValue(mucMem),
+			if (cap case int cap)
+				VetField.CAP.withValue(cap),
+			if (jug case int jug)
+				VetField.JUG.withValue(jug),
+			if (hydr case int hydr)
+				VetField.HYDR.withValue(hydr),
+			if (gut case int gut)
+				VetField.GUT.withValue(gut),
+			if (sore case int sore)
+				VetField.SORE.withValue(sore),
+			if (wounds case int wounds)
+				VetField.WNDS.withValue(wounds),
+			if (gait case int gait)
+				VetField.GAIT.withValue(gait),
+			if (attitude case int attitude)
+				VetField.ATT.withValue(attitude),
 		];
 
 	JSON toJson() => _$VetDataToJson(this);

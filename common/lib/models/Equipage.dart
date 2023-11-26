@@ -63,21 +63,28 @@ class Equipage extends IJSON {
 
 	bool skipLoop() {
 		if (isFinalLoop) return false;
-		if (currentLoop == null) return false;
-		if (currentLoopData case LoopData ld) {
-			if (ld.vet case int vet) {
-				loops[currentLoop!+1].expDeparture = vet + ld.loop.restTime * 60;
+		if (currentLoop case int cur) {
+			if (currentLoopData case LoopData ld) {
+				if (ld.vet case int vet) {
+					loops[cur].expDeparture = vet + ld.loop.restTime * 60;
+				}
 			}
+			currentLoop = cur + 1;
 		}
-		currentLoop = currentLoop! + 1;
 		return true;
 	}
 
 	LoopData? get currentLoopData =>
-		currentLoop == null ? null : loops[currentLoop!];
+		switch (currentLoop) {
+			(int i) => loops[i],
+			_ => null
+		};
 
 	LoopData? get previousLoopData =>
-		currentLoop == null || currentLoop! - 1 < 0 ? null : loops[currentLoop! - 1];
+		switch (currentLoop) {
+			(int i) when i > 0 => loops[i-1],
+			_ => null
+		};
 
 	/// indicates this equipage failed to complete competition
 	bool get isOut => status.isOut;
@@ -121,13 +128,31 @@ class Equipage extends IJSON {
 		return dist * 3600 / time;
 	}
 
+	int get startTime => category.startTime + startOffsetSecs;
 
-	int? idealFinishTime() => category.idealSpeed == null ? null :
-		category.startTime + startOffsetSecs + category.idealRideTime()! + category.totalRestTime();
-	int? minFinishTime() => category.minSpeed == null ? null :
-		category.startTime + startOffsetSecs + category.minRideTime()! + category.totalRestTime();
-	int? maxFinishTime() => category.maxSpeed == null ? null :
-		category.startTime + startOffsetSecs + category.maxRideTime()! + category.totalRestTime();
+	int? idealFinishTime() => 
+		switch (category.idealRideTime()) {
+			int idealRideTime => startTime + idealRideTime + category.totalRestTime(),
+			_ => null
+		};
+
+	int? minFinishTime() => 
+		switch (category.minRideTime()) {
+			int minRideTime => startTime + minRideTime + category.totalRestTime(),
+			_ => null
+		};
+
+	int? maxFinishTime() => 
+		switch (category.maxRideTime()) {
+			int maxRideTime => startTime + maxRideTime + category.totalRestTime(),
+			_ => null
+		};
+
+	int? idealTimeError() =>
+		switch ((loops.lastOrNull?.arrival, idealFinishTime())) {
+			(int arrival, int time) when isFinalLoop => (time - arrival).abs(),
+			_ => null
+		};
 
 	static int byClassDistanceAndEid(Equipage a, Equipage b)
 		=> a.compareClassAndEid(b);
@@ -164,25 +189,31 @@ class Equipage extends IJSON {
 			return 1;
 		} else if (isFinished && category.idealSpeed != null) {
 			// CHECK: if this works
-			// TODO: avoid null checks
-			int dif = (loops.last.arrival! - idealFinishTime()!).abs();
-			int eqdif = (eq.loops.last.arrival! - eq.idealFinishTime()!).abs();
-			return dif - eqdif;
+			switch ((idealTimeError(), eq.idealTimeError())) {
+				case (int dif, int eqdif):
+					return dif - eqdif;
+			}
+			// should not happen
+			return 0;
 		}
 
 		if (category.clearRound) {
 			return 0;
 		}
 
+		int cl;
 		if (currentLoop != eq.currentLoop)
 			// largest loop
 			return (eq.currentLoop ?? -1) - (currentLoop ?? -1);
-		if (currentLoop == null)
+		if (currentLoop case int currentLoop) {
+			cl = currentLoop;
+		} else {
 			// before preExam
 			return 0;
+		}
 
-		var l = loops[currentLoop!];
-		var eql = eq.loops[currentLoop!];
+		var l = loops[cl];
+		var eql = eq.loops[cl];
 		if (l.vet != eql.vet && !isFinalLoop)
 			// first vet time, unless final loop
 			return (l.vet ?? UNIX_FUTURE) - (eql.vet ?? UNIX_FUTURE);

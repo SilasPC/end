@@ -5,6 +5,7 @@
  - cryto security
  - dividers / row coloring in gates
  - test gate skipping (more)
+ - coverage
 
 # Other
  - ftq/dsq ga me ...

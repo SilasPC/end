@@ -215,10 +215,10 @@ class ExamEvent extends EnduranceEvent {
 		else if (eq.status != EquipageStatus.VET) {
 			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
 		}
-		if (loopHint != null && loopHint != cl) {
+		if (loopHint case int loopHint when loopHint != cl) {
 			m.model.errors.add(EventError(m.buildIndex, "exam out of order loop ${loopHint}, current $cl"));
-			if (loopHint! > cl) {
-				cl = (eq.currentLoop = loopHint)!;
+			if (loopHint > cl) {
+				cl = eq.currentLoop = loopHint;
 			}
 		}
 		bool p = data.passed;
@@ -226,11 +226,11 @@ class ExamEvent extends EnduranceEvent {
 			// regular gate
 			ld.data = data;
 			if (p) {
-				if (eq.currentLoop! != eq.loops.length - 1) {
+				if (eq.currentLoop case int currentLoop when eq.isFinalLoop) {
 					// next loop
-					var next = eq.currentLoop = eq.currentLoop! + 1;
-					if (ld.vet != null) {
-						eq.loops[next].expDeparture = ld.vet! + ld.loop.restTime * 60;
+					var next = eq.currentLoop = currentLoop + 1;
+					if (ld.vet case int vetTime) {
+						eq.loops[next].expDeparture = vetTime + ld.loop.restTime * 60;
 					}
 					eq.status = EquipageStatus.RESTING;
 				} else {
@@ -248,7 +248,7 @@ class ExamEvent extends EnduranceEvent {
 			} else {
 				eq.status = EquipageStatus.DNF;
 			}
-			if (p && ld.vet != null && time > ld.vet! + COOL_TIME) {
+			if (ld.vet case int vetTime when p && time > vetTime + COOL_TIME) {
 				m.model.errors.add(EventError(m.buildIndex, "too late to pass exam"));
 			}
 			ld.nextGate = null;
@@ -299,9 +299,9 @@ class VetEvent extends EnduranceEvent {
 		else if (eq.status != EquipageStatus.COOLING) {
 			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
 		}
-		if (loopHint != null && loopHint != eq.currentLoop) {
+		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
 			m.model.errors.add(EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
-			if (loopHint! > (eq.currentLoop ?? -1)) {
+			if (loopHint > (eq.currentLoop ?? -1)) {
 				eq.currentLoop = loopHint;
 			}
 		}
@@ -349,9 +349,9 @@ class ArrivalEvent extends EnduranceEvent {
 		else if (eq.status != EquipageStatus.RIDING) {
 			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
 		}
-		if (loopHint != null && loopHint != eq.currentLoop) {
+		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
 			m.model.errors.add(EventError(m.buildIndex, "arrival out of order loop ${loopHint}"));
-			if (loopHint! > (eq.currentLoop ?? -1)) {
+			if (loopHint > (eq.currentLoop ?? -1)) {
 				eq.currentLoop = loopHint;
 			}
 		}
@@ -430,9 +430,9 @@ class DepartureEvent extends EnduranceEvent {
 		else if (eq.status != EquipageStatus.RESTING) {
 			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
 		}
-		if (loopHint != null && loopHint != eq.currentLoop) {
+		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
 			m.model.errors.add(EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
-			if (loopHint! > (eq.currentLoop ?? -1)) {
+			if (loopHint > (eq.currentLoop ?? -1)) {
 				eq.currentLoop = loopHint;
 			}
 		}

@@ -101,9 +101,9 @@ Future<(Category, int?, dynamic)?> _parseCategory(dynamic meeting_class, Model m
 	String name = meeting_class["name"];
 	var class_sections = (meeting_class["class_sections"] ?? []) as List;
 	if (class_sections.isEmpty) return null;
-	var equipeId = class_sections.first["id"];
+	int equipeId = class_sections.first["id"];
 
-	var cls = await _loadJSON("api/v1/class_sections/${equipeId!}");
+	var cls = await _loadJSON("api/v1/class_sections/${equipeId}");
 	if (nullOrEmpty((cls["starts"] as List).firstOrNull?["start_no"])) {
 		print("skip cat $name");
 		return null;

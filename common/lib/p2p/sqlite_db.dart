@@ -70,15 +70,19 @@ class SqliteDatabase extends EventDatabase<Model> {
 				..query("deletes", columns: ["json"])
 				..query("peers", where: "peerId = ?", whereArgs: [peerId])
 		).commit();
-		var evs = (data[0]! as List)
+
+		var [events, deletes, peers] = data.cast<List>();
+
+		var evs = events
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
-		var dels = (data[1]! as List)
+		var dels = deletes
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
-		var self = (data[2]! as List)
+		var self = peers
 			.map((d) => PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...d})) // TODO: hack
 			.firstOrNull;
+		
 		return Tuple(SyncMsg(evs, dels), self);
 	}
 
