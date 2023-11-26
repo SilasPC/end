@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 
 class EquipagesCard extends StatefulWidget {
 
+	static double width = 400;
+
 	final EquipageTile Function(BuildContext, Equipage, Color?) builder;
 	
 	const EquipagesCard({
@@ -44,7 +46,7 @@ class _EquipagesCardState extends State<EquipagesCard> {
 		return Card(
 			color: Colors.black26,
 			child: SizedBox(
-				width: 400,
+				width: EquipagesCard.width,
 				child: Builder(
 					builder: (context) {
 						LocalModel model = context.watch();

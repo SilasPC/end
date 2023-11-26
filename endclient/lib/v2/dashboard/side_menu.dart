@@ -11,29 +11,23 @@ import 'settings_view.dart';
 
 import 'package:esys_client/util/text_clock.dart';
 
-class DashboardMenu extends StatefulWidget {
+class DashboardMenu extends StatelessWidget {
 
-	static Widget defaultView() => OverviewView();
-
+	final Type currentView;
 	final void Function(Widget) viewSelected;
 
-	const DashboardMenu({super.key, required this.viewSelected});
-
-	@override
-	State<DashboardMenu> createState() => _DashboardMenuState();
-
-}
-
-class _DashboardMenuState extends State<DashboardMenu> {
-
-	Type current = OverviewView;
+	const DashboardMenu({
+		super.key,
+		required this.viewSelected,
+		required this.currentView,
+	});
 
 	void setCurrent<T extends Widget>(T Function() f) {
-		if (current != T) {
-			setState(() {
+		if (currentView != T) {
+			/* setState(() {
 				current = T;
-			});
-			widget.viewSelected(f());
+			}); */
+			viewSelected(f());
 		}
 	} 
 
@@ -55,19 +49,19 @@ class _DashboardMenuState extends State<DashboardMenu> {
 				ListTile(
 					leading: Icon(Icons.grid_view),
 					title: Text("Overview"),
-					tileColor: current == OverviewView ? Colors.black26 : null,
+					tileColor: currentView == OverviewView ? Colors.black26 : null,
 					onTap: () => setCurrent(OverviewView.new)
 				),
 				ListTile(
 					leading: Icon(Icons.data_array),
 					title: Text("Data"),
-					tileColor: current == DataView ? Colors.black26 : null,
+					tileColor: currentView == DataView ? Colors.black26 : null,
 					onTap: () => setCurrent(DataView.new)
 				),
 				ListTile(
 					leading: Icon(Icons.flag),
 					title: Text("Gates"),
-					tileColor: current == GateView ? Colors.black26 : null,
+					tileColor: currentView == GateView ? Colors.black26 : null,
 					onTap: () => setCurrent(GateView.new)
 				),
 				/* ListTile(
@@ -78,7 +72,7 @@ class _DashboardMenuState extends State<DashboardMenu> {
 				ListTile(
 					leading: Icon(Icons.settings),
 					title: Text("Settings"),
-					tileColor: current == SettingsView ? Colors.black26 : null,
+					tileColor: currentView == SettingsView ? Colors.black26 : null,
 					onTap: () => setCurrent(SettingsView.new)
 				),
 				/* ListTile(

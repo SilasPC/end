@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 
 class NotificationsCard extends StatelessWidget {
+
+	static double width = 250;
+
   const NotificationsCard({
     super.key,
   });
@@ -12,7 +15,7 @@ class NotificationsCard extends StatelessWidget {
     return Card(
     	color: Colors.black26,
     	child: SizedBox(
-    		width: 250,
+    		width: NotificationsCard.width,
     		child: Column(
     			children: [
     				Container(

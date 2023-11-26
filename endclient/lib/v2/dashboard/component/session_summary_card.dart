@@ -22,6 +22,8 @@ class SessionSummaryCard extends StatelessWidget {
 							padding: const EdgeInsets.all(8),
 							child: Text(
 								model.model.rideName,
+								overflow: TextOverflow.ellipsis,
+								maxLines: 1,
 								style: TextStyle(
 									fontSize: 20
 								)

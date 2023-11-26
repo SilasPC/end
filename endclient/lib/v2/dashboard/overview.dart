@@ -12,38 +12,64 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class OverviewView extends StatelessWidget {
-	const OverviewView({super.key});
+
+	OverviewView({super.key});
 
 	@override
 	Widget build(BuildContext context) =>
-		Row(
-			children: [
-				Expanded(
-					child: Column(
+		LayoutBuilder(
+			builder: (context, constraints) {
+				
+				const maxWidth = 160;
+
+				var rem = constraints.maxWidth - EquipagesCard.width - NotificationsCard.width;
+				var showNotifs = rem > 1.5 * maxWidth;
+				var stacked = constraints.maxWidth < EquipagesCard.width + maxWidth;
+
+				if (stacked) {
+					return Column(
 						children: [
 							SessionSummaryCard(),
-							Expanded(
-								child: LayoutBuilder(
-									builder: (context, constraints) {
-										const maxWidth = 160;
-										var cats = context.watch<LocalModel>().model.categories;
-										var maxEls = constraints.maxWidth / maxWidth;
-										return GridView.count(
-											crossAxisCount: max(1, maxEls.floor()),
-											children: [
-												for (var cat in cats.values)
-												CategoryCard(cat: cat),
-											],
-										);
-									}
-								)
-							)
+							/* Expanded( // UI: don't remember how to do this
+								child: _catsGrid,
+							), */
+							Expanded(child:EquipagesCard(builder: EquipagesCard.withAdminChoices))
 						]
-					),
-				),
-				EquipagesCard(builder: EquipagesCard.withAdminChoices),
-				NotificationsCard()
-			],
+					);
+				}
+
+				return Row(
+					children: [
+						Expanded(
+							child: Column(
+								children: [
+									SessionSummaryCard(),
+									Expanded(
+										child: _catsGrid,
+									)
+								]
+							),
+						),
+						EquipagesCard(builder: EquipagesCard.withAdminChoices),
+						if (showNotifs)
+						NotificationsCard(),
+					],
+				);
+			},
 		);
+
+	final Widget _catsGrid = LayoutBuilder(
+		builder: (context, constraints) {
+			var cats = context.watch<LocalModel>().model.categories;
+			var maxEls = constraints.maxWidth / 160;
+			return GridView.count(	
+				crossAxisCount: max(1, maxEls.floor()),
+				children: [
+					for (var cat in cats.values)
+					CategoryCard(cat: cat),
+				],
+			);
+		}
+	);
 
 }
