@@ -13,13 +13,8 @@ class CategoryCard extends StatelessWidget {
 	
 	@override
 	Widget build(BuildContext context) {
-		int len = context.select((LocalModel _) => cat.equipages.length);
-		int fin = context.select((LocalModel _) => cat.numFinished());
-		int dnf = context.select((LocalModel _) => cat.numDNF());
-		int rem = len - fin - dnf;
 		const borderRadius = 20.0; // TODO: provider
 
-		// UI: align, overflow, etc.
 		return Card(
 			child: Column(
 				children: [
@@ -40,37 +35,52 @@ class CategoryCard extends StatelessWidget {
 							)
 						)
 					),
-					Container(
-						padding: const EdgeInsets.all(10),
+					SizedBox(height: 4,),
+					Flexible(
+						fit: FlexFit.tight,
 						child: Row(
+							crossAxisAlignment: CrossAxisAlignment.center,
 							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 							children: [
 								textCol("${cat.distance()} km", "distance"),
 								textCol("${cat.loops.length}", "loops"),
 							],
+						),
+					),
+					Flexible(
+						fit: FlexFit.tight,
+						child: Builder(
+							builder: (context) {
+								int len = context.select((LocalModel _) => cat.equipages.length);
+								int fin = context.select((LocalModel _) => cat.numFinished());
+								int dnf = context.select((LocalModel _) => cat.numDNF());
+								int rem = len - fin - dnf;
+								return Row(
+									crossAxisAlignment: CrossAxisAlignment.center,
+									mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+									children: [
+										textCol("$fin/$len", "finished"),
+										textCol("$rem", "remaining"),
+									],
+								);
+							}
 						)
 					),
-					Divider(),
-					Container(
-						padding: const EdgeInsets.all(10),
-						child: Row(
-							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-							children: [
-								textCol("$fin/$len", "finished"),
-								textCol("$rem", "remaining"),
-							],
-						)
-					),
+					SizedBox(height: 4,),
 				]
 			)
 		);
 	}
 
 	Widget textCol(String title, String subtitle) =>
-		Column(
-			children: [
-				Text(title, style: const TextStyle(fontSize: 20)),
-				Text(subtitle, style: const TextStyle()),
-			],
+		FittedBox(
+			fit: BoxFit.contain,
+			child: Column(
+				mainAxisAlignment: MainAxisAlignment.center,
+				children: [
+					Text(title, style: const TextStyle(fontSize: 20)),
+					Text(subtitle, style: const TextStyle()),
+				],
+			)
 		);
 }

@@ -1,7 +1,7 @@
 
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:esys_client/v2/dashboard/menu.dart';
+import 'package:esys_client/v2/dashboard/side_menu.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {

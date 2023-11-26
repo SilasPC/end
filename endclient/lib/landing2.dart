@@ -74,46 +74,21 @@ class Landing2 extends StatelessWidget {
 						),
 					),
 					SizedBox(
-						height: MediaQuery.sizeOf(context).height - 250,
-						child: Card(
-							color: Colors.black26,
-							child: SizedBox(
-								width: 400,
-								child: Builder(
-									builder: (context) {
-										LocalModel model = context.watch();
-										return ListView(
-											children: [
-												Container(
-													alignment: Alignment.center,
-													padding: const EdgeInsets.all(8),
-													child: Text(
-														"Equipages",
-														style: TextStyle(
-															fontSize: 20
-														)
-													),
-												),
-												Divider(),
-												// UI: sort by eid
-												for (var (i, eq) in model.model.equipages.values.indexed)
-												EquipageTile(
-													eq,
-													trailing: [Icon(Icons.chevron_right)],
-													color: i % 2 == 0 ? Color.fromARGB(5, 255, 255, 255) : null,
-													/* onTap: () {
-														Navigator.of(context)
-															.push(MaterialPageRoute(
-																builder: (context) => EquipagePage(eq)
-															));
-													} */
-												)
-											],
-										);
-									}
-								)
-							)
-						)
+						height: MediaQuery.sizeOf(context).height - 250, // UI: alternative to -250 ?
+						child: EquipagesCard(
+							builder: (context, eq, color) =>
+								EquipageTile(
+									eq,
+									trailing: [Icon(Icons.chevron_right)],
+									color: color,
+									/* onTap: () {
+										Navigator.of(context)
+											.push(MaterialPageRoute(
+												builder: (context) => EquipagePage(eq)
+											));
+									} */
+								),
+						),
 					)
 				],
 			)

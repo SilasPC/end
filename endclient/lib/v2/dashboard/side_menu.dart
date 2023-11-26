@@ -5,9 +5,9 @@ import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'data_view.dart';
 import 'gate.dart';
-import 'settings.dart';
-import 'package:esys_client/util/MyIcons.dart';
+import 'settings_view.dart';
 
 import 'package:esys_client/util/text_clock.dart';
 
@@ -59,33 +59,54 @@ class _DashboardMenuState extends State<DashboardMenu> {
 					onTap: () => setCurrent(OverviewView.new)
 				),
 				ListTile(
+					leading: Icon(Icons.data_array),
+					title: Text("Data"),
+					tileColor: current == DataView ? Colors.black26 : null,
+					onTap: () => setCurrent(DataView.new)
+				),
+				ListTile(
 					leading: Icon(Icons.flag),
 					title: Text("Gates"),
 					tileColor: current == GateView ? Colors.black26 : null,
 					onTap: () => setCurrent(GateView.new)
 				),
-				ListTile(
+				/* ListTile(
 					leading: Icon(MyIcons.equipe),
 					title: Text("Equipe"),
 					onTap: () {},
-				),
+				), */
 				ListTile(
 					leading: Icon(Icons.settings),
 					title: Text("Settings"),
 					tileColor: current == SettingsView ? Colors.black26 : null,
 					onTap: () => setCurrent(SettingsView.new)
 				),
-				ListTile(
+				/* ListTile(
 					leading: Icon(Icons.admin_panel_settings),
 					title: Text("Administration"),
 					onTap: () {},
-				),
+				), */
 				Spacer(),
 				SizedBox(
 					width: 150,
 					child: FittedBox(
 						fit: BoxFit.fitWidth,
 						child: TextClock()
+					),
+				),
+				Divider(),
+				ListTile(
+					/* leading: CircleAvatar(
+						child: Icon(Icons.person),
+					), */
+					title: Text("Username"),
+					subtitle: Text("Something"),
+					trailing: IconButton(
+						splashRadius: 20, // TODO: provider
+						icon: Icon(Icons.logout),
+						onPressed: () {
+							Navigator.of(context).pop();
+						},
 					),
 				),
 				Divider(),

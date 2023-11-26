@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class ChipStrip extends StatelessWidget {
 
-	final List<Chip> chips;
+	final List<Widget> chips;
 	final Decoration? decoration;
 	
 	const ChipStrip({super.key, required this.chips, this.decoration});

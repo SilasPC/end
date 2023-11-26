@@ -41,7 +41,7 @@ class OverviewView extends StatelessWidget {
 						]
 					),
 				),
-				EquipagesCard(),
+				EquipagesCard(builder: EquipagesCard.withAdminChoices),
 				NotificationsCard()
 			],
 		);

@@ -73,6 +73,7 @@ class SettingsProviderState extends State<SettingsProvider> {
 		try {
 			set(Settings.fromJsonString(val, this));
 		} catch (_) {
+			print("settings parse failed $val");
 			_save();
 		}
 	}
@@ -166,6 +167,7 @@ class Settings extends IJSON {
 		'serverURI': serverURI,
 		'author': author,
 		'darkTheme': darkTheme,
+		'largeUI': darkTheme,
 		'showAdmin': showAdmin,
 		'sendNotifs': sendNotifs,
 		'autoYield': autoYield,
