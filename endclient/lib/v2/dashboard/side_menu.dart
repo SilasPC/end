@@ -50,19 +50,19 @@ class DashboardMenu extends StatelessWidget {
 				ListTile(
 					leading: Icon(Icons.grid_view),
 					title: Text("Overview"),
-					tileColor: currentView == OverviewView ? Colors.black26 : null,
+					selected: currentView == OverviewView,
 					onTap: () => setCurrent(OverviewView.new)
 				),
 				ListTile(
 					leading: Icon(Icons.data_array),
 					title: Text("Data"),
-					tileColor: currentView == DataView ? Colors.black26 : null,
+					selected: currentView == DataView,
 					onTap: () => setCurrent(DataView.new)
 				),
 				ListTile(
 					leading: Icon(Icons.flag),
 					title: Text("Gates"),
-					tileColor: currentView == GateView ? Colors.black26 : null,
+					selected: currentView == GateView,
 					onTap: () => setCurrent(GateView.new)
 				),
 				/* ListTile(
@@ -73,7 +73,7 @@ class DashboardMenu extends StatelessWidget {
 				ListTile(
 					leading: Icon(Icons.settings),
 					title: Text("Settings"),
-					tileColor: currentView == SettingsView ? Colors.black26 : null,
+					selected: currentView == SettingsView,
 					onTap: () => setCurrent(SettingsView.new)
 				),
 				/* ListTile(

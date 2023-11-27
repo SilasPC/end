@@ -95,7 +95,6 @@ class _SettingsViewState extends State<SettingsView> {
 		return Row(
 			children: [
 				Card(
-					color: Colors.black26,
 					child: SizedBox(
 						width: 350,
 						child: ListView(
@@ -153,6 +152,17 @@ class _SettingsViewState extends State<SettingsView> {
 										value: set.largeUI,
 										onChanged: (val) => setState((){
 											set.largeUI = val;
+											set.save();
+										}),
+									),
+								),
+								ListTile(
+									leading: const Icon(Icons.dark_mode),
+									title: const Text("Dark UI"),
+									trailing: Switch(
+										value: set.darkTheme,
+										onChanged: (val) => setState((){
+											set.darkTheme = val;
 											set.save();
 										}),
 									),

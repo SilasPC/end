@@ -14,7 +14,6 @@ class SessionSummaryCard extends StatelessWidget {
 		return SizedBox(
 			height: 100,
 			child: Card(
-				color: Colors.black26,
 				child: Column(
 					children: [
 						Container(

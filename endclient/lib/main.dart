@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:esys_client/consts.dart';
 import 'package:esys_client/service_graph.dart';
+import 'package:esys_client/theme.dart';
 import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,6 @@ import 'services/settings.dart';
 Future<void> main() async {
 
 	var graph = defineServices();
-	// await Future.delayed(const Duration(milliseconds: 50));
 
 	FlutterError.onError = (details) {
 		FlutterError.presentError(details);
@@ -40,31 +39,19 @@ class MyApp extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
-		var cs = ColorScheme.fromSwatch().copyWith(
-			primary: primaryColor,
-			secondary: secondaryColor,
-		);
+
+		var dark = context.select((Settings set) => set.darkTheme);
+
+		var (lightTheme, darkTheme) = themeData();
+
 		return MaterialApp(
-			theme: ThemeData(
-				colorScheme: cs,
-				cardTheme: CardTheme.of(context).copyWith(
-					margin: const EdgeInsets.all(16),
-					shape: RoundedRectangleBorder(
-						borderRadius: BorderRadius.circular(20),
-					)
-				)
-			),
 			title: 'eSys Endurance',
+			
+			theme: lightTheme,
+			darkTheme: darkTheme,
+			themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+
 			debugShowCheckedModeBanner: false,
-			darkTheme: ThemeData.dark().copyWith(
-				colorScheme: cs,
-				cardTheme: CardTheme.of(context).copyWith(
-					margin: const EdgeInsets.all(16),
-					shape: RoundedRectangleBorder(
-						borderRadius: BorderRadius.circular(20),
-					)
-				)
-			),
 			home: Builder(
 				builder: (context) {
 					MediaQueryData mq = MediaQuery.of(context);

@@ -5,62 +5,55 @@ import 'package:flutter/material.dart';
 
 class NotificationsCard extends StatelessWidget {
 
-	static double width = 250;
-
   const NotificationsCard({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-    	color: Colors.black26,
-    	child: SizedBox(
-    		width: NotificationsCard.width,
-    		child: Column(
-    			children: [
-    				Container(
-    					alignment: Alignment.center,
-    					padding: const EdgeInsets.all(8),
-    					child: Text(
-    						"Notifications",
-    						style: TextStyle(
-    							fontSize: 20
-    						)
-    					),
-    				),
-    				Divider(),
-    				Container(
-    					decoration: BoxDecoration(
-    						border: Border.all(
-    							color: Colors.green,
-    						),
-    						borderRadius: BorderRadius.circular(8)
-    					),
-    					child: ListTile(
-    						title: Text("MA finished!"),
-    						subtitle: Text("Results available"),
-    						trailing: IconButton(
-    							splashRadius: splashRadius,
-    							color: Colors.white30,
-    							icon: Icon(Icons.close),
-    							onPressed: () {},
-    						),
-    					),
-    				),
-    				ListTile(
-    					title: Text("Warning"),
-    					subtitle: Text("203 late start"),
-    					trailing: IconButton(
-    						splashRadius: splashRadius,
-    						color: Colors.white30,
-    						icon: Icon(Icons.close),
-    						onPressed: () {},
-    					),
-    				),
-    			],
-    		),
-    	)
-    );
-  }
+  Widget build(BuildContext context) =>
+		Card(
+			child: Column(
+				children: [
+					Container(
+						alignment: Alignment.center,
+						padding: const EdgeInsets.all(8),
+						child: Text(
+							"Notifications",
+						style: TextStyle(
+							fontSize: 20
+						)
+					),
+				),
+				Divider(),
+				Container(
+					decoration: BoxDecoration(
+						border: Border.all(
+							color: Colors.green,
+						),
+						borderRadius: BorderRadius.circular(8)
+					),
+					child: ListTile(
+						title: Text("MA finished!"),
+						subtitle: Text("Results available"),
+						trailing: IconButton(
+							splashRadius: splashRadius,
+							color: Colors.white30,
+							icon: Icon(Icons.close),
+							onPressed: () {},
+						),
+					),
+				),
+				ListTile(
+					title: Text("Warning"),
+					subtitle: Text("203 late start"),
+					trailing: IconButton(
+						splashRadius: splashRadius,
+						color: Colors.white30,
+						icon: Icon(Icons.close),
+						onPressed: () {},
+					),
+				),
+			],
+		),
+	);
 }

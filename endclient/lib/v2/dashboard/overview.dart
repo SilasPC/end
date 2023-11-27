@@ -11,6 +11,10 @@ import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+const double eqCardWidth = 400;
+const double notifCardWidth = 250;
+const double maxGridCardWidth = 160;
+
 class OverviewView extends StatelessWidget {
 
 	OverviewView({super.key});
@@ -19,12 +23,9 @@ class OverviewView extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		LayoutBuilder(
 			builder: (context, constraints) {
-				
-				const maxWidth = 160;
-
-				var rem = constraints.maxWidth - EquipagesCard.width - NotificationsCard.width;
-				var showNotifs = rem > 1.5 * maxWidth;
-				var stacked = constraints.maxWidth < EquipagesCard.width + maxWidth;
+				var rem = constraints.maxWidth - eqCardWidth - notifCardWidth;
+				var showNotifs = rem > 1.5 * maxGridCardWidth;
+				var stacked = constraints.maxWidth < eqCardWidth + maxGridCardWidth;
 
 				if (stacked) {
 					return Column(
@@ -50,9 +51,17 @@ class OverviewView extends StatelessWidget {
 								]
 							),
 						),
-						EquipagesCard(builder: EquipagesCard.withAdminChoices),
+						SizedBox(
+							width: eqCardWidth,
+							child: EquipagesCard(
+								builder: EquipagesCard.withAdminChoices
+							),
+						),
 						if (showNotifs)
-						NotificationsCard(),
+						SizedBox(
+							width: notifCardWidth,
+							child: NotificationsCard(),
+						)
 					],
 				);
 			},
@@ -61,7 +70,7 @@ class OverviewView extends StatelessWidget {
 	final Widget _catsGrid = LayoutBuilder(
 		builder: (context, constraints) {
 			var cats = context.watch<LocalModel>().model.categories;
-			var maxEls = constraints.maxWidth / 160;
+			var maxEls = constraints.maxWidth / maxGridCardWidth;
 			return GridView.count(	
 				crossAxisCount: max(1, maxEls.floor()),
 				children: [

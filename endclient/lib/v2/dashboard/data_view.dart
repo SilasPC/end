@@ -24,7 +24,6 @@ class DataView extends StatelessWidget {
 		return Row(
 			children: [
 				Card(
-					color: Colors.black26,
 					child: SizedBox(
 						width: 350,
 						child: Column(
@@ -60,7 +59,6 @@ class DataView extends StatelessWidget {
 					)
 				),
 				Card(
-					color: Colors.black26,
 					child: SizedBox(
 						width: 350,
 						child: Column(
