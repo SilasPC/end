@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'package:esys_client/consts.dart';
 import 'package:flutter/material.dart';
 
 class NotificationsCard extends StatelessWidget {
@@ -40,7 +41,7 @@ class NotificationsCard extends StatelessWidget {
     						title: Text("MA finished!"),
     						subtitle: Text("Results available"),
     						trailing: IconButton(
-    							splashRadius: 16,
+    							splashRadius: splashRadius,
     							color: Colors.white30,
     							icon: Icon(Icons.close),
     							onPressed: () {},
@@ -51,7 +52,7 @@ class NotificationsCard extends StatelessWidget {
     					title: Text("Warning"),
     					subtitle: Text("203 late start"),
     					trailing: IconButton(
-    						splashRadius: 16,
+    						splashRadius: splashRadius,
     						color: Colors.white30,
     						icon: Icon(Icons.close),
     						onPressed: () {},

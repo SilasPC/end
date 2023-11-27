@@ -2,6 +2,7 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util/unix.dart';
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
@@ -10,7 +11,7 @@ import 'package:provider/provider.dart';
 
 Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) =>
 	PopupMenuButton<String>(
-		splashRadius: 16,
+		splashRadius: splashRadius,
 		onSelected: (value) {
 			var model = context.read<LocalModel>();
 			var author = context.read<Settings>().author;

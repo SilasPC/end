@@ -2,6 +2,7 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/results.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/MyIcons.dart';
@@ -143,7 +144,7 @@ class CategoryCard extends StatelessWidget {
 		return Card(
 			child: Column(
 				children: [
-					cardHeader(context, category.name, color: const Color.fromARGB(255, 98, 85, 115)),
+					cardHeader(context, category.name, color: primaryColor),
 					Padding(
 						padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
 						child: Row(
@@ -153,29 +154,29 @@ class CategoryCard extends StatelessWidget {
 									child: ChipStrip(
 										chips: [
 											Chip(
-												backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+												backgroundColor: secondaryColor,
 												label: Text(
 													category.loops.map((c) => "${c.distance} km").join(" | ")
 												)
 											),
 											if (category.clearRound)
 												const Chip(
-													backgroundColor: Color.fromARGB(255, 146, 119, 68),
+													backgroundColor: secondaryColor,
 													label: Text("Clearround")
 												),
 											if (category.idealSpeed != null)
 												Chip(
-													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													backgroundColor: secondaryColor,
 													label: Text("Ideal ${category.idealSpeed} km/h")
 												),
 											if (category.minSpeed != null)
 												Chip(
-													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													backgroundColor: secondaryColor,
 													label: Text("Min. ${category.minSpeed} km/h")
 												),
 											if (category.maxSpeed != null)
 												Chip(
-													backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+													backgroundColor: secondaryColor,
 													label: Text("Max. ${category.maxSpeed} km/h")
 												),
 										],

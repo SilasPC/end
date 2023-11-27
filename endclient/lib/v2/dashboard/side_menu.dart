@@ -1,6 +1,7 @@
 
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,7 @@ class DashboardMenu extends StatelessWidget {
 					title: Text("Username"),
 					subtitle: Text("Something"),
 					trailing: IconButton(
-						splashRadius: 20, // TODO: provider
+						splashRadius: splashRadius,
 						icon: Icon(Icons.logout),
 						onPressed: () {
 							Navigator.of(context).pop();

@@ -1,5 +1,6 @@
 
 import 'package:common/models/Category.dart';
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class ResultsPage extends StatelessWidget {
                EquipageTile(
                   entry.key,
                   leading: CircleAvatar(
-                     backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+                     backgroundColor: secondaryColor,
                      child: Text(
 								entry.value.toString(),
 								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
@@ -41,7 +42,7 @@ class ResultsPage extends StatelessWidget {
 						trailing: [
 							// UI: better container
 							CircleAvatar(
-								backgroundColor: const Color.fromARGB(255, 98, 85, 115),
+								backgroundColor: primaryColor,
 								child: Text(
 									"${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h",
 									style: const TextStyle(color: Colors.white),
@@ -58,7 +59,7 @@ class ResultsPage extends StatelessWidget {
 					EquipageTile(
                   entry.key,
                   leading: CircleAvatar(
-                     backgroundColor: const Color.fromARGB(255, 146, 119, 68),
+                     backgroundColor: secondaryColor,
                      child: Text(
 								entry.value.toString(),
 								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)

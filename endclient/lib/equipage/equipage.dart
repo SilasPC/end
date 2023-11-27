@@ -1,4 +1,5 @@
 
+import 'package:esys_client/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
@@ -86,7 +87,7 @@ class EquipagePageState extends State<EquipagePage> {
 					child: ListView(
 						children: [
 							Card(
-								child: EquipageTile(widget.equipage, color: const Color.fromARGB(255, 98, 85, 115)),
+								child: EquipageTile(widget.equipage, color: primaryColor),
 							),
 							CategoryCard(category: widget.equipage.category),
 							...loopCards(),
@@ -122,7 +123,7 @@ class EquipagePageState extends State<EquipagePage> {
 							Container(
 								padding: const EdgeInsets.symmetric(horizontal: 10),
 								decoration: BoxDecoration(
-									color: const Color.fromARGB(255, 98, 85, 115),
+									color: primaryColor,
 									border: Border.all(
 										color: Colors.black54,
 										width: 0.3,
@@ -194,7 +195,7 @@ class LoopCard extends StatelessWidget {
 		Container(
 			padding: const EdgeInsets.symmetric(horizontal: 10),
 			decoration: BoxDecoration(
-				color: const Color.fromARGB(255, 98, 85, 115),
+				color: primaryColor,
 				border: Border.all(
 					color: Colors.black54,
 					width: 0.3,

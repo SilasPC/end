@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:common/models/glob.dart';
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/util/util.dart';
@@ -43,7 +44,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 			child: Card(
 				child: Column(
 					children: [
-						cardHeader(context, cat.name, color: const Color.fromARGB(255, 146, 119, 68)),
+						cardHeader(context, cat.name, color: secondaryColor),
 
 						Container(
 							padding: const EdgeInsets.all(10),
@@ -63,7 +64,7 @@ class SecretaryPageState extends State<SecretaryPage> {
 
 	Widget headerCard(String rideName) =>
 		Card(
-			color: const Color.fromARGB(255, 98, 85, 115),
+			color: primaryColor,
 			child: Column(
 				children: [
 					cardHeader(context, rideName),

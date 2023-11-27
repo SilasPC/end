@@ -1,4 +1,5 @@
 
+import 'package:esys_client/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -56,7 +57,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 				children: [
 					Card(
 						margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-						color: const Color.fromARGB(255, 146, 119, 68),
+						color: secondaryColor,
 						child: Container(
 							height: 50,
 							padding: const EdgeInsets.only(right: 10),

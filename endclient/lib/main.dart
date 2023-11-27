@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/service_graph.dart';
 import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
@@ -40,8 +41,8 @@ class MyApp extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		var cs = ColorScheme.fromSwatch().copyWith(
-			primary: const Color.fromARGB(255, 98, 85, 115),
-			secondary: const Color.fromARGB(255, 146, 119, 68),
+			primary: primaryColor,
+			secondary: secondaryColor,
 		);
 		return MaterialApp(
 			theme: ThemeData(
