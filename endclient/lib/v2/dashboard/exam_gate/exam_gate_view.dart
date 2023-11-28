@@ -1,29 +1,26 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'package:common/EnduranceEvent.dart';
-import 'package:common/models/VetData.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
+import 'package:esys_client/equipage/equipage.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/secretary/util.dart';
 import 'package:esys_client/services/settings.dart';
-import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/util/numpad.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 class ExamGateView extends StatefulWidget {
 	const ExamGateView({super.key});
 
 	@override
-	State<ExamGateView> createState() => _SettingsViewState();
+	State<ExamGateView> createState() => _ExamGateViewState();
 }
 
-class _SettingsViewState extends State<ExamGateView> {
+class _ExamGateViewState extends State<ExamGateView> {
 
 	Equipage? equipage;
 	VetData data = VetData.empty();
@@ -88,7 +85,7 @@ class _SettingsViewState extends State<ExamGateView> {
 												flex: 2,
 												child: ElevatedButton(
 													style: ElevatedButton.styleFrom(backgroundColor: Colors.red, padding: const EdgeInsets.symmetric(vertical: 12)),
-													child: Text("FAIL", style: TextStyle(fontSize: 20)),
+													child: const Text("FAIL", style: TextStyle(fontSize: 20)),
 													onPressed: () => submit(false),
 												),
 											),
@@ -99,7 +96,7 @@ class _SettingsViewState extends State<ExamGateView> {
 													padding: const EdgeInsets.symmetric(horizontal: 12),
 													child: ElevatedButton(
 														style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(vertical: 12)),
-														child: Text("PASS", style: TextStyle(fontSize: 20)),
+														child: const Text("PASS", style: TextStyle(fontSize: 20)),
 														onPressed: () => submit(true),
 													),
 												)
@@ -109,7 +106,7 @@ class _SettingsViewState extends State<ExamGateView> {
 												flex: 2,
 												child: ElevatedButton(
 													style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, padding: const EdgeInsets.symmetric(vertical: 12)),
-													child: Text("RETIRE", style: TextStyle(fontSize: 20)),
+													child: const Text("RETIRE", style: TextStyle(fontSize: 20)),
 													onPressed: () => submit(true, retire: true),
 												),
 											)
@@ -121,21 +118,21 @@ class _SettingsViewState extends State<ExamGateView> {
 											mainAxisSpacing: 10,
 											crossAxisSpacing: 10,
 											children: [
-												numField(context, data.hr1,"Pulse 1", (n) => setState(() => data.hr1 = n)),
-												numField(context, data.hr2,"Pulse 2", (n) => setState(() => data.hr2 = n)),
-												letField(data.resp,"Respiration", (n) => setState(() => data.resp = n)),
+												field(VetField.HR1, data.hr1, (n) => setState(() => data.hr1 = n)),
+												field(VetField.HR2, data.hr2, (n) => setState(() => data.hr2 = n)),
+												field(VetField.RESP, data.resp, (n) => setState(() => data.resp = n)),
 
-												digField(data.mucMem,"Mucous membranes", (n) => setState(() => data.mucMem = n)),
-												digField(data.cap,"Capilary refill", (n) => setState(() => data.cap = n)),
-												digField(data.jug,"Jugular refill", (n) => setState(() => data.jug = n)),
+												field(VetField.MUC_MEM, data.mucMem, (n) => setState(() => data.mucMem = n)),
+												field(VetField.CAP, data.cap, (n) => setState(() => data.cap = n)),
+												field(VetField.JUG, data.jug, (n) => setState(() => data.jug = n)),
 
-												digField(data.hydr,"Hydration", (n) => setState(() => data.hydr = n)),
-												letField(data.gut,"Gut sounds", (n) => setState(() => data.gut = n)),
-												letField(data.sore,"Soreness", (n) => setState(() => data.sore = n)),
+												field(VetField.HYDR, data.hydr, (n) => setState(() => data.hydr = n)),
+												field(VetField.GUT, data.gut, (n) => setState(() => data.gut = n)),
+												field(VetField.SORE, data.sore, (n) => setState(() => data.sore = n)),
 
-												letField(data.wounds,"Wounds", (n) => setState(() => data.wounds = n)),
-												letField(data.gait,"Gait", (n) => setState(() => data.gait = n)),
-												letField(data.attitude,"Attitude", (n) => setState(() => data.attitude = n)),
+												field(VetField.WNDS, data.wounds, (n) => setState(() => data.wounds = n)),
+												field(VetField.GAIT, data.gait, (n) => setState(() => data.gait = n)),
+												field(VetField.ATT, data.attitude, (n) => setState(() => data.attitude = n)),
 											]
 										),
 									),
@@ -149,19 +146,11 @@ class _SettingsViewState extends State<ExamGateView> {
 					child: Card(
 						child: Column(
 							children: [
-								// UI: loops, prev-data, general info
 								if (equipage case Equipage equipage) ...[
 									EquipageTile(equipage),
 									ListTile(
-										title: Text("Loop"),
+										title: const Text("Loop"),
 										trailing: Text("${equipage.currentLoopOneIndexed ?? "-"}/${equipage.category.loops.length}"),
-										/* Slider(
-											divisions: equipage.category.loops.length ,
-											min: -1,
-											max: equipage.category.loops.length.toDouble(),
-											value: (equipage.currentLoop ?? -1).toDouble(),
-											onChanged: null,
-										), */
 									),
 									Expanded(
 										child: ListView(
@@ -173,7 +162,7 @@ class _SettingsViewState extends State<ExamGateView> {
 								Container(
 									alignment: Alignment.topCenter,
 									padding: const EdgeInsets.only(top: 16),
-									child: Text(
+									child: const Text(
 										"Select an equipage",
 										style: TextStyle(
 											fontSize: 16,
@@ -189,63 +178,42 @@ class _SettingsViewState extends State<ExamGateView> {
 		);
 	}
 
-	Widget numField(BuildContext context, int? val, String display, void Function(int? n) f) =>
+	Widget field(VetField field, int? val, void Function(int? n) f) =>
 		ElevatedButton(
 			onLongPress: () => f(null),
 			onPressed: () {
-				showIntPicker(
-					context,
-					(n) {
-						f(n);
-						Navigator.pop(context);
-					}
-				);
-			},
-			child: Column(
-				mainAxisAlignment: MainAxisAlignment.center,
-				children: [
-					Text(val == null ? "-" : val.toString(), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),),
-					Text(display, textAlign: TextAlign.center,),
-				],
-			),
-		);
-
-	Widget digField(int? val, String display, void Function(int? n) f) =>
-		ElevatedButton(
-			onPressed: (){
-				if (val case int value) {
-					val = (value + 1) % 4;
-					if (val == 0) val = null;
-				} else {
-					val = 1;
+				switch (field.type) {
+					case VetFieldType.NUMBER:
+						showIntPicker(
+							context,
+							(n) {
+								f(n);
+								Navigator.pop(context);
+							}
+						);
+						break;
+					default:
+						if (val case int value) {
+							val = (value + 1) % 4;
+							if (val == 0) val = null;
+						} else {
+							val = 1;
+						}
+						f(val);
+						break;
 				}
-				f(val);
 			},
 			child: Column(
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: [
-					Text(val == null ? "-" : val.toString(), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-					Text(display, textAlign: TextAlign.center,),
-				],
-			),
-		);
-
-	Widget letField(int? val, String display, void Function(int? n) f) =>
-		ElevatedButton(
-			onPressed: () {
-				if (val case int value) {
-					val = (value + 1) % 4;
-					if (val == 0) val = null;
-				} else {
-					val = 1;
-				}
-				f(val);
-			},
-			child: Column(
-				mainAxisAlignment: MainAxisAlignment.center,
-				children: [
-					Text(val == null ? "-" : String.fromCharCode(64 + val), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-					Text(display, textAlign: TextAlign.center,),
+					Text(
+						val != null ? field.withValue(val).toString() : "-",
+						style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+					),
+					Text(
+						field.name,
+						textAlign: TextAlign.center,
+					),
 				],
 			),
 		);
@@ -265,7 +233,7 @@ class _SettingsViewState extends State<ExamGateView> {
 								padding: const EdgeInsets.symmetric(horizontal: 10),
 								decoration: BoxDecoration(
 									color: primaryColor,
-									borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+									borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
 									border: Border.all(
 										color: Colors.black54,
 										width: 0.3,
@@ -287,115 +255,3 @@ class _SettingsViewState extends State<ExamGateView> {
 	}
 
 }
-
-class LoopCard extends StatelessWidget {
-
-	const LoopCard({super.key, required this.loopNr, required this.loopData, required this.isFinish});
-
-	final int loopNr;
-	final LoopData loopData;
-	final bool isFinish;
-
-	@override
-	Widget build(BuildContext context) {
-		var remarks = loopData.data?.remarks() ?? const [];
-		return Card(
-			child: Column(
-				children: [
-					header(),
-					grid(),
-					if (remarks.isNotEmpty)
-					remarksList(remarks),
-				],
-			)
-		);
-	}
-
-	static Widget remarksList(List<VetFieldValue> remarks, [Color? color = Colors.amber]) =>
-		// UI: expand horizontally
-		Container(
-			decoration: BoxDecoration(
-				border: Border.all(
-					color: Colors.black54,
-					width: 0.3,
-				),
-			),
-			padding: const EdgeInsets.all(4),
-			child: Wrap(
-				runSpacing: 4,
-				spacing: 4,
-				children: [
-					for (var remark in remarks)
-					Chip(
-						backgroundColor: color,
-						label: Text("${remark.field.name} ${remark.toString()}")
-					),
-					if (remarks.isEmpty)
-					const Chip(
-						backgroundColor: Colors.green,
-						label: Text("No remarks!")
-					)
-				],
-			)
-		);
-
-	Widget header() =>
-		Container(
-			padding: const EdgeInsets.symmetric(horizontal: 10),
-			decoration: BoxDecoration(
-				color: primaryColor,
-				borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-				border: Border.all(
-					color: Colors.black54,
-					width: 0.3,
-				),
-			),
-			height: 30,
-			child: Row(
-				mainAxisAlignment: MainAxisAlignment.spaceBetween,
-				children: [
-					Text("LOOP $loopNr"),
-					Text("${loopData.loop.distance} km"),
-				],
-			)
-		);
-
-	Widget grid() =>
-		AspectRatio(
-			aspectRatio: 3/2,
-			child: GridView.count(
-				crossAxisCount: 3,
-				children: [
-					txtCol([maybe(loopData.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
-					txtCol(["${loopData.data?.hr1 ?? "-"}/${loopData.data?.hr2 ?? "-"}","Heartrate"]),
-					txtCol([maybe(loopData.speed(finish: isFinish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
-					txtCol([maybe(loopData.expDeparture, unixHMS) ?? "-","Departure"]),
-					txtCol([maybe(loopData.arrival, unixHMS) ?? "-","Arrival"]),
-					txtCol([maybe(loopData.vet, unixHMS) ?? "-","Vet"]),
-				].map(wrapTxtCol).toList(),
-			),
-		);
-
-}
-
-Widget txtCol(List<String> strs) =>
-	Column(
-		children: strs.map((s) => Text(s)).toList(),
-	);
-
-Widget wrapTxtCol(Widget w) =>
-	AspectRatio(
-		aspectRatio: 1,
-		child: Container(
-			padding: const EdgeInsets.all(20),
-			decoration: BoxDecoration(
-				border: Border.all(
-					color: Colors.black54,
-					width: 0.3,
-				),
-			),
-			child: FittedBox(
-				child: w,
-			),
-		)
-	);
