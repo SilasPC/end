@@ -121,7 +121,7 @@ class Settings extends IJSON {
 		'serverURI': serverURI,
 		'author': author,
 		'darkTheme': darkTheme,
-		'largeUI': darkTheme,
+		'largeUI': largeUI,
 		'showAdmin': showAdmin,
 		'sendNotifs': sendNotifs,
 		'autoYield': autoYield,

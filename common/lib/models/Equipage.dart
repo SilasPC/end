@@ -49,6 +49,12 @@ class Equipage extends IJSON {
 	String? dsqReason;
 	int startOffsetSecs = 0;
 
+	int? get currentLoopOneIndexed =>
+		switch (currentLoop) {
+			int currentLoop => currentLoop + 1,
+			null => null
+		};
+
 	@JsonKey(ignore: true)
 	late Category _category;
 	@JsonKey(ignore: true)

@@ -171,7 +171,7 @@ class RetireEvent extends EnduranceEvent {
 	void safeBuild(EventModel<Model> m) {
 		var eq = m.model.equipages[eid]!;
 		if (eq.status != EquipageStatus.RESTING) {
-			m.model.errors.add(EventError(m.buildIndex, "Retire ${eq.eid} when status is ${eq.status.toString()}"));
+			m.model.errors.add(EventError(m.buildIndex, "Retire when status is ${eq.status.name}"));
 		}
 		eq.status = EquipageStatus.RETIRED;
 	}
@@ -226,7 +226,7 @@ class ExamEvent extends EnduranceEvent {
 			// regular gate
 			ld.data = data;
 			if (p) {
-				if (eq.currentLoop case int currentLoop when eq.isFinalLoop) {
+				if (eq.currentLoop case int currentLoop when !eq.isFinalLoop) {
 					// next loop
 					var next = eq.currentLoop = currentLoop + 1;
 					if (ld.vet case int vetTime) {

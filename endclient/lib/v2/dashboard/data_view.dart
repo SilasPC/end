@@ -10,6 +10,7 @@ import 'package:common/util.dart';
 import 'package:common/util/unix.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/util/input_modals.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:provider/provider.dart';
@@ -28,17 +29,7 @@ class DataView extends StatelessWidget {
 						width: 350,
 						child: Column(
 							children: [
-								Container(
-									alignment: Alignment.center,
-									padding: const EdgeInsets.all(8),
-									child: Text(
-										"Events",
-										style: TextStyle(
-											fontSize: 20
-										)
-									),
-								),
-								Divider(),
+								...cardHeader("Events"),
 								Expanded(
 									child: ListView.builder(
 										itemCount: model.events.length,

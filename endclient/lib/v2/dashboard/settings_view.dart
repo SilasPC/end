@@ -9,6 +9,7 @@ import 'package:common/util/unix.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -99,17 +100,7 @@ class _SettingsViewState extends State<SettingsView> {
 						width: 350,
 						child: ListView(
 							children: [
-								Container(
-									alignment: Alignment.center,
-									padding: const EdgeInsets.all(8),
-									child: Text(
-										"Settings",
-										style: TextStyle(
-											fontSize: 20
-										)
-									),
-								),
-								Divider(),
+								...cardHeader("Settings"),
 								ListTile(
 									title: TextField(
 										decoration: const InputDecoration(

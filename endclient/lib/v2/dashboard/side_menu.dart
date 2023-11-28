@@ -3,6 +3,7 @@
 
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +65,12 @@ class DashboardMenu extends StatelessWidget {
 					title: Text("Gates"),
 					selected: currentView == GateView,
 					onTap: () => setCurrent(GateView.new)
+				),
+				ListTile(
+					leading: Icon(Icons.monitor_heart),
+					title: Text("Exam gate"),
+					selected: currentView == ExamGateView,
+					onTap: () => setCurrent(ExamGateView.new)
 				),
 				/* ListTile(
 					leading: Icon(MyIcons.equipe),

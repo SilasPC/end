@@ -19,29 +19,29 @@ class VetData extends IJSON {
 
 	List<VetFieldValue> remarks([bool returnHr = false]) =>
 		[
-			if (hr1 case int hr1)
+			if (hr1 case int hr1 when returnHr)
 				VetField.HR1.withValue(hr1),
-			if (hr2 case int hr2)
+			if (hr2 case int hr2 when returnHr)
 				VetField.HR2.withValue(hr2),
-			if (resp case int resp)
+			if (resp case int resp when resp != 1)
 				VetField.RESP.withValue(resp),
-			if (mucMem case int mucMem)
+			if (mucMem case int mucMem when mucMem != 1)
 				VetField.MUC_MEM.withValue(mucMem),
-			if (cap case int cap)
+			if (cap case int cap when cap != 1)
 				VetField.CAP.withValue(cap),
-			if (jug case int jug)
+			if (jug case int jug when jug != 1)
 				VetField.JUG.withValue(jug),
-			if (hydr case int hydr)
+			if (hydr case int hydr when hydr != 1)
 				VetField.HYDR.withValue(hydr),
-			if (gut case int gut)
+			if (gut case int gut when gut != 1)
 				VetField.GUT.withValue(gut),
-			if (sore case int sore)
+			if (sore case int sore when sore != 1)
 				VetField.SORE.withValue(sore),
-			if (wounds case int wounds)
+			if (wounds case int wounds when wounds != 1)
 				VetField.WNDS.withValue(wounds),
-			if (gait case int gait)
+			if (gait case int gait when gait != 1)
 				VetField.GAIT.withValue(gait),
-			if (attitude case int attitude)
+			if (attitude case int attitude when attitude != 1)
 				VetField.ATT.withValue(attitude),
 		];
 

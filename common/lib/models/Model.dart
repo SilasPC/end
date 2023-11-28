@@ -11,6 +11,7 @@ part "Model.g.dart";
 class Model extends IJSON {
 
 	String rideName = "";
+	// TODO: int? equipeId;
 	Map<String, Category> categories = {};
 	@JsonKey(ignore: true)
 	Map<int, Equipage> equipages = {};

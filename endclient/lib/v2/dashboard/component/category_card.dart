@@ -3,6 +3,7 @@
 import 'package:common/models/glob.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,23 +20,7 @@ class CategoryCard extends StatelessWidget {
 		return Card(
 			child: Column(
 				children: [
-					Container(
-						height: 50,
-						padding: const EdgeInsets.symmetric(horizontal: 8),
-						alignment: Alignment.center,
-						decoration: BoxDecoration(
-							borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-							color: Colors.black26,
-						),
-						child: Text(
-							cat.name,
-							overflow: TextOverflow.ellipsis,
-							maxLines: 1,
-							style: TextStyle(
-								fontSize: 20,
-							)
-						)
-					),
+					coloredCardheader(cat.name),
 					SizedBox(height: 4,),
 					Flexible(
 						fit: FlexFit.tight,

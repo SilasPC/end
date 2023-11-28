@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:esys_client/service_graph.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/theme.dart';
 import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
@@ -100,6 +101,8 @@ ServiceGraph defineServices() {
 	b.pipe((ServerConnection conn, NearbyManager nm) {
 		nm.autoConnect = !conn.inSync;
 	});
+
+	b.addListenable(IdentityService());	
 
 	return b;
 }
