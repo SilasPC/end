@@ -45,7 +45,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async {
 		var peer = await _db.query("peers", where: "peerId = ?", whereArgs: [peerId]);
 		if (peer.isEmpty) return null;
-		var psm = PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...peer.first}); // TODO: hack
+		var psm = PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...peer.first}); // IGNORED: TODO: hack
 		var si = SyncInfo.fromJson(peer.first);
 		return Tuple(psm, si);
 	}
@@ -80,7 +80,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
 		var self = peers
-			.map((d) => PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...d})) // TODO: hack
+			.map((d) => PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...d})) // IGNORED: TODO: hack
 			.firstOrNull;
 		
 		return Tuple(SyncMsg(evs, dels), self);

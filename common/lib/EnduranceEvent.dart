@@ -23,6 +23,9 @@ abstract class EnduranceEvent extends Event<Model> {
 		}
 	}
 
+	EnduranceEvent copyWithTime(int time) =>
+		eventFromJSON(toJson()..["time"] = time);
+
 	factory EnduranceEvent.fromJson(JSON json) =>
 		eventFromJSON(json);
 

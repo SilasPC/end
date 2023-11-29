@@ -34,7 +34,7 @@ Future<List<EquipeMeeting>> _loadMeetings(String uri) async {
 		.toList();
 }
 
-/// TODO: determine actual rest time?
+/// IGNORED: TODO: determine actual rest time?
 const TYPICAL_REST_TIME = 40;
 
 Future<List<Event<Model>>> _loadModelEvents(int classId) async {
@@ -42,7 +42,7 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 	if (schd["discipline"] != "endurance")
 		throw Exception("Could not load a non-endurance event");
 
-	Model m = Model();
+	Model m = Model()..equipeId = classId;
 	List<Event<Model>> mevs = [InitEvent(0, "equipe", m)];
 	m.rideName = schd["display_name"];
 

@@ -192,11 +192,11 @@ class CategoryCard extends StatelessWidget {
                                  ));
                            }
 								),
-								if (category.equipeId != null)
+								if (category.equipeId case int equipeId)
 								IconButton(
 									icon: const Icon(MyIcons.equipe),
 									onPressed: () {
-										var uri = Uri.parse("https://online.equipe.com/da/class_sections/${category.equipeId}");
+										var uri = Uri.parse("https://online.equipe.com/da/class_sections/$equipeId");
 										launchUrl(uri);
 									},
 								),

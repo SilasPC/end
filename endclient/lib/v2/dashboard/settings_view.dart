@@ -89,7 +89,7 @@ class _SettingsCardState extends State<SettingsCard> {
 	}
 
 	static Future<void> saveCSV(BuildContext context) async {
-		// CHECK: android saving works
+		// IGNORED: CHECK: android saving works
 		var m = context.read<LocalModel>();
 		var sm = ScaffoldMessenger.of(context);
 		var dir = await getApplicationDocumentsDirectory();

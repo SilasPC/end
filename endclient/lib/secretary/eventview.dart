@@ -112,10 +112,8 @@ class _EventViewState extends State<EventView> {
 																context,
 																fromUNIX(e.time),
 																(dt) {
-																	// TODO: this is a hack
-																	var json = jsonDecode(e.toJsonString());
-																	json["time"] = toUNIX(dt);
-																	var e2 = eventFromJSON(json);
+																	var e2 = (e as EnduranceEvent)
+																		.copyWithTime(toUNIX(dt));
 																	model.addSync([e2], [e]);
 																}
 															);

@@ -46,10 +46,8 @@ class EventTile extends StatelessWidget {
 									context,
 									fromUNIX(event.time),
 									(dt) {
-										// TODO: this is a hack
-										var json = jsonDecode(event.toJsonString());
-										json["time"] = toUNIX(dt);
-										var updated = eventFromJSON(json);
+										var updated = (event as EnduranceEvent)
+											.copyWithTime(toUNIX(dt));
 										context.read<LocalModel>().addSync([updated], [event]);
 									}
 								);
