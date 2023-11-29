@@ -17,13 +17,20 @@ List<Widget> cardHeader(String label) => [
 	const Divider(),
 ];
 
-Widget coloredCardheader(String label) =>
-	Container(
+Widget coloredCardheader(BuildContext context, String label) {
+	var shape = CardTheme.of(context).shape;
+	BorderRadius? borderRadius;
+	if (shape case RoundedRectangleBorder(borderRadius: BorderRadius(:var topLeft, :var topRight)) when topLeft == topRight) {
+		borderRadius = BorderRadius.vertical(
+			top: topLeft
+		);
+	}
+	return Container(
 		padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
 		alignment: Alignment.center,
-		decoration: const BoxDecoration(
-			borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-			color: Colors.black26, // TODO: theme                   ^ read from cardtheme
+		decoration: BoxDecoration(
+			borderRadius: borderRadius,
+			color: Colors.black26, // TODO: theme
 		),
 		child: Text(
 			label,
@@ -34,3 +41,4 @@ Widget coloredCardheader(String label) =>
 			)
 		)
 	);
+}

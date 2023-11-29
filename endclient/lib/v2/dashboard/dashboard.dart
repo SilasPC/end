@@ -48,7 +48,10 @@ class _DashboardState extends State<Dashboard> {
 						),
 					),
 					Expanded(
-						child: _gradient(view)
+						child: Container(
+							decoration: backgroundGradient,
+							child: view
+						)
 					),
 				],
 			)
@@ -96,30 +99,12 @@ class _DashboardState extends State<Dashboard> {
 					});
 				},
 			),
-			body: _gradient(view),
+			body: Container(
+				decoration: backgroundGradient,
+				child: view,
+			)
 		);
 	}
-
-	Widget _gradient(Widget child) =>
-		Container(
-			decoration: BoxDecoration(
-				gradient: LinearGradient(
-					begin: Alignment.topCenter,
-					end: Alignment.bottomCenter,
-					stops: [
-						0.1,
-						0.5,
-						0.9,
-					],
-					colors: [
-						Color.fromARGB(255, 14, 14, 14),
-						Color.fromARGB(255, 62, 58, 62),
-						Color.fromARGB(255, 14, 14, 14),
-					]
-				)
-			),
-			child: child,
-		);
 
 }
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class EquipageTile extends StatelessWidget {
 
-	static const double height = 64;
+	static const double height = 65;
 
 	final VoidCallback? onTap;
 	final VoidCallback? onLongPress;
@@ -38,6 +38,7 @@ class EquipageTile extends StatelessWidget {
 				height: EquipageTile.height,
 				child: Row(
 					mainAxisAlignment: MainAxisAlignment.start,
+					crossAxisAlignment: CrossAxisAlignment.center,
 					children: [
 						if (leading case Widget leading)
 							leading,
@@ -45,9 +46,9 @@ class EquipageTile extends StatelessWidget {
 						Flexible(
 							fit: FlexFit.tight,
 							child: Column(
+								mainAxisAlignment: MainAxisAlignment.center,
 								crossAxisAlignment: CrossAxisAlignment.start,
 								children: [
-									const SizedBox(height: 5),
 									Text("${equipage.eid} ${equipage.rider}", overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16)),
 									Text(equipage.horse, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12),),
 								],

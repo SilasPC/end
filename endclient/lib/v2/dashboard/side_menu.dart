@@ -47,48 +47,52 @@ class DashboardMenu extends StatelessWidget {
 					),
 				),
 				Divider(),
-				SizedBox(height: 25,),
-				ListTile(
-					leading: Icon(Icons.grid_view),
-					title: Text("Overview"),
-					selected: currentView == OverviewView,
-					onTap: () => setCurrent(OverviewView.new)
+				Expanded(
+					child: ListView(
+						children: [
+							ListTile(
+								leading: Icon(Icons.grid_view),
+								title: Text("Overview"),
+								selected: currentView == OverviewView,
+								onTap: () => setCurrent(OverviewView.new)
+							),
+							ListTile(
+								leading: Icon(Icons.data_array),
+								title: Text("Data"),
+								selected: currentView == DataView,
+								onTap: () => setCurrent(DataView.new)
+							),
+							ListTile(
+								leading: Icon(Icons.flag),
+								title: Text("Gates"),
+								selected: currentView == GateView,
+								onTap: () => setCurrent(GateView.new)
+							),
+							ListTile(
+								leading: Icon(Icons.monitor_heart),
+								title: Text("Exam gate"),
+								selected: currentView == ExamGateView,
+								onTap: () => setCurrent(ExamGateView.new)
+							),
+							/* ListTile(
+								leading: Icon(MyIcons.equipe),
+								title: Text("Equipe"),
+								onTap: () {},
+							), */
+							ListTile(
+								leading: Icon(Icons.settings),
+								title: Text("Settings"),
+								selected: currentView == SettingsView,
+								onTap: () => setCurrent(SettingsView.new)
+							),
+							/* ListTile(
+								leading: Icon(Icons.admin_panel_settings),
+								title: Text("Administration"),
+								onTap: () {},
+							), */
+						],
+					),
 				),
-				ListTile(
-					leading: Icon(Icons.data_array),
-					title: Text("Data"),
-					selected: currentView == DataView,
-					onTap: () => setCurrent(DataView.new)
-				),
-				ListTile(
-					leading: Icon(Icons.flag),
-					title: Text("Gates"),
-					selected: currentView == GateView,
-					onTap: () => setCurrent(GateView.new)
-				),
-				ListTile(
-					leading: Icon(Icons.monitor_heart),
-					title: Text("Exam gate"),
-					selected: currentView == ExamGateView,
-					onTap: () => setCurrent(ExamGateView.new)
-				),
-				/* ListTile(
-					leading: Icon(MyIcons.equipe),
-					title: Text("Equipe"),
-					onTap: () {},
-				), */
-				ListTile(
-					leading: Icon(Icons.settings),
-					title: Text("Settings"),
-					selected: currentView == SettingsView,
-					onTap: () => setCurrent(SettingsView.new)
-				),
-				/* ListTile(
-					leading: Icon(Icons.admin_panel_settings),
-					title: Text("Administration"),
-					onTap: () {},
-				), */
-				Spacer(),
 				SizedBox(
 					width: 150,
 					child: FittedBox(

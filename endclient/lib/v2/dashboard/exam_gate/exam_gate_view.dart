@@ -13,6 +13,7 @@ import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// UI: phone layout
 class ExamGateView extends StatefulWidget {
 	const ExamGateView({super.key});
 
@@ -180,10 +181,17 @@ class _ExamGateViewState extends State<ExamGateView> {
 
 	Widget field(VetField field, int? val, void Function(int? n) f) =>
 		ElevatedButton(
+			style: ElevatedButton.styleFrom(
+				shape: RoundedRectangleBorder(
+					borderRadius: BorderRadius.circular(20),
+				),
+				padding: const EdgeInsets.all(8),
+			),
 			onLongPress: () => f(null),
 			onPressed: () {
 				switch (field.type) {
 					case VetFieldType.NUMBER:
+						f(null);
 						showIntPicker(
 							context,
 							(n) {
@@ -226,31 +234,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 			for (int l = cl; l >= 0; l--)
 				LoopCard(loopNr: l + 1, loopData: lps[l], isFinish: l == lps.length),
 			if (equipage.preExam case VetData vd)
-				Card(
-					child: Column(
-						children: [
-							Container(
-								padding: const EdgeInsets.symmetric(horizontal: 10),
-								decoration: BoxDecoration(
-									color: primaryColor,
-									borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-									border: Border.all(
-										color: Colors.black54,
-										width: 0.3,
-									),
-								),
-								height: 30,
-								child: const Row(
-									mainAxisAlignment: MainAxisAlignment.spaceBetween,
-									children: [
-										Text("PRE-EXAM"),
-									],
-								)
-							),
-							LoopCard.remarksList(vd.remarks())
-						],
-					),
-				)
+				LoopCard.preExam(vd)
 		];
 	}
 

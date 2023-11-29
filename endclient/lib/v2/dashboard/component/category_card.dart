@@ -15,12 +15,10 @@ class CategoryCard extends StatelessWidget {
 	
 	@override
 	Widget build(BuildContext context) {
-		const borderRadius = 20.0; // TODO: provider
-
 		return Card(
 			child: Column(
 				children: [
-					coloredCardheader(cat.name),
+					coloredCardheader(context, cat.name),
 					SizedBox(height: 4,),
 					Flexible(
 						fit: FlexFit.tight,

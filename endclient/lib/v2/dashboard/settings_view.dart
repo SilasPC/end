@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
+import 'package:common/p2p/Manager.dart';
 import 'package:common/util/unix.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/settings.dart';
@@ -15,14 +16,27 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-class SettingsView extends StatefulWidget {
+class SettingsView extends StatelessWidget {
 	const SettingsView({super.key});
 
 	@override
-	State<SettingsView> createState() => _SettingsViewState();
+	Widget build(BuildContext context) =>
+		Row(
+			children: [
+				SettingsCard()
+			],
+		);
+
 }
 
-class _SettingsViewState extends State<SettingsView> {
+class SettingsCard extends StatefulWidget {
+	const SettingsCard({super.key});
+
+	@override
+	State<SettingsCard> createState() => _SettingsCardState();
+}
+
+class _SettingsCardState extends State<SettingsCard> {
 	
 	final TextEditingController _servAddr = TextEditingController();
 	final TextEditingController _author = TextEditingController();
@@ -93,177 +107,181 @@ class _SettingsViewState extends State<SettingsView> {
 		var model = context.read<LocalModel>();
 		var conn = context.watch<ServerConnection>();
       var session = context.watch<SessionState>();
-		return Row(
-			children: [
-				Card(
-					child: SizedBox(
-						width: 350,
-						child: ListView(
-							children: [
-								...cardHeader("Settings"),
-								ListTile(
-									title: TextField(
-										decoration: const InputDecoration(
-											label: Text("Server address"),
-										),
-										controller: _servAddr,
-										onSubmitted: (val) {
-											set.serverURI = val;
-											set.save();
-										},
-									)
+		return Card(
+			child: SizedBox(
+				width: 350,
+				child: ListView(
+					children: [
+						...cardHeader("Settings"),
+						ListTile(
+							title: TextField(
+								decoration: const InputDecoration(
+									label: Text("Server address"),
 								),
-								ListTile(
-									title: TextField(
-										decoration: const InputDecoration(
-											label: Text("Author"),
-										),
-										controller: _author,
-										onSubmitted: (val) => setState((){
-											set.author = val;
-											set.save();
-										}),
-									)
-								),
-								ListTile(
-									leading: const Icon(Icons.notifications),
-									title: const Text("Enable notifications"),
-									trailing: Switch(
-										value: set.sendNotifs,
-										onChanged: (val) => setState((){
-											set.sendNotifs = val;
-											set.save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.zoom_in),
-									title: const Text("Large UI"),
-									trailing: Switch(
-										value: set.largeUI,
-										onChanged: (val) => setState((){
-											set.largeUI = val;
-											set.save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.dark_mode),
-									title: const Text("Dark UI"),
-									trailing: Switch(
-										value: set.darkTheme,
-										onChanged: (val) => setState((){
-											set.darkTheme = val;
-											set.save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.stay_current_portrait),
-									title: const Text("Gates keep screen alive"),
-									trailing: Switch(
-										value: set.useWakeLock,
-										onChanged: (val) => setState((){
-											set.useWakeLock = val;
-											set.save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.cloud_download),
-									title: const Text("Auto yield"),
-									trailing: Switch(
-										value: set.autoYield,
-										onChanged: (val) => setState((){
-											set..autoYield = val..save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.groups),
-									title: const Text("Use P2P"),
-									trailing: Switch(
-										value: set.useP2P,
-										onChanged: (val) => setState((){
-											set..useP2P = val..save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.admin_panel_settings),
-									title: const Text("Enable advanced mode"),
-									trailing: Switch(
-										value: set.showAdmin,
-										onChanged: (val) => setState((){
-											set.showAdmin = val;
-											set.save();
-										}),
-									),
-								),
-								ListTile(
-									leading: const Icon(Icons.settings_backup_restore),
-									title: const Text("Reset to defaults"),
-									onTap: () => setState((){
-										set..setDefaults()..save();
-									}),
-								),
-								ListTile(
-									leading: const Icon(Icons.sync),
-									title: const Text("Resync"),
-									onTap: () => model.resetModel(),
-								),
-								ListTile(
-									leading: const Icon(Icons.data_array),
-									title: const Text("Save CSV"),
-									onTap: () => saveCSV(context),
-								),
-								if (set.showAdmin)
-								...[
-									const ListTile(
-										title: Text("Administration"),
-										dense: true,
-									),
-									ListTile(
-										leading: const Icon(Icons.cancel),
-										title: const Text("New session"),
-										subtitle: Text("Current: ${session.sessionId}"),
-										onTap: () {
-											if (set.autoYield) {
-												setState((){
-													set..autoYield = false
-														..save();
-												});
-											}
-											session.reset();
-										}
-									),
-									ListTile(
-										leading: const Icon(Icons.cloud_upload),
-										title: const Text("Upload session"),
-										subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
-										onTap: () => conn.yieldRemote(),
-									),
-									ListTile(
-										leading: const Icon(Icons.download),
-										title: const Text("Load model..."),
-										onTap: loadModel,
-									),
-								],
-								const ListTile(
-									title: Text("About"),
-									dense: true,
-								),
-								if (_loadPackageInfo() case PackageInfo info) ...[
-									ListTile(
-										title: const Text("Version"),
-										subtitle: Text("${info.version}+${info.buildNumber}"),
-									)
-								]
-							],
+								controller: _servAddr,
+								onSubmitted: (val) {
+									set.serverURI = val;
+									set.save();
+								},
+							)
 						),
-					)
-				)
-			],
+						ListTile(
+							title: TextField(
+								decoration: const InputDecoration(
+									label: Text("Author"),
+								),
+								controller: _author,
+								onSubmitted: (val) => setState((){
+									set.author = val;
+									set.save();
+								}),
+							)
+						),
+						ListTile(
+							leading: const Icon(Icons.notifications),
+							title: const Text("Enable notifications"),
+							trailing: Switch(
+								value: set.sendNotifs,
+								onChanged: (val) => setState((){
+									set.sendNotifs = val;
+									set.save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.zoom_in),
+							title: const Text("Large UI"),
+							trailing: Switch(
+								value: set.largeUI,
+								onChanged: (val) => setState((){
+									set.largeUI = val;
+									set.save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.dark_mode),
+							title: const Text("Dark UI"),
+							trailing: Switch(
+								value: set.darkTheme,
+								onChanged: (val) => setState((){
+									set.darkTheme = val;
+									set.save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.stay_current_portrait),
+							title: const Text("Gates keep screen alive"),
+							trailing: Switch(
+								value: set.useWakeLock,
+								onChanged: (val) => setState((){
+									set.useWakeLock = val;
+									set.save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.cloud_download),
+							title: const Text("Auto yield"),
+							trailing: Switch(
+								value: set.autoYield,
+								onChanged: (val) => setState((){
+									set..autoYield = val..save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.groups),
+							title: const Text("Use P2P"),
+							trailing: Switch(
+								value: set.useP2P,
+								onChanged: (val) => setState((){
+									set..useP2P = val..save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.admin_panel_settings),
+							title: const Text("Enable advanced mode"),
+							trailing: Switch(
+								value: set.showAdmin,
+								onChanged: (val) => setState((){
+									set.showAdmin = val;
+									set.save();
+								}),
+							),
+						),
+						ListTile(
+							leading: const Icon(Icons.settings_backup_restore),
+							title: const Text("Reset to defaults"),
+							onTap: () => setState((){
+								set = set.defaults()..save();
+							}),
+						),
+						ListTile(
+							leading: const Icon(Icons.sync),
+							title: const Text("Resync"),
+							onTap: () => model.resetModel(),
+						),
+						ListTile(
+							leading: const Icon(Icons.data_array),
+							title: const Text("Save CSV"),
+							onTap: () => saveCSV(context),
+						),
+						if (set.showAdmin)
+						...[
+							const ListTile(
+								title: Text("Administration"),
+								dense: true,
+							),
+							ListTile(
+								leading: const Icon(Icons.cancel),
+								title: const Text("New session"),
+								subtitle: Text("Current: ${session.sessionId}"),
+								onTap: () {
+									if (set.autoYield) {
+										setState((){
+											set..autoYield = false
+												..save();
+										});
+									}
+									session.reset();
+								}
+							),
+							ListTile(
+								leading: const Icon(Icons.cloud_upload),
+								title: const Text("Upload session"),
+								subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
+								onTap: () => conn.yieldRemote(),
+							),
+							ListTile(
+								leading: const Icon(Icons.download),
+								title: const Text("Load model..."),
+								onTap: loadModel,
+							),
+						],
+						const ListTile(
+							title: Text("About"),
+							dense: true,
+						),
+						if (_loadPackageInfo() case PackageInfo info) ...[
+							ListTile(
+								title: const Text("Version"),
+								subtitle: Text("${info.version}+${info.buildNumber}"),
+							)
+						],
+						ListTile(
+							title: Text("Protocol version"),
+							trailing: Text(SyncProtocol.VERSION.toString()),
+						),
+						ListTile(
+							title: Text("License"),
+							trailing: Text("???"), // TODO: license
+						),
+					],
+				),
+			)
 		);
 	}
 	

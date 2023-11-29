@@ -18,8 +18,12 @@ import 'package:flutter/material.dart';
 				backgroundColor: colorScheme.background,
 			),
 			chipTheme: ChipThemeData(
-				backgroundColor: black90,
+				showCheckmark: false,
+				// backgroundColor: black90,
 				selectedColor: colorScheme.secondary,
+			),
+			switchTheme: SwitchThemeData(
+				splashRadius: splashRadius,
 			),
 			cardTheme: CardTheme(
 				color: colorScheme.background,
@@ -36,8 +40,12 @@ import 'package:flutter/material.dart';
 		bottomNavigationBarTheme: BottomNavigationBarThemeData(
 			backgroundColor: black27,
 		),
+		switchTheme: SwitchThemeData(
+			splashRadius: splashRadius,
+		),
 		chipTheme: ChipThemeData(
-			backgroundColor: black90,
+			showCheckmark: false,
+			// backgroundColor: black90,
 			selectedColor: colorScheme.secondary,
 		),
 		cardTheme: CardTheme(

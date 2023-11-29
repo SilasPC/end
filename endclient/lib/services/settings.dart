@@ -86,22 +86,11 @@ class Settings extends IJSON {
 		useP2P = true,
 		useWakeLock = true;
 
-	// IGNORED: TODO: this is not very nice
-	void setDefaults() {
-		serverURI = "https://kastanie.ddns.net/esys";
-		author = Platform.localHostname;
-		darkTheme = false;
-		largeUI = false;
-		showAdmin = false;
-		sendNotifs = Platform.isAndroid || Platform.isIOS;
-		autoYield = true;
-		useP2P = true;
-		useWakeLock = true;
-	}
-
 	void save() {
 		_service.set(clone());
 	}
+
+	Settings defaults() => Settings.defaults(_service);
 
 	Settings clone() => Settings(
 		_service,

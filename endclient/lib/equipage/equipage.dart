@@ -158,10 +158,11 @@ class LoopCard extends StatelessWidget {
 	Widget build(BuildContext context) {
 		var remarks = loopData.data?.remarks() ?? const [];
 		return Card(
+			elevation: 0,
 			child: Column(
 				children: [
-					header(),
-					grid(),
+					_header(),
+					_grid(),
 					if (remarks.isNotEmpty)
 					remarksList(remarks),
 				],
@@ -191,11 +192,12 @@ class LoopCard extends StatelessWidget {
 			],
 		);
 
-	Widget header() =>
+	Widget _header() =>
 		Container(
 			padding: const EdgeInsets.symmetric(horizontal: 10),
 			decoration: BoxDecoration(
 				color: primaryColor,
+				borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
 				border: Border.all(
 					color: Colors.black54,
 					width: 0.3,
@@ -211,7 +213,7 @@ class LoopCard extends StatelessWidget {
 			)
 		);
 
-	Widget grid() =>
+	Widget _grid() =>
 		AspectRatio(
 			aspectRatio: 3/2,
 			child: GridView.count(
@@ -227,6 +229,34 @@ class LoopCard extends StatelessWidget {
 			),
 		);
 
+	static Widget preExam(VetData data) =>
+		Card(
+			elevation: 0,
+			child: Column(
+				children: [
+					Container(
+						padding: const EdgeInsets.symmetric(horizontal: 10),
+						decoration: BoxDecoration(
+							color: primaryColor,
+							borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+							border: Border.all(
+								color: Colors.black54,
+								width: 0.3,
+							),
+						),
+						height: 30,
+						child: const Row(
+							mainAxisAlignment: MainAxisAlignment.spaceBetween,
+							children: [
+								Text("PRE-EXAM"),
+							],
+						)
+					),
+					LoopCard.remarksList(data.remarks())
+				],
+			),
+		);
+
 }
 
 Widget txtCol(List<String> strs) =>
@@ -238,7 +268,7 @@ Widget wrapTxtCol(Widget w) =>
 	AspectRatio(
 		aspectRatio: 1,
 		child: Container(
-			padding: const EdgeInsets.all(20),
+			padding: const EdgeInsets.all(8),
 			decoration: BoxDecoration(
 				border: Border.all(
 					color: Colors.black54,

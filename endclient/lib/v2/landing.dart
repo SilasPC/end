@@ -1,12 +1,13 @@
 
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
-import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
+import 'package:esys_client/v2/dashboard/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -20,30 +21,36 @@ class Landing extends StatelessWidget {
 		FutureBuilder(
 			future: context.read<IdentityService>().isAuthorized(),
 			builder: (context, snapshot) {
+				Widget body;
 				switch (snapshot.data) {
 					case false:
 						var model = context.watch<LocalModel>();
 						// var conn = context.watch<ServerConnection>();
 						var inSession = model.model.rideName != "";
-						return _view(context, inSession, model);
-					case true:
-						Navigator.push(context, MaterialPageRoute(
-							builder: (context) => const Dashboard()
-						));
-						break;
-					case null:
-						break;
+						body = _view(context, inSession, model);
+					case true || null:
+						if (snapshot.data == true) {
+							Navigator.push(context, MaterialPageRoute(
+								builder: (context) => const Dashboard()
+							));
+						}
+						body = Center(
+							child: SpinKitCubeGrid(
+								color: primaryColor,
+							),
+						);
 				}
-				return Center(
-					child: SpinKitCubeGrid(
-						color: primaryColor,
-					),
+				return Material(
+					child: Container(
+						decoration: backgroundGradient,
+						child: body,
+					)
 				);
 			}
 		);
 
-	Widget _view(BuildContext context, bool inSession, LocalModel model) => Material(
-		child: Wrap(
+	Widget _view(BuildContext context, bool inSession, LocalModel model) =>
+		Wrap(
 			alignment: WrapAlignment.center,
 			runAlignment: WrapAlignment.center,
 			crossAxisAlignment: WrapCrossAlignment.center,
@@ -70,20 +77,43 @@ class Landing extends StatelessWidget {
 								),
 								Divider(),
 								Center(
-									child: ElevatedButton(
-										style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
-										child: const Row(
-											mainAxisSize: MainAxisSize.min,
-											children: [
-												Text("LOGIN  "),
-												Icon(Icons.login),
-											],
-										),
-										onPressed: () {
-											Navigator.of(context)
-												.push(MaterialPageRoute(builder: (context) => const Dashboard()));
-										},
-									),
+									child: Row(
+										mainAxisAlignment: MainAxisAlignment.spaceAround,
+										children: [
+											ElevatedButton(
+												style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
+												child: const Row(
+													mainAxisSize: MainAxisSize.min,
+													children: [
+														Text("LOGIN  "),
+														Icon(Icons.login),
+													],
+												),
+												onPressed: () {
+													Navigator.of(context)
+														.push(MaterialPageRoute(builder: (context) => const Dashboard()));
+												},
+											),
+											ElevatedButton(
+												style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
+												child: const Row(
+													mainAxisSize: MainAxisSize.min,
+													children: [
+														Text("SETTINGS  "),
+														Icon(Icons.settings),
+													],
+												),
+												onPressed: () {
+													showModal(
+														context: context,
+														builder: (context) => Center(
+															child: SettingsCard()
+														),
+													);
+												},
+											),
+										]
+									)
 								),
 							]
 						)
@@ -95,7 +125,6 @@ class Landing extends StatelessWidget {
 					child: EquipagesCard(builder: EquipagesCard.withChevrons),
 				)
 			],
-		)
-	);
+		);
 
 }
