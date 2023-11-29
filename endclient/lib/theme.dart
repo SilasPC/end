@@ -11,28 +11,32 @@ import 'package:flutter/material.dart';
 		secondary: secondaryColor,
 	);
 
-	ThemeData lightTheme = 
-		ThemeData.light().copyWith(
-			colorScheme: colorScheme,
-			bottomNavigationBarTheme: BottomNavigationBarThemeData(
-				backgroundColor: colorScheme.background,
-			),
-			chipTheme: ChipThemeData(
-				showCheckmark: false,
-				// backgroundColor: black90,
-				selectedColor: colorScheme.secondary,
-			),
-			switchTheme: SwitchThemeData(
-				splashRadius: splashRadius,
-			),
-			cardTheme: CardTheme(
-				color: colorScheme.background,
-				margin: const EdgeInsets.all(16),
-				shape: RoundedRectangleBorder(
-					borderRadius: BorderRadius.circular(20),
-				)
-			),
-		);
+	ThemeData lightTheme = ThemeData.light().copyWith(
+		colorScheme: colorScheme,
+		focusColor: null,
+		bottomNavigationBarTheme: BottomNavigationBarThemeData(
+			backgroundColor: colorScheme.background,
+		),
+		chipTheme: ChipThemeData(
+			showCheckmark: false,
+			selectedColor: colorScheme.secondary,
+		),
+		switchTheme: SwitchThemeData(
+			splashRadius: splashRadius,
+		),
+		elevatedButtonTheme: ElevatedButtonThemeData(
+			/* style: ElevatedButton.styleFrom(
+				backgroundColor: colorScheme.surface,
+			) */
+		),
+		cardTheme: CardTheme(
+			color: colorScheme.background,
+			margin: const EdgeInsets.all(16),
+			shape: RoundedRectangleBorder(
+				borderRadius: BorderRadius.circular(20),
+			)
+		),
+	);
 
 	ThemeData darkTheme = ThemeData.dark().copyWith(
 		colorScheme: colorScheme,
@@ -40,13 +44,20 @@ import 'package:flutter/material.dart';
 		bottomNavigationBarTheme: BottomNavigationBarThemeData(
 			backgroundColor: black27,
 		),
+		chipTheme: ChipThemeData(
+			showCheckmark: false,
+			selectedColor: colorScheme.secondary,
+		),
 		switchTheme: SwitchThemeData(
 			splashRadius: splashRadius,
 		),
-		chipTheme: ChipThemeData(
-			showCheckmark: false,
-			// backgroundColor: black90,
-			selectedColor: colorScheme.secondary,
+		elevatedButtonTheme: ElevatedButtonThemeData(
+			style: ElevatedButton.styleFrom(
+				backgroundColor: Colors.black26,
+				/* textStyle: TextStyle(
+					color: colorScheme.tertiary,
+				) */
+			)
 		),
 		cardTheme: CardTheme(
 			color: black20,

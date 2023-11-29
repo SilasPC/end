@@ -216,7 +216,10 @@ class _ExamGateViewState extends State<ExamGateView> {
 				children: [
 					Text(
 						val != null ? field.withValue(val).toString() : "-",
-						style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+						style: const TextStyle(
+							fontSize: 28,
+							fontWeight: FontWeight.bold
+						),
 					),
 					Text(
 						field.name,

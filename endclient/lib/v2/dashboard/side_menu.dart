@@ -35,121 +35,128 @@ class DashboardMenu extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) =>
-		Column( // UI: listview
-			children: [
-				SizedBox(
-					height: 60,
-					child: Center(
-						child: Text(
-							"eSys",
-							style: TextStyle(fontSize: 20, color: Colors.white38),
-						)
-					),
-				),
-				Divider(),
-				Expanded(
-					child: ListView(
-						children: [
-							ListTile(
-								leading: Icon(Icons.grid_view),
-								title: Text("Overview"),
-								selected: currentView == OverviewView,
-								onTap: () => setCurrent(OverviewView.new)
-							),
-							ListTile(
-								leading: Icon(Icons.data_array),
-								title: Text("Data"),
-								selected: currentView == DataView,
-								onTap: () => setCurrent(DataView.new)
-							),
-							ListTile(
-								leading: Icon(Icons.flag),
-								title: Text("Gates"),
-								selected: currentView == GateView,
-								onTap: () => setCurrent(GateView.new)
-							),
-							ListTile(
-								leading: Icon(Icons.monitor_heart),
-								title: Text("Exam gate"),
-								selected: currentView == ExamGateView,
-								onTap: () => setCurrent(ExamGateView.new)
-							),
-							/* ListTile(
-								leading: Icon(MyIcons.equipe),
-								title: Text("Equipe"),
-								onTap: () {},
-							), */
-							ListTile(
-								leading: Icon(Icons.settings),
-								title: Text("Settings"),
-								selected: currentView == SettingsView,
-								onTap: () => setCurrent(SettingsView.new)
-							),
-							/* ListTile(
-								leading: Icon(Icons.admin_panel_settings),
-								title: Text("Administration"),
-								onTap: () {},
-							), */
-						],
-					),
-				),
-				SizedBox(
-					width: 150,
-					child: FittedBox(
-						fit: BoxFit.fitWidth,
-						child: TextClock()
-					),
-				),
-				Divider(),
-				ListTile(
-					/* leading: CircleAvatar(
-						child: Icon(Icons.person),
-					), */
-					title: Text("Username"),
-					subtitle: Text("Something"),
-					trailing: IconButton(
-						splashRadius: splashRadius,
-						icon: Icon(Icons.logout),
-						onPressed: () {
-							Navigator.of(context).pop();
-						},
-					),
-				),
-				Divider(),
-				Builder(
-					builder: (context) {
-
-						ServerConnection conn = context.watch();
-						PeerStates peers = context.watch();
-						var peerCount = peers.peers
-							.where((p) => p.connected)
-							.where((p) => p != conn.peer)
-							.length;
-
-						return ListTile(
-							leading: Icon(
-								switch ((conn.connected, conn.state?.isSync)) {
-									(false, _) => Icons.cloud_off,
-									(true, true) => Icons.cloud_done,
-									_ => Icons.cloud,
-								},
-								color: switch ((conn.connected, conn.state?.isSync)) {
-									(false, _) => Colors.red,
-									(true, true) => Colors.green,
-									_ => Colors.amber,
-								}
-							),
-							title: Text(
-								conn.connected ? "Connected" : "Disconnected",
+		Container(
+			width: 200,
+			color: Theme.of(context).canvasColor,
+			child: Column( // UI: listview
+				children: [
+					SizedBox(
+						height: 60,
+						child: Center(
+							child: Text(
+								"eSys",
 								style: TextStyle(
-									color: Colors.grey
-								)
-							),
-							subtitle: Text("$peerCount peer(s)"),
-						);
-					},
-				)
-			],
+									fontSize: 20,
+									color: Theme.of(context).colorScheme.onSurface
+								),
+							)
+						),
+					),
+					Divider(),
+					Expanded(
+						child: ListView(
+							children: [
+								ListTile(
+									leading: Icon(Icons.grid_view),
+									title: Text("Overview"),
+									selected: currentView == OverviewView,
+									onTap: () => setCurrent(OverviewView.new)
+								),
+								ListTile(
+									leading: Icon(Icons.data_array),
+									title: Text("Data"),
+									selected: currentView == DataView,
+									onTap: () => setCurrent(DataView.new)
+								),
+								ListTile(
+									leading: Icon(Icons.flag),
+									title: Text("Gates"),
+									selected: currentView == GateView,
+									onTap: () => setCurrent(GateView.new)
+								),
+								ListTile(
+									leading: Icon(Icons.monitor_heart),
+									title: Text("Exam gate"),
+									selected: currentView == ExamGateView,
+									onTap: () => setCurrent(ExamGateView.new)
+								),
+								/* ListTile(
+									leading: Icon(MyIcons.equipe),
+									title: Text("Equipe"),
+									onTap: () {},
+								), */
+								ListTile(
+									leading: Icon(Icons.settings),
+									title: Text("Settings"),
+									selected: currentView == SettingsView,
+									onTap: () => setCurrent(SettingsView.new)
+								),
+								/* ListTile(
+									leading: Icon(Icons.admin_panel_settings),
+									title: Text("Administration"),
+									onTap: () {},
+								), */
+							],
+						),
+					),
+					SizedBox(
+						width: 150,
+						child: FittedBox(
+							fit: BoxFit.fitWidth,
+							child: TextClock()
+						),
+					),
+					Divider(),
+					ListTile(
+						/* leading: CircleAvatar(
+							child: Icon(Icons.person),
+						), */
+						title: Text("Username"),
+						subtitle: Text("Something"),
+						trailing: IconButton(
+							splashRadius: splashRadius,
+							icon: Icon(Icons.logout),
+							onPressed: () {
+								Navigator.of(context).pop();
+							},
+						),
+					),
+					Divider(),
+					Builder(
+						builder: (context) {
+
+							ServerConnection conn = context.watch();
+							PeerStates peers = context.watch();
+							var peerCount = peers.peers
+								.where((p) => p.connected)
+								.where((p) => p != conn.peer)
+								.length;
+
+							return ListTile(
+								leading: Icon(
+									switch ((conn.connected, conn.state?.isSync)) {
+										(false, _) => Icons.cloud_off,
+										(true, true) => Icons.cloud_done,
+										_ => Icons.cloud,
+									},
+									color: switch ((conn.connected, conn.state?.isSync)) {
+										(false, _) => Colors.red,
+										(true, true) => Colors.green,
+										_ => Colors.amber,
+									}
+								),
+								title: Text(
+									conn.connected ? "Connected" : "Disconnected",
+									style: TextStyle(
+										color: Colors.grey
+									)
+								),
+								subtitle: Text("$peerCount peer(s)"),
+							);
+						},
+					)
+				],
+			)
 		);
 
 }

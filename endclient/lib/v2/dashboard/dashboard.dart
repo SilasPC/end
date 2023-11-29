@@ -37,15 +37,11 @@ class _DashboardState extends State<Dashboard> {
 		Material(
 			child: Row(
 				children: [
-					Container(
-						width: 200,
-						color: black27,
-						child: DashboardMenu(
-							currentView: view.runtimeType,
-							viewSelected: (newView) => setState(() {
-								view = newView;
-							}),
-						),
+					DashboardMenu(
+						currentView: view.runtimeType,
+						viewSelected: (newView) => setState(() {
+							view = newView;
+						}),
 					),
 					Expanded(
 						child: Container(
