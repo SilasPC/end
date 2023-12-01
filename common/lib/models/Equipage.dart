@@ -194,7 +194,6 @@ class Equipage extends IJSON {
 			if (isFinished) return -1;
 			return 1;
 		} else if (isFinished && category.idealSpeed != null) {
-			// CHECK: if this works
 			switch ((idealTimeError(), eq.idealTimeError())) {
 				case (int dif, int eqdif):
 					return dif - eqdif;

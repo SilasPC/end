@@ -3,7 +3,6 @@
  - tablet ui
  - ui improvements
  - cryto security
- - dividers / row coloring in gates
  - test gate skipping (more)
  - coverage
 

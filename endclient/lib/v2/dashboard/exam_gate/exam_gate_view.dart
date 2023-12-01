@@ -2,14 +2,14 @@
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/consts.dart';
-import 'package:esys_client/equipage/equipage.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/util/numpad.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
+import 'package:esys_client/v2/dashboard/exam_gate/loop_card.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +49,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 
 		// LocalModel model = context.watch();
 
+		// TODO: flex width => layout change when needed
 		return Row(
 			children: [
 				SizedBox(
@@ -59,6 +60,8 @@ class _ExamGateViewState extends State<ExamGateView> {
 								child: EquipagesCard(
 									builder: EquipagesCard.withChevrons,
 									onTap: (eq) => setState(() {equipage = eq;}),
+									filter: (e) => e.status == EquipageStatus.VET,
+									emptyLabel: "None ready for examination",
 								),
 							),
 							Card(
@@ -147,6 +150,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 					child: Card(
 						child: Column(
 							children: [
+								...cardHeader("Equipage info"),
 								if (equipage case Equipage equipage) ...[
 									EquipageTile(equipage),
 									ListTile(
@@ -160,17 +164,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 									)
 								]
 								else
-								Container(
-									alignment: Alignment.topCenter,
-									padding: const EdgeInsets.only(top: 16),
-									child: const Text(
-										"Select an equipage",
-										style: TextStyle(
-											fontSize: 16,
-											fontStyle: FontStyle.italic,
-										)
-									),
-								)
+								emptyListText("Select an equipage")
 							],
 						),
 					),

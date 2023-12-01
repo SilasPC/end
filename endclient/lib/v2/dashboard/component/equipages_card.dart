@@ -15,13 +15,17 @@ import 'package:provider/provider.dart';
 
 class EquipagesCard extends StatefulWidget {
 
+	final Predicate<Equipage>? filter;
 	final EquipageTile Function(BuildContext, EquipagesCard, Equipage, Color?) builder;
 	final void Function(Equipage)? onTap;
+	final String? emptyLabel;
 	
 	const EquipagesCard({
 		super.key,
 		this.builder = EquipagesCard.withPlainTiles,
 		this.onTap,
+		this.filter,
+		this.emptyLabel = "None found",
 	});
 
 	@override
@@ -61,12 +65,17 @@ class _EquipagesCardState extends State<EquipagesCard> {
 	@override
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
+		var eqs = model.model.equipages.values;
+		if (widget.filter case Predicate<Equipage> filter) {
+			eqs = eqs.where(filter);
+		}
 		return Card(
 			// needed because the tiles have a background color
 			clipBehavior: Clip.hardEdge,
 			child: Column(
 				children: [
 					...cardHeader("Equipages"),
+					if (widget.filter == null)
 					ChipStrip(
 						chips: [
 							for (var cat in model.model.categories.values)
@@ -82,10 +91,11 @@ class _EquipagesCardState extends State<EquipagesCard> {
 					Expanded(
 						child: ListView(
 							children: [
-								// UI: sort by eid
-								for (var (i, eq) in model.model.equipages.values.indexed)
+								for (var (i, eq) in eqs.indexed)
 								if (cat == null || eq.category == cat)
-								widget.builder(context, widget, eq, i % 2 == 0 ? Theme.of(context).focusColor : null)
+								widget.builder(context, widget, eq, i % 2 == 0 ? Theme.of(context).focusColor : null),
+								if (widget.emptyLabel case String label when eqs.isEmpty)
+								emptyListText(label)
 							],
 						)
 					),

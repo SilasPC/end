@@ -1,4 +1,6 @@
 
+import 'dart:collection';
+
 import 'package:json_annotation/json_annotation.dart';
 
 import 'dart:convert';
@@ -14,34 +16,8 @@ class Model extends IJSON {
 	int? equipeId;
 	Map<String, Category> categories = {};
 	@JsonKey(ignore: true)
-	Map<int, Equipage> equipages = {};
+	SplayTreeMap<int, Equipage> equipages = SplayTreeMap();
 	List<EventError> errors = [];
-
-	List<Equipage> vetGate() {
-		List<Equipage> eqs = [];
-		for (Equipage e in equipages.values) {
-			if (e.loops.length == 0)
-				continue;
-			if (e.loops.last.vet == null && e.loops.last.arrival != null)
-				eqs.add(e);
-		}
-		return eqs;
-	}
-
-	List<Equipage> examGate() {
-		List<Equipage> eqs = [];
-		for (Equipage e in equipages.values) {
-			if (e.preExam == null) {
-				eqs.add(e);
-				continue;
-			}
-			if (e.loops.length == 0)
-				continue;
-			if (e.loops.last.vet != null && e.loops.last.data == null)
-				eqs.add(e);
-		}
-		return eqs;
-	}
 
 	void addCategories(Iterable<Category> cats) {
 		for (var cat in cats) {

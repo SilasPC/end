@@ -27,6 +27,34 @@ class LoopCard extends StatelessWidget {
 		);
 	}
 
+	static Widget preExam(VetData data) =>
+		Card(
+			elevation: 0,
+			child: Column(
+				children: [
+					Container(
+						padding: const EdgeInsets.symmetric(horizontal: 10),
+						decoration: BoxDecoration(
+							color: primaryColor,
+							borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+							border: Border.all(
+								color: Colors.black54,
+								width: 0.3,
+							),
+						),
+						height: 30,
+						child: const Row(
+							mainAxisAlignment: MainAxisAlignment.spaceBetween,
+							children: [
+								Text("PRE-EXAM"),
+							],
+						)
+					),
+					remarksList(data.remarks())
+				],
+			),
+		);
+
 	static Widget remarksList(List<VetFieldValue> remarks, [Color? color = Colors.amber]) =>
 		// UI: expand horizontally
 		Container(

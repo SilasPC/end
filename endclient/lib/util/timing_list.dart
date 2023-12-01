@@ -27,7 +27,7 @@ class TimingList extends StatelessWidget {
 					children: [
 						Expanded(
 							child: ReorderableListView(
-								// PERF: would be faster, but causes UI glitch
+								// IGNORED: PERF: would be faster, but causes UI glitch
 								// itemExtent: height,
 								onReorder: onReorder,
 								children: children,

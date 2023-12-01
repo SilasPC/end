@@ -42,3 +42,30 @@ Widget coloredCardheader(BuildContext context, String label) {
 		)
 	);
 }
+
+Widget labelIconButton(String text, IconData icon, {VoidCallback? onPressed}) =>
+	ElevatedButton(
+		style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
+		onPressed: onPressed,
+		child: Row(
+			mainAxisSize: MainAxisSize.min,
+			children: [
+				Text(text),
+				const SizedBox(width: 6),
+				Icon(icon),
+			],
+		),
+	);
+
+Widget emptyListText(String label) =>
+	Container(
+		alignment: Alignment.topCenter,
+		padding: const EdgeInsets.only(top: 16),
+		child: Text(
+			label,
+			style: const TextStyle(
+				fontSize: 16,
+				fontStyle: FontStyle.italic,
+			)
+		),
+	);

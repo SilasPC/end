@@ -3,11 +3,14 @@
 
 import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
+import 'package:esys_client/v2/equipage_page.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
+import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/settings_view.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -76,44 +79,31 @@ class Landing extends StatelessWidget {
 									),
 								),
 								Divider(),
-								Center(
-									child: Row(
-										mainAxisAlignment: MainAxisAlignment.spaceAround,
-										children: [
-											ElevatedButton(
-												style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
-												child: const Row(
-													mainAxisSize: MainAxisSize.min,
-													children: [
-														Text("LOGIN  "),
-														Icon(Icons.login),
-													],
+								Row(
+									mainAxisAlignment: MainAxisAlignment.spaceAround,
+									children: [
+										labelIconButton("LOGIN", Icons.login, onPressed: () {
+											Navigator.of(context)
+												.push(MaterialPageRoute(builder: (context) => const Dashboard()));
+										}),
+										labelIconButton("SETTINGS", Icons.login, onPressed: () {
+											showModal(
+												context: context,
+												builder: (context) => Center(
+													child: SettingsCard()
 												),
-												onPressed: () {
-													Navigator.of(context)
-														.push(MaterialPageRoute(builder: (context) => const Dashboard()));
-												},
-											),
-											ElevatedButton(
-												style: ElevatedButton.styleFrom(backgroundColor: Colors.black38.withAlpha(200)),
-												child: const Row(
-													mainAxisSize: MainAxisSize.min,
-													children: [
-														Text("SETTINGS  "),
-														Icon(Icons.settings),
-													],
-												),
-												onPressed: () {
-													showModal(
-														context: context,
-														builder: (context) => Center(
-															child: SettingsCard()
-														),
-													);
-												},
-											),
-										]
-									)
+											);
+										}),
+									]
+								),
+								Row(
+									mainAxisAlignment: MainAxisAlignment.spaceAround,
+									children: [
+										labelIconButton("EXAM DATA", Icons.login, onPressed: () {
+											Navigator.of(context)
+												.push(MaterialPageRoute(builder: (context) => const ExamGateView()));
+										}),
+									]
 								),
 							]
 						)
@@ -122,7 +112,11 @@ class Landing extends StatelessWidget {
 				SizedBox(
 					height: MediaQuery.sizeOf(context).height - 250, // UI: alternative to -250 ?
 					width: 400,
-					child: EquipagesCard(builder: EquipagesCard.withChevrons),
+					child: EquipagesCard(
+						builder: EquipagesCard.withChevrons,
+						onTap: (eq) => Navigator.of(context)
+							.push(MaterialPageRoute(builder: (context) => EquipagePage(eq))),
+					),
 				)
 			],
 		);

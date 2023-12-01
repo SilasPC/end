@@ -50,6 +50,7 @@ import 'package:flutter/material.dart';
 		),
 		switchTheme: SwitchThemeData(
 			splashRadius: splashRadius,
+			// UI: switch thumb color
 		),
 		elevatedButtonTheme: ElevatedButtonThemeData(
 			style: ElevatedButton.styleFrom(
