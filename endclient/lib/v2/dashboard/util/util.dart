@@ -1,5 +1,27 @@
 
+import 'package:esys_client/consts.dart';
 import 'package:flutter/material.dart';
+
+Widget listGroupHeader(String label) =>
+	Row(
+		children: [
+			const Expanded(
+				child: Divider(color: black27, indent: 16, endIndent: 16,) 
+			),
+			Text(
+				label,
+				/* textAlign: TextAlign.center, */
+				style: const TextStyle(
+					/* fontSize: 20, */
+					fontWeight: FontWeight.bold,
+					color: black27
+				)
+			),
+			const Expanded(
+				child: Divider(color: black27, indent: 16, endIndent: 16,) 
+			)
+		]
+	);
 
 List<Widget> cardHeader(String label) => [
 	Container(
@@ -56,7 +78,7 @@ Widget coloredCardheader(BuildContext context, String label) {
 		alignment: Alignment.center,
 		decoration: BoxDecoration(
 			borderRadius: borderRadius,
-			color: Colors.black26, // TODO: theme
+			color: Colors.black26, // UI: theme
 		),
 		child: Text(
 			label,

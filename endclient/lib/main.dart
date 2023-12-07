@@ -45,6 +45,9 @@ class MyApp extends StatelessWidget {
 
 		var (lightTheme, darkTheme) = themeData();
 
+		// IGNORED: FEAT: use largeUI
+		// context.select((Settings set) => set.largeUI);
+
 		return MaterialApp(
 			title: 'eSys Endurance',
 			
@@ -53,19 +56,7 @@ class MyApp extends StatelessWidget {
 			themeMode: dark ? ThemeMode.dark : ThemeMode.light,
 
 			debugShowCheckedModeBanner: false,
-			home: Builder(
-				builder: (context) {
-					MediaQueryData mq = MediaQuery.of(context);
-					// FEAT: scale everything ?
-					var factor = context.watch<Settings>().largeUI ? 1.2 : 1;
-					return MediaQuery(
-						data: mq.copyWith(
-							textScaleFactor: mq.textScaleFactor * factor,
-						),
-						child: const Landing(),
-					);
-				}
-			)
+			home: const Landing(),
 		);
 	}
 

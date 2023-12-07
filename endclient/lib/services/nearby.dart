@@ -18,7 +18,7 @@ enum DevStatus {
 	UNAVAILABLE,
 }
 
-// FIXME: race conditions
+// IGNORED: CHECK: race conditions
 class Device extends Peer {
 
    @override

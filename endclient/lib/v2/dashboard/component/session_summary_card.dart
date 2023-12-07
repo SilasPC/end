@@ -9,13 +9,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SessionSummaryCard extends StatelessWidget {
 
+	static double height = 100;
+
 	const SessionSummaryCard({super.key});
 	
 	@override
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
 		return SizedBox(
-			height: 100,
+			height: height,
 			child: Card(
 				child: Column(
 					children: [

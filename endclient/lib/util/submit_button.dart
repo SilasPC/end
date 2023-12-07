@@ -36,7 +36,7 @@ class SubmitButtonState extends State<SubmitButton> {
 	
 	@override
 	Widget build(BuildContext context) {
-		// UI: fix icons (CircularProgressIndicator() ?)
+		// IGNORED: UI: fix icons (CircularProgressIndicator() ?)
 		if (loading) {
 			return Container(
 				padding: const EdgeInsets.all(8),

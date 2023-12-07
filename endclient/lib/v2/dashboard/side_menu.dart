@@ -22,7 +22,7 @@ class DashboardMenu extends StatelessWidget {
 		Container(
 			width: 200,
 			color: Theme.of(context).canvasColor,
-			child: Column( // UI: listview
+			child: Column(
 				children: [
 					SizedBox(
 						height: 60,

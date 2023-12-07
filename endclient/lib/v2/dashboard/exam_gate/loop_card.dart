@@ -17,6 +17,7 @@ class LoopCard extends StatelessWidget {
 		var remarks = loopData.data?.remarks() ?? const [];
 		return Card(
 			child: Column(
+				crossAxisAlignment: CrossAxisAlignment.stretch,
 				children: [
 					header(),
 					grid(),
@@ -31,6 +32,7 @@ class LoopCard extends StatelessWidget {
 		Card(
 			elevation: 0,
 			child: Column(
+				crossAxisAlignment: CrossAxisAlignment.stretch,
 				children: [
 					Container(
 						padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -56,7 +58,6 @@ class LoopCard extends StatelessWidget {
 		);
 
 	static Widget remarksList(List<VetFieldValue> remarks, [Color? color = Colors.amber]) =>
-		// UI: expand horizontally
 		Container(
 			decoration: BoxDecoration(
 				border: Border.all(
@@ -66,6 +67,7 @@ class LoopCard extends StatelessWidget {
 			),
 			padding: const EdgeInsets.all(4),
 			child: Wrap(
+				alignment: WrapAlignment.center,
 				runSpacing: 4,
 				spacing: 4,
 				children: [

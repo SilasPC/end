@@ -28,14 +28,23 @@ class OverviewView extends StatelessWidget {
 				var stacked = constraints.maxWidth < eqCardWidth + maxGridCardWidth;
 
 				if (stacked) {
-					return Column(
+					return ListView(
 						children: [
-							SessionSummaryCard(),
-							/* Expanded( // UI: don't remember how to do this
-								child: _catsGrid,
-							), */
-							Expanded(child:EquipagesCard(builder: EquipagesCard.withAdminChoices))
-						]
+							Column(
+								mainAxisSize: MainAxisSize.min,
+								children: [
+									SessionSummaryCard(),
+									SizedBox(
+										height: constraints.maxHeight - SessionSummaryCard.height,
+										child: EquipagesCard(builder: EquipagesCard.withAdminChoices)
+									),
+								],
+							),
+							SizedBox(
+								height: constraints.maxHeight,
+								child: _catsGrid
+							),
+						],
 					);
 				}
 
@@ -71,7 +80,7 @@ class OverviewView extends StatelessWidget {
 		builder: (context, constraints) {
 			var cats = context.watch<LocalModel>().model.categories;
 			var maxEls = constraints.maxWidth / maxGridCardWidth;
-			return GridView.count(	
+			return GridView.count(
 				crossAxisCount: max(1, maxEls.floor()),
 				children: [
 					for (var cat in cats.values)

@@ -89,13 +89,11 @@ class Landing extends StatelessWidget {
 										labelIconButton("SETTINGS", Icons.login, onPressed: () {
 											showModal(
 												context: context,
-												builder: (context) => Center(
-													child: SettingsCard()
-												),
+												builder: (context) => SettingsView(mainAxisAlignment: MainAxisAlignment.center),
 											);
 										}),
 									]
-								),
+								),/* 
 								Row(
 									mainAxisAlignment: MainAxisAlignment.spaceAround,
 									children: [
@@ -104,7 +102,7 @@ class Landing extends StatelessWidget {
 												.push(MaterialPageRoute(builder: (context) => const ExamGateView()));
 										}),
 									]
-								),
+								), */
 							]
 						)
 					),

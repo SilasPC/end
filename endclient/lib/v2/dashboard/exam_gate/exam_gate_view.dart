@@ -49,7 +49,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 
 		// LocalModel model = context.watch();
 
-		// TODO: flex width => layout change when needed
+		// UI: flex width => layout change when needed
 		return Row(
 			children: [
 				SizedBox(
@@ -145,9 +145,8 @@ class _ExamGateViewState extends State<ExamGateView> {
 						)
 					)
 				),
-				SizedBox(
-					width: 300,
-					child: Card(
+				Expanded(
+					child: Card( // UI: flex/wrap whatever layout
 						child: Column(
 							children: [
 								...cardHeader("Equipage info"),
@@ -168,7 +167,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 							],
 						),
 					),
-				),
+				)
 			],
 		);
 	}

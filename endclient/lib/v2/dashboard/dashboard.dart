@@ -116,27 +116,7 @@ class _DashboardState extends State<Dashboard> {
 			),
 			body: Column(
 				children: [
-					Container(
-						padding: const EdgeInsets.symmetric(
-							horizontal: 12
-						),
-						height: 65,
-						color: Theme.of(context).canvasColor,
-						child: Row(
-							children: [
-								FittedBox(
-									// UI: too small
-									fit: BoxFit.fitHeight,
-									child: TextClock(),
-								),
-								const Spacer(),
-								// UI: user icon
-								const ConnectionIndicator2(
-									iconOnly: true,
-								)
-							],
-						),
-					),
+					topBar(),
 					Expanded(
 						child: Container(
 							decoration: backgroundGradient,
@@ -147,5 +127,37 @@ class _DashboardState extends State<Dashboard> {
 			)
 		);
 	}
+
+	Widget topBar() =>
+		Container(
+			padding: const EdgeInsets.symmetric(
+				horizontal: 12
+			),
+			height: 65,
+			color: Theme.of(context).canvasColor,
+			child: Row(
+				children: [
+					Container(
+						height: 65,
+						padding: const EdgeInsets.only(bottom: 6),
+						child: FittedBox(
+							fit: BoxFit.fitHeight,
+							child: TextClock(),
+						),
+					),
+					const Spacer(),
+					IconButton(
+						icon: const Icon(Icons.lock_open),
+						onPressed: () {
+							Navigator.of(context).pop();
+						},
+					),
+					const SizedBox(width: 10,),
+					const ConnectionIndicator2(
+						iconOnly: true,
+					)
+				],
+			),
+		);
 
 }

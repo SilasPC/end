@@ -60,13 +60,14 @@ class EquipagesCard extends StatefulWidget {
 
 class _EquipagesCardState extends State<EquipagesCard> {
 
+	bool filterEnabled = true;
 	Category? cat;
 
 	@override
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
 		var eqs = model.model.equipages.values;
-		if (widget.filter case Predicate<Equipage> filter) {
+		if (widget.filter case Predicate<Equipage> filter when filterEnabled) {
 			eqs = eqs.where(filter);
 		}
 		return Card(
@@ -74,7 +75,13 @@ class _EquipagesCardState extends State<EquipagesCard> {
 			clipBehavior: Clip.hardEdge,
 			child: Column(
 				children: [
-					...cardHeader("Equipages"), // UI: add filter on/off button
+					...cardHeaderWithTrailing("Equipages", [
+						if (widget.filter != null)
+						IconButton(
+							icon: Icon(filterEnabled ? Icons.filter_list : Icons.filter_list_off),
+							onPressed: () => setState(() => filterEnabled ^= true),
+						)
+					]),
 					if (widget.filter == null)
 					ChipStrip(
 						chips: [

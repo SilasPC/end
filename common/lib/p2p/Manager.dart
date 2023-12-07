@@ -356,8 +356,6 @@ class PeerManager<M extends IJSON> {
 			if (await _db.loadPeer(ps.peerId) case (var preSyncMsg, var syncInfo)) {
 				p._lastKnownState = preSyncMsg;
 				p._lastLocal = syncInfo;
-			} else {
-				p._lastKnownState = null;
 			}
 		}
 		var last = p._lastKnownState ?? ps;

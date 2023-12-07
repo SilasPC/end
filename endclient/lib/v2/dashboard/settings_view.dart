@@ -16,27 +16,17 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-class SettingsView extends StatelessWidget {
-	const SettingsView({super.key});
+// UI: flex layout
+class SettingsView extends StatefulWidget {
+
+	final MainAxisAlignment mainAxisAlignment;
+	const SettingsView({super.key, this.mainAxisAlignment = MainAxisAlignment.start});
 
 	@override
-	Widget build(BuildContext context) =>
-		Row(
-			children: [
-				SettingsCard()
-			],
-		);
-
+	State<SettingsView> createState() => _SettingsCardState();
 }
 
-class SettingsCard extends StatefulWidget {
-	const SettingsCard({super.key});
-
-	@override
-	State<SettingsCard> createState() => _SettingsCardState();
-}
-
-class _SettingsCardState extends State<SettingsCard> {
+class _SettingsCardState extends State<SettingsView> {
 	
 	final TextEditingController _servAddr = TextEditingController();
 	final TextEditingController _author = TextEditingController();
@@ -107,182 +97,230 @@ class _SettingsCardState extends State<SettingsCard> {
 		var model = context.read<LocalModel>();
 		var conn = context.watch<ServerConnection>();
       var session = context.watch<SessionState>();
-		return Card(
-			child: SizedBox(
-				width: 350,
-				child: ListView(
-					children: [
-						...cardHeader("Settings"),
-						ListTile(
-							title: TextField(
-								decoration: const InputDecoration(
-									label: Text("Server address"),
+		return Row(
+			mainAxisAlignment: widget.mainAxisAlignment,
+			children: [
+				Card(
+					child: SizedBox(
+						width: 350,
+						child: ListView(
+							children: [
+								...cardHeader("Settings"),
+								ListTile(
+									leading: const Icon(Icons.notifications),
+									title: const Text("Enable notifications"),
+									trailing: Switch(
+										value: set.sendNotifs,
+										onChanged: (val) => setState((){
+											set.sendNotifs = val;
+											set.save();
+										}),
+									),
 								),
-								controller: _servAddr,
-								onSubmitted: (val) {
-									set.serverURI = val;
-									set.save();
-								},
-							)
-						),
-						ListTile(
-							title: TextField(
-								decoration: const InputDecoration(
-									label: Text("Author"),
+								/* ListTile(
+									leading: const Icon(Icons.zoom_in),
+									title: const Text("Large UI"),
+									trailing: Switch(
+										value: set.largeUI,
+										onChanged: (val) => setState((){
+											set.largeUI = val;
+											set.save();
+										}),
+									),
+								), */
+								ListTile(
+									leading: const Icon(Icons.dark_mode),
+									title: const Text("Dark UI"),
+									trailing: Switch(
+										value: set.darkTheme,
+										onChanged: (val) => setState((){
+											set.darkTheme = val;
+											set.save();
+										}),
+									),
 								),
-								controller: _author,
-								onSubmitted: (val) => setState((){
-									set.author = val;
-									set.save();
-								}),
-							)
+								ListTile(
+									leading: const Icon(Icons.stay_current_portrait),
+									title: const Text("Gates keep screen alive"),
+									trailing: Switch(
+										value: set.useWakeLock,
+										onChanged: (val) => setState((){
+											set.useWakeLock = val;
+											set.save();
+										}),
+									),
+								),
+								ListTile(
+									leading: const Icon(Icons.admin_panel_settings),
+									title: const Text("Enable advanced mode"),
+									trailing: Switch(
+										value: set.showAdmin,
+										onChanged: (val) => setState((){
+											set.showAdmin = val;
+											set.save();
+										}),
+									),
+								),
+								ListTile(
+									leading: const Icon(Icons.settings_backup_restore),
+									title: const Text("Reset to defaults"),
+									onTap: () => setState((){
+										set = set.defaults()..save();
+									}),
+								),
+								ListTile(
+									leading: const Icon(Icons.sync),
+									title: const Text("Resync"),
+									onTap: () => model.resetModel(),
+								),
+								ListTile(
+									leading: const Icon(Icons.data_array),
+									title: const Text("Save CSV"),
+									onTap: () => saveCSV(context),
+								),
+								listGroupHeader("About"),
+								if (_loadPackageInfo() case PackageInfo info) ...[
+									ListTile(
+										title: const Text("Version"),
+										subtitle: Text("${info.version}+${info.buildNumber}"),
+									)
+								],
+								ListTile(
+									title: Text("Protocol version"),
+									trailing: Text(SyncProtocol.VERSION.toString()),
+								),
+							],
 						),
-						ListTile(
-							leading: const Icon(Icons.notifications),
-							title: const Text("Enable notifications"),
-							trailing: Switch(
-								value: set.sendNotifs,
-								onChanged: (val) => setState((){
-									set.sendNotifs = val;
-									set.save();
-								}),
-							),
-						),
-						/* ListTile(
-							leading: const Icon(Icons.zoom_in),
-							title: const Text("Large UI"),
-							trailing: Switch(
-								value: set.largeUI,
-								onChanged: (val) => setState((){
-									set.largeUI = val;
-									set.save();
-								}),
-							),
-						), */
-						ListTile(
-							leading: const Icon(Icons.dark_mode),
-							title: const Text("Dark UI"),
-							trailing: Switch(
-								value: set.darkTheme,
-								onChanged: (val) => setState((){
-									set.darkTheme = val;
-									set.save();
-								}),
-							),
-						),
-						ListTile(
-							leading: const Icon(Icons.stay_current_portrait),
-							title: const Text("Gates keep screen alive"),
-							trailing: Switch(
-								value: set.useWakeLock,
-								onChanged: (val) => setState((){
-									set.useWakeLock = val;
-									set.save();
-								}),
-							),
-						),
-						ListTile(
-							leading: const Icon(Icons.cloud_download),
-							title: const Text("Auto yield"),
-							trailing: Switch(
-								value: set.autoYield,
-								onChanged: (val) => setState((){
-									set..autoYield = val..save();
-								}),
-							),
-						),
-						ListTile(
-							leading: const Icon(Icons.groups),
-							title: const Text("Use P2P"),
-							trailing: Switch(
-								value: set.useP2P,
-								onChanged: (val) => setState((){
-									set..useP2P = val..save();
-								}),
-							),
-						),
-						ListTile(
-							leading: const Icon(Icons.admin_panel_settings),
-							title: const Text("Enable advanced mode"),
-							trailing: Switch(
-								value: set.showAdmin,
-								onChanged: (val) => setState((){
-									set.showAdmin = val;
-									set.save();
-								}),
-							),
-						),
-						ListTile(
-							leading: const Icon(Icons.settings_backup_restore),
-							title: const Text("Reset to defaults"),
-							onTap: () => setState((){
-								set = set.defaults()..save();
-							}),
-						),
-						ListTile(
-							leading: const Icon(Icons.sync),
-							title: const Text("Resync"),
-							onTap: () => model.resetModel(),
-						),
-						ListTile(
-							leading: const Icon(Icons.data_array),
-							title: const Text("Save CSV"),
-							onTap: () => saveCSV(context),
-						),
-						if (set.showAdmin)
-						...[
-							const ListTile(
-								title: Text("Administration"),
-								dense: true,
-							),
-							ListTile(
-								leading: const Icon(Icons.cancel),
-								title: const Text("New session"),
-								subtitle: Text("Current: ${session.sessionId}"),
-								onTap: () {
-									if (set.autoYield) {
-										setState((){
-											set..autoYield = false
-												..save();
-										});
-									}
-									session.reset();
-								}
-							),
-							ListTile(
-								leading: const Icon(Icons.cloud_upload),
-								title: const Text("Upload session"),
-								subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
-								onTap: () => conn.yieldRemote(),
-							),
-							ListTile(
-								leading: const Icon(Icons.download),
-								title: const Text("Load model..."),
-								onTap: loadModel,
-							),
-						],
-						const ListTile(
-							title: Text("About"),
-							dense: true,
-						),
-						if (_loadPackageInfo() case PackageInfo info) ...[
-							ListTile(
-								title: const Text("Version"),
-								subtitle: Text("${info.version}+${info.buildNumber}"),
-							)
-						],
-						ListTile(
-							title: Text("Protocol version"),
-							trailing: Text(SyncProtocol.VERSION.toString()),
-						),
-						ListTile(
-							title: Text("License"),
-							trailing: Text("???"), // TODO: license
-						),
-					],
+					)
 				),
-			)
+				if (set.showAdmin)
+				Card(
+					child: SizedBox(
+						width: 350,
+						child: ListView(
+							children: [
+								...cardHeader("Advanced"),
+								listGroupHeader("Connections"),
+								ListTile(
+									title: TextField(
+										decoration: const InputDecoration(
+											label: Text("Server address"),
+										),
+										controller: _servAddr,
+										onSubmitted: (val) {
+											set.serverURI = val;
+											set.save();
+										},
+									)
+								),
+								ListTile(
+									leading: const Icon(Icons.cloud_download),
+									title: const Text("Auto yield"),
+									trailing: Switch(
+										value: set.autoYield,
+										onChanged: (val) => setState((){
+											set..autoYield = val..save();
+										}),
+									),
+								),
+								ListTile(
+									leading: const Icon(Icons.groups),
+									title: const Text("Use P2P"),
+									trailing: Switch(
+										value: set.useP2P,
+										onChanged: (val) => setState((){
+											set..useP2P = val..save();
+										}),
+									),
+								),
+								listGroupHeader("Session"),
+								ListTile(
+									leading: const Icon(Icons.cancel),
+									title: const Text("New session"),
+									subtitle: Text("Current: ${session.sessionId}"),
+									onTap: () {
+										if (set.autoYield) {
+											setState((){
+												set..autoYield = false
+													..save();
+											});
+										}
+										session.reset();
+									}
+								),
+								ListTile(
+									leading: const Icon(Icons.cloud_upload),
+									title: const Text("Upload session"),
+									subtitle: conn.sessionId != null ? Text("Remote: ${conn.sessionId}") : null,
+									onTap: () => conn.yieldRemote(),
+								),
+								ListTile(
+									leading: const Icon(Icons.download),
+									title: const Text("Load model..."),
+									onTap: loadModel,
+								),
+								listGroupHeader("Security"),
+								ListTile(
+									title: TextField(
+										decoration: const InputDecoration(
+											label: Text("Author"),
+										),
+										controller: _author,
+										onSubmitted: (val) => setState((){
+											set.author = val;
+											set.save();
+										}),
+									)
+								),
+							],
+						),
+					),
+				),
+				if (set.showAdmin)
+				Card(
+					child: SizedBox(
+						width: 350,
+						child: Builder(
+							builder: (context) {
+								var conn = context.watch<ServerConnection>();
+								var peers = context.watch<PeerStates>().peers;
+								return ListView(
+									children: [
+										...cardHeader("Connections"),
+										if (conn.peer case Peer p)
+											_peerTile(p, "Server"),
+										for (var p in peers)
+										if (p != conn.peer)
+											_peerTile(p)
+									],
+								);
+							}
+						)
+					),
+				)
+			],
 		);
 	}
+
+	Widget _peerTile(Peer p, [String? name]) =>
+		ListTile(
+			title: Text(name ?? p.id ?? "-"),
+			// tileColor: p.connected ? Colors.green : Colors.red,
+			subtitle: Text(p.connected ? p.state.name : "Disconnected"),
+			onLongPress: () {
+				if (p.connected) {
+					p.disconnect();
+				} else {
+					p.connect();
+				}
+			},
+			trailing: p.state.isConflict
+				? IconButton(
+					icon: const Icon(Icons.cloud_download),
+					onPressed: () {
+						context.read<LocalModel>().manager.yieldTo(p);
+					},
+				) : null,
+		);
 	
 }

@@ -36,7 +36,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 		);
 	}
 
-	// UI: new sync indicator
+	// IGNORED: UI: new sync indicator
 	Widget _syncMenu(BuildContext context) {
 		var conn = context.watch<ServerConnection>();
 		var ses = context.select<SessionState, int>((s) => s.sessionId);
