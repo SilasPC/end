@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:convert';
+import 'dart:math';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/event_model/Event.dart';
 import 'package:common/models/Model.dart';
@@ -62,7 +63,10 @@ class EventTile extends StatelessWidget {
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: [
 					Text(unixHMS(event.time)),
-					Text(event.author, style: const TextStyle(color: Colors.grey)),
+					SizedBox(
+						width: 50,
+						child: Text(event.author, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.grey)),
+					)
 				]
 			),
 			title: Text(

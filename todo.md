@@ -8,9 +8,10 @@
 
 # Other
  - ftq/dsq ga me ...
- - confirm closing with unsaved data
+ - confirm closing with unsaved data (WillPopScope)
  - more icons (?)
  - make warnings visible
+ - list animations (great_list_view)
 
 # UI guidelines
  - simple to use/understand

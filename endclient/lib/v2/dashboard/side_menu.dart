@@ -1,37 +1,21 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:esys_client/consts.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
-import 'package:esys_client/v2/dashboard/overview.dart';
+import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
+import 'package:esys_client/v2/dashboard/helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'data_view.dart';
-import 'gate.dart';
-import 'settings_view.dart';
 
 import 'package:esys_client/util/text_clock.dart';
 
 class DashboardMenu extends StatelessWidget {
 
-	final Type currentView;
-	final void Function(Widget) viewSelected;
+	final List<NavItem> navItems;
+	final int currentItem;
+	final void Function(int) itemSelected;
 
 	const DashboardMenu({
-		super.key,
-		required this.viewSelected,
-		required this.currentView,
+		super.key, required this.navItems, required this.itemSelected, required this.currentItem,
 	});
-
-	void setCurrent<T extends Widget>(T Function() f) {
-		if (currentView != T) {
-			/* setState(() {
-				current = T;
-			}); */
-			viewSelected(f());
-		}
-	} 
 
 	@override
 	Widget build(BuildContext context) =>
@@ -52,50 +36,19 @@ class DashboardMenu extends StatelessWidget {
 							)
 						),
 					),
-					Divider(),
+					const Divider(),
 					Expanded(
 						child: ListView(
 							children: [
+								for (var (i, navItem) in navItems.indexed)
 								ListTile(
-									leading: Icon(Icons.grid_view),
-									title: Text("Overview"),
-									selected: currentView == OverviewView,
-									onTap: () => setCurrent(OverviewView.new)
+									leading: Icon(navItem.icon),
+									title: Text(navItem.label),
+									selected: currentItem == i,
+									onTap: () => {
+										if (i != currentItem) itemSelected(i)
+									}
 								),
-								ListTile(
-									leading: Icon(Icons.data_array),
-									title: Text("Data"),
-									selected: currentView == DataView,
-									onTap: () => setCurrent(DataView.new)
-								),
-								ListTile(
-									leading: Icon(Icons.flag),
-									title: Text("Gates"),
-									selected: currentView == GateView,
-									onTap: () => setCurrent(GateView.new)
-								),
-								ListTile(
-									leading: Icon(Icons.monitor_heart),
-									title: Text("Exam gate"),
-									selected: currentView == ExamGateView,
-									onTap: () => setCurrent(ExamGateView.new)
-								),
-								/* ListTile(
-									leading: Icon(MyIcons.equipe),
-									title: Text("Equipe"),
-									onTap: () {},
-								), */
-								ListTile(
-									leading: Icon(Icons.settings),
-									title: Text("Settings"),
-									selected: currentView == SettingsView,
-									onTap: () => setCurrent(SettingsView.new)
-								),
-								/* ListTile(
-									leading: Icon(Icons.admin_panel_settings),
-									title: Text("Administration"),
-									onTap: () {},
-								), */
 							],
 						),
 					),
@@ -106,55 +59,23 @@ class DashboardMenu extends StatelessWidget {
 							child: TextClock()
 						),
 					),
-					Divider(),
+					const Divider(),
 					ListTile(
 						/* leading: CircleAvatar(
 							child: Icon(Icons.person),
 						), */
-						title: Text("Username"),
-						subtitle: Text("Something"),
+						title: const Text("Username"),
+						subtitle: const Text("Something"),
 						trailing: IconButton(
 							splashRadius: splashRadius,
-							icon: Icon(Icons.logout),
+							icon: const Icon(Icons.logout),
 							onPressed: () {
 								Navigator.of(context).pop();
 							},
 						),
 					),
-					Divider(),
-					Builder(
-						builder: (context) {
-
-							ServerConnection conn = context.watch();
-							PeerStates peers = context.watch();
-							var peerCount = peers.peers
-								.where((p) => p.connected)
-								.where((p) => p != conn.peer)
-								.length;
-
-							return ListTile(
-								leading: Icon(
-									switch ((conn.connected, conn.state?.isSync)) {
-										(false, _) => Icons.cloud_off,
-										(true, true) => Icons.cloud_done,
-										_ => Icons.cloud,
-									},
-									color: switch ((conn.connected, conn.state?.isSync)) {
-										(false, _) => Colors.red,
-										(true, true) => Colors.green,
-										_ => Colors.amber,
-									}
-								),
-								title: Text(
-									conn.connected ? "Connected" : "Disconnected",
-									style: TextStyle(
-										color: Colors.grey
-									)
-								),
-								subtitle: Text("$peerCount peer(s)"),
-							);
-						},
-					)
+					const Divider(),
+					const ConnectionIndicator2()
 				],
 			)
 		);

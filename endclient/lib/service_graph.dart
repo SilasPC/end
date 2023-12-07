@@ -188,6 +188,7 @@ class ServiceGraph {
 	final Map<Type, dynamic> _services = {};
 
 	Service<T> get<T extends Object>() => _services[T];
+	T read<T extends Object>() => _services[T].value!;
 
 	void addListenable<T extends Listenable>(FutureOr<T> service) async {
 		var node = _services[T] = ListenableService<T>(this, service is T ? service : null);

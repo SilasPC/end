@@ -23,6 +23,14 @@ import 'package:flutter/material.dart';
 		),
 		switchTheme: SwitchThemeData(
 			splashRadius: splashRadius,
+			thumbColor: MaterialStateProperty.all(colorScheme.inversePrimary),
+			trackOutlineColor: MaterialStateProperty.all(colorScheme.primary),
+			trackColor: MaterialStateProperty.resolveWith((set) {
+				if (set.contains(MaterialState.selected)) {
+					return colorScheme.primary;
+				}
+				return colorScheme.background;
+			})
 		),
 		elevatedButtonTheme: ElevatedButtonThemeData(
 			/* style: ElevatedButton.styleFrom(
@@ -50,7 +58,14 @@ import 'package:flutter/material.dart';
 		),
 		switchTheme: SwitchThemeData(
 			splashRadius: splashRadius,
-			// UI: switch thumb color
+			thumbColor: MaterialStateProperty.all(colorScheme.inversePrimary),
+			trackOutlineColor: MaterialStateProperty.all(colorScheme.primary),
+			trackColor: MaterialStateProperty.resolveWith((set) {
+				if (set.contains(MaterialState.selected)) {
+					return colorScheme.primary;
+				}
+				return black27;
+			})
 		),
 		elevatedButtonTheme: ElevatedButtonThemeData(
 			style: ElevatedButton.styleFrom(

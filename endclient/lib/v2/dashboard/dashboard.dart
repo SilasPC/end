@@ -1,11 +1,18 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
+import 'package:common/EnduranceEvent.dart';
+import 'package:common/util/unix.dart';
 import 'package:esys_client/consts.dart';
+import 'package:esys_client/util/text_clock.dart';
+import 'package:esys_client/v2/dashboard/arrival_view.dart';
+import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
 import 'package:esys_client/v2/dashboard/data_view.dart';
-import 'package:esys_client/v2/dashboard/gate.dart';
+import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
+import 'package:esys_client/v2/dashboard/helpers.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:esys_client/v2/dashboard/side_menu.dart';
+import 'package:esys_client/v2/dashboard/timing_list_gate_view.dart';
+import 'package:esys_client/v2/dashboard/vet_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,16 +28,56 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
 
-	Widget view = OverviewView();
+	static List<NavItem> navItems = [
+		NavItem(
+			icon: Icons.grid_view,
+			label: "Overview",
+			view: OverviewView(),
+		),
+		const NavItem(
+			icon: Icons.data_array,
+			label: "Data",
+			view: DataView(),
+		),
+		/* NavItem(
+			icon: Icons.flag,
+			label: "Depature gate",
+			view: TimingListGateView(
+				predicate: (eq) => eq.status.isRESTING,
+			),
+		), */
+		const NavItem(
+			icon: Icons.flag,
+			label: "Arrival gate",
+			view: ArrivalView(),
+		),
+		const NavItem(
+			icon: Icons.flag,
+			label: "Vet gate",
+			view: VetView(),
+		),
+		const NavItem(
+			icon: Icons.monitor_heart,
+			label: "Exam gate",
+			view: ExamGateView(),
+		),
+		const NavItem(
+			icon: Icons.settings,
+			label: "Settings",
+			view: SettingsView()
+		),
+	];
+
+	int currentView = 0;
 
 	@override
 	Widget build(BuildContext context) {
 		var size = MediaQuery.sizeOf(context);
 		bool narrow = size.width < 800;
-		return Provider.value(
+		return /* Provider.value(
 			value: narrow ? DashLayout.narrow : DashLayout.wide,
-			child: narrow ? narrowLayout() : wideLayout(),
-		);
+			child:  */narrow ? narrowLayout() : wideLayout()/* ,
+		) */;
 	}
 	
 	Widget wideLayout() =>
@@ -38,73 +85,67 @@ class _DashboardState extends State<Dashboard> {
 			child: Row(
 				children: [
 					DashboardMenu(
-						currentView: view.runtimeType,
-						viewSelected: (newView) => setState(() {
-							view = newView;
-						}),
+						navItems: navItems,
+						itemSelected: (newView) => setState(() { currentView = newView; }),
+						currentItem: currentView,
 					),
 					Expanded(
 						child: Container(
 							decoration: backgroundGradient,
-							child: view
+							child: navItems[currentView].view
 						)
 					),
 				],
 			)
 		);
-
-	int _cur = 0;
 		
 	Widget narrowLayout() {
 		var color = BottomNavigationBarTheme.of(context).backgroundColor;
 		return Scaffold(
 			bottomNavigationBar: BottomNavigationBar(
-				currentIndex: _cur,
+				currentIndex: currentView,
 				items: [
+					for (var navItem in navItems)
 					BottomNavigationBarItem(
-						icon: Icon(Icons.grid_view),
-						label: "Overview",
+						icon: Icon(navItem.icon),
+						label: navItem.label,
 						backgroundColor: color,
 					),
-					BottomNavigationBarItem(
-						icon: Icon(Icons.data_array),
-						label: "Data",
-						backgroundColor: color,
-					),
-					BottomNavigationBarItem(
-						icon: Icon(Icons.flag),
-						label: "Gates",
-						backgroundColor: color,
-					),
-					BottomNavigationBarItem(
-						icon: Icon(Icons.settings),
-						label: "Settings",
-						backgroundColor: color,
-					)
 				],
-				onTap: (index) {
-					setState(() {
-						_cur = index;
-						view = switch (index) {
-							0 => OverviewView(),
-							1 => DataView(),
-							2 => GateView(),
-							3 => SettingsView(),
-							_ => view
-						};
-					});
-				},
+				onTap: (index) => setState(() { currentView = index; })
 			),
-			body: Container(
-				decoration: backgroundGradient,
-				child: view,
+			body: Column(
+				children: [
+					Container(
+						padding: const EdgeInsets.symmetric(
+							horizontal: 12
+						),
+						height: 65,
+						color: Theme.of(context).canvasColor,
+						child: Row(
+							children: [
+								FittedBox(
+									// UI: too small
+									fit: BoxFit.fitHeight,
+									child: TextClock(),
+								),
+								const Spacer(),
+								// UI: user icon
+								const ConnectionIndicator2(
+									iconOnly: true,
+								)
+							],
+						),
+					),
+					Expanded(
+						child: Container(
+							decoration: backgroundGradient,
+							child: navItems[currentView].view,
+						),
+					)
+				]
 			)
 		);
 	}
 
-}
-
-enum DashLayout {
-	wide,
-	narrow
 }

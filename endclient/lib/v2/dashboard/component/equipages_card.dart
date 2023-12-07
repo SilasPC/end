@@ -74,7 +74,7 @@ class _EquipagesCardState extends State<EquipagesCard> {
 			clipBehavior: Clip.hardEdge,
 			child: Column(
 				children: [
-					...cardHeader("Equipages"),
+					...cardHeader("Equipages"), // UI: add filter on/off button
 					if (widget.filter == null)
 					ChipStrip(
 						chips: [
@@ -151,22 +151,46 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 			PopupMenuItem(
 				enabled: eq.dsqReason == null,
 				value: "disqualify",
-				child: const Text("Disqualify..."),
+				child: const Row(
+					children: [
+						Icon(Icons.block),
+						SizedBox(width: 10,),
+						Text("Disqualify..."),
+					]
+				),
 			),
 			PopupMenuItem(
 				enabled: eq.status == EquipageStatus.RESTING,
 				value: "retire",
-				child: const Text("Retire")
+				child: const Row(
+					children: [
+						Icon(Icons.bed),
+						SizedBox(width: 10,),
+						Text("Retire"),
+					]
+				),
 			),
 			PopupMenuItem(
 				enabled: eq.status == EquipageStatus.WAITING,
 				value: "start-clearance",
-				child: const Text("Clear for start"),
+				child: const Row(
+					children: [
+						Icon(Icons.check),
+						SizedBox(width: 10,),
+						Text("Clear for start"),
+					]
+				),
 			),
 			PopupMenuItem(
 				enabled: eq.status == EquipageStatus.WAITING,
 				value: "change-category",
-				child: const Text("Change category..."),
+				child: const Row(
+					children: [
+						Icon(Icons.edit),
+						SizedBox(width: 10,),
+						Text("Change category..."),
+					]
+				),
 			),
 		],
 	);

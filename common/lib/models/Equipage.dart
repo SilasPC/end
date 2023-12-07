@@ -16,19 +16,23 @@ enum EquipageStatus {
 	RESTING,
 	RETIRED;
 
+	bool get isWAITING => this == WAITING;
+	bool get isRIDING => this == RIDING;
+	bool get isVET => this == VET;
+	bool get isDNF => this == DNF;
+	bool get isFINISHED => this == FINISHED;
+	bool get isCOOLING => this == COOLING;
+	bool get isRESTING => this == RESTING;
+	bool get isRETIRED => this == RETIRED;
+
 	/// indicates equipage failed to complete competition
-	bool get isOut =>
-		this == EquipageStatus.DNF || this == EquipageStatus.RETIRED;
+	bool get isOut => isDNF || isRETIRED;
 
 	/// indicates equipage successfully completed competition
-	bool get isFinished =>
-		this == EquipageStatus.FINISHED;
+	bool get isFinished => isFINISHED;
 
 	/// indicates equipage no longer competing
-	bool get isEnded =>
-		this == EquipageStatus.DNF ||
-		this == EquipageStatus.FINISHED ||
-		this == EquipageStatus.RETIRED;
+	bool get isEnded => isDNF || isFINISHED || isRETIRED;
 
 	String toJson() => name;
 	factory EquipageStatus.fromJson(dynamic status) =>

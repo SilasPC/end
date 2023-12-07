@@ -148,7 +148,7 @@ class _SettingsCardState extends State<SettingsCard> {
 								}),
 							),
 						),
-						ListTile(
+						/* ListTile(
 							leading: const Icon(Icons.zoom_in),
 							title: const Text("Large UI"),
 							trailing: Switch(
@@ -158,7 +158,7 @@ class _SettingsCardState extends State<SettingsCard> {
 									set.save();
 								}),
 							),
-						),
+						), */
 						ListTile(
 							leading: const Icon(Icons.dark_mode),
 							title: const Text("Dark UI"),

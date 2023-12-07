@@ -47,9 +47,9 @@ void main() {
 
 		await tester.pump();
 
-		expect(g.get<A>().value, isA<A>());
-		expect(g.get<B>().value, isA<B>());
-		expect(g.get<C>().value, isA<C>());
+		expect(g.read<A>(), isA<A>());
+		expect(g.read<B>(), isA<B>());
+		expect(g.read<C>(), isA<C>());
 
 		await tester.pumpWidget(
 			MaterialApp(
@@ -71,15 +71,15 @@ void main() {
 
 		expect(find.text("0/0 0 0"), findsOneWidget);
 
-		g.get<B>().value!.inc();
+		g.read<B>().inc();
 		await tester.pumpAndSettle();
 		expect(find.text("0/0 1 0"), findsOneWidget);
 
-		g.get<A>().value!.inc();
+		g.read<A>().inc();
 		await tester.pumpAndSettle();
 		expect(find.text("1/0 1 1"), findsOneWidget);
 		
-		g.get<A>().value!.inc();
+		g.read<A>().inc();
 		await tester.pumpAndSettle();
 		expect(find.text("4/0 1 2"), findsOneWidget);
 
@@ -87,8 +87,8 @@ void main() {
 		await tester.pumpAndSettle();
 		expect(find.text("0/1 0 0"), findsOneWidget);
 
-		g.get<A>().value!.inc();
-		g.get<A>().value!.inc();
+		g.read<A>().inc();
+		g.read<A>().inc();
 		await tester.pumpAndSettle();
 		expect(find.text("4/1 0 2"), findsOneWidget);
 

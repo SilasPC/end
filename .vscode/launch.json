@@ -2,6 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "lenovo",
+			"cwd": "endclient",
+			"request": "launch",
+			"type": "dart",
+			"args": ["-d", "len"]
+		},
+		{
 			"name": "windows",
 			"cwd": "endclient",
 			"request": "launch",

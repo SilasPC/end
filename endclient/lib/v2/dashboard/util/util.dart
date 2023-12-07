@@ -17,6 +17,32 @@ List<Widget> cardHeader(String label) => [
 	const Divider(),
 ];
 
+List<Widget> cardHeaderWithTrailing(String label, List<Widget> trailing) => [
+	Stack(
+		clipBehavior: Clip.none,
+		alignment: Alignment.center,
+		children: [
+			Container(
+				padding: const EdgeInsets.all(8),
+				child: Text(
+					label,
+					overflow: TextOverflow.ellipsis,
+					maxLines: 1,
+					textAlign: TextAlign.center,
+					style: const TextStyle(
+						fontSize: 20
+					)
+				),
+			),
+			Row(
+				mainAxisAlignment: MainAxisAlignment.end,
+				children: trailing,
+			),
+		],
+	),
+	const Divider()
+];
+
 Widget coloredCardheader(BuildContext context, String label) {
 	var shape = CardTheme.of(context).shape;
 	BorderRadius? borderRadius;
