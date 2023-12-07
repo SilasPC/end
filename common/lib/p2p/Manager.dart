@@ -197,12 +197,11 @@ class PeerManager<M extends IJSON> {
 	void _initDatabase(AsyncProducer<EventDatabase<M>> createDb) {
 		_mutex.protect(() async {
 			_db = await createDb();
-			var data = await _db.loadData(this.peerId);
-			_em.add(data.a.evs, data.a.dels);
-			if (data.b != null) {
-				// TODO: _peerId = data.b!.peerId;
-				_resetCount = data.b!.resetCount;
-				_sessionId = data.b!.sessionId;
+			var (syncMsg, preSyncMsg) = await _db.loadData(this.peerId);
+			_em.add(syncMsg.evs, syncMsg.dels);
+			if (preSyncMsg case PreSyncMsg preSyncMsg) {
+				_resetCount = preSyncMsg.resetCount;
+				_sessionId = preSyncMsg.sessionId;
 				// print("$peerId ses = $_sessionId");
 				_onSessionUpdate.add(_sessionId);
 			}
@@ -354,9 +353,12 @@ class PeerManager<M extends IJSON> {
 			// disconnect ?
 		}
 		if (p._lastKnownState == null) {
-			var state = await _db.loadPeer(ps.peerId);
-			p._lastKnownState = state?.a;
-			p._lastLocal = state?.b ?? p._lastLocal;
+			if (await _db.loadPeer(ps.peerId) case (var preSyncMsg, var syncInfo)) {
+				p._lastKnownState = preSyncMsg;
+				p._lastLocal = syncInfo;
+			} else {
+				p._lastKnownState = null;
+			}
 		}
 		var last = p._lastKnownState ?? ps;
 		if (last.peerId != ps.peerId) {
@@ -511,13 +513,13 @@ class LocalPeer extends Peer {
 	final bool _outgoing;
 
 	LocalPeer._(this._outgoing) {}
-	static Tuple<LocalPeer, LocalPeer> pair() {
-		var pair = Tuple(
+	static (LocalPeer, LocalPeer) pair() {
+		var pair = (
 			LocalPeer._(true),
 			LocalPeer._(false),
 		);
-		pair.a._other = pair.b;
-		pair.b._other = pair.a;
+		pair.$1._other = pair.$2;
+		pair.$2._other = pair.$1;
 		return pair;
 	}
 

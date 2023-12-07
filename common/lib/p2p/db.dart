@@ -6,8 +6,8 @@ import '../util.dart';
 abstract class EventDatabase<M extends IJSON> {
 	Future<void> add(SyncMsg<M> sr);
 	Future<void> clear({required bool keepPeers});
-	Future<Tuple<SyncMsg<M>, PreSyncMsg?>> loadData(String peerId);
-	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId);
+	Future<(SyncMsg<M>, PreSyncMsg?)> loadData(String peerId);
+	Future<(PreSyncMsg, SyncInfo)?> loadPeer(String peerId);
 	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo);
 }
 
@@ -23,20 +23,20 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
 	@override
 	Future<void> clear({required bool keepPeers}) async {}
 	@override
-	Future<Tuple<SyncMsg<M>, PreSyncMsg?>> loadData(String peerId)
+	Future<(SyncMsg<M>, PreSyncMsg?)> loadData(String peerId)
 		=> Future.value(
-				Tuple(
-					SyncMsg([], []),
+				(
+					SyncMsg<M>([], []),
 					PreSyncMsg(
 						peerId,
 						sessionId,
 						0
 					),
 				)
-		);
+			);
 
 	@override
-	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async => null;
+	Future<(PreSyncMsg, SyncInfo)?> loadPeer(String peerId) async => null;
 
 	@override
 	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) async {}

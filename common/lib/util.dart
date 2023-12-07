@@ -1,7 +1,6 @@
 
 import 'dart:async';
 export 'util/unix.dart';
-export 'util/tuple.dart';
 export 'util/json.dart';
 export 'util/list.dart';
 

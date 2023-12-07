@@ -81,14 +81,14 @@ void main() {
 		expect(s.model.result, "1");
 		expect(c.model.result, "");
 
-		await c.addPeer(pair.a);
-		await s.addPeer(pair.b);
+		await c.addPeer(pair.$1);
+		await s.addPeer(pair.$2);
 		await pumpEventQueue();
 
 		expect(c.sessionId, s.sessionId);
 		expect(c.sessionId, 1);
-		expect(pair.a.state.isSync, true);
-		expect(pair.b.state.isSync, true);
+		expect(pair.$1.state.isSync, true);
+		expect(pair.$2.state.isSync, true);
 
 		expect(s.model.result, "1");
 		expect(c.model.result, "1");
@@ -113,10 +113,10 @@ void main() {
 		var p2 = manager("p2", 1);
 		var p3 = manager("p3", 1);
 		
-		await p2.addPeer(con1.a);
-		await p1.addPeer(con1.b);
-		await p3.addPeer(con2.a);
-		await p2.addPeer(con2.b);
+		await p2.addPeer(con1.$1);
+		await p1.addPeer(con1.$2);
+		await p3.addPeer(con2.$1);
+		await p2.addPeer(con2.$2);
 		await pumpEventQueue();
 
 		await p1.add([StrEv.dig(1)]);
@@ -145,8 +145,8 @@ void main() {
 		var s = manager("server", 1);
 		var c = manager("client", 1);
 
-		await c.addPeer(pair.a);
-		await s.addPeer(pair.b);
+		await c.addPeer(pair.$1);
+		await s.addPeer(pair.$2);
 
 		await s.add([StrEv.dig(1)]);
 		await pumpEventQueue();
@@ -166,15 +166,15 @@ void main() {
 		var s = manager("server", 1);
 		var c = manager("client", 2);
 
-		await c.addPeer(pair.a);
-		await s.addPeer(pair.b);
+		await c.addPeer(pair.$1);
+		await s.addPeer(pair.$2);
 
 		await s.add([StrEv.dig(1)]);
 		await pumpEventQueue();
 		expect(s.model.result, "1");
 		expect(c.model.result, "");
 
-		var yielded = await c.yieldTo(pair.a);
+		var yielded = await c.yieldTo(pair.$1);
 		expect(yielded, true);
 		expect(c.sessionId, s.sessionId);
 

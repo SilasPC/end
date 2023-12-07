@@ -6,7 +6,6 @@ import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
-import 'package:common/util.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -42,12 +41,12 @@ class SqliteDatabase extends EventDatabase<Model> {
 	}
 
 	@override
-	Future<Tuple<PreSyncMsg, SyncInfo>?> loadPeer(String peerId) async {
+	Future<(PreSyncMsg, SyncInfo)?> loadPeer(String peerId) async {
 		var peer = await _db.query("peers", where: "peerId = ?", whereArgs: [peerId]);
 		if (peer.isEmpty) return null;
 		var psm = PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...peer.first}); // IGNORED: TODO: hack
 		var si = SyncInfo.fromJson(peer.first);
-		return Tuple(psm, si);
+		return (psm, si);
 	}
 
 	@override
@@ -63,7 +62,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 	}
 
 	@override
-	Future<Tuple<SyncMsg<Model>, PreSyncMsg?>> loadData(String peerId) async {
+	Future<(SyncMsg<Model>, PreSyncMsg?)> loadData(String peerId) async {
 		var data = await (
 			_db.batch()
 				..query("events", columns: ["json"])
@@ -83,7 +82,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			.map((d) => PreSyncMsg.fromJson({"protocolVersion": SyncProtocol.VERSION, ...d})) // IGNORED: TODO: hack
 			.firstOrNull;
 		
-		return Tuple(SyncMsg(evs, dels), self);
+		return (SyncMsg(evs, dels), self);
 	}
 
 	static Future<Database> _createDB() async {

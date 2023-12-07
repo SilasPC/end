@@ -19,8 +19,8 @@ class OrderedSet<T> extends ReadOnlyOrderedSet<T> {
 	bool add(T t) {
 		if (!_els.add(t)) return false;
 		_byOrd
-			..add(Tuple(t, _byIns.length))
-			..sort((t0, t1) => _cmp(t0.a,t1.a));
+			..add((t, _byIns.length))
+			..sort((t0, t1) => _cmp(t0.$1,t1.$1));
 		_byIns.add(t);
 		return true;
 	}
@@ -36,7 +36,7 @@ class ReadOnlyOrderedSet<T> {
 	final Comparator<T> _cmp;
 
 	HashSet<T> _els = HashSet();
-	List<Tuple<T,int>> _byOrd = [];
+	List<(T,int)> _byOrd = [];
 	List<T> _byIns = [];
 
 	ReadOnlyOrderedSet():
@@ -51,7 +51,7 @@ class ReadOnlyOrderedSet<T> {
 	int? findOrdIndex(T t) {
 		int i = binarySearch((t0) => _cmp(t0, t) >= 0);
 		if (i == -1) return null;
-		if (_cmp(_byOrd[i].a,t) == 0) return i;
+		if (_cmp(_byOrd[i].$1,t) == 0) return i;
 		return null;
 	}
 
@@ -62,22 +62,22 @@ class ReadOnlyOrderedSet<T> {
 	bool get isNotEmpty => _els.isNotEmpty;
 	int get length => _els.length;
 
-	int? get lastInsertionIndex => _byOrd.isEmpty ? null : _byOrd.last.b;
+	int? get lastInsertionIndex => _byOrd.isEmpty ? null : _byOrd.last.$2;
 
-	Iterable<T> get iterator => _byOrd.map((e) => e.a);
+	Iterable<T> get iterator => _byOrd.map((e) => e.$1);
 	Iterable<T> get iteratorInsertion => _byIns;
 
-	T get last => _byOrd.last.a;
-	T get first => _byOrd.first.a;
+	T get last => _byOrd.last.$1;
+	T get first => _byOrd.first.$1;
 
-	int lastIndexWhere(Predicate<T> p) =>_byOrd.lastIndexWhere((e) => p(e.a));
-	int indexWhere(Predicate<T> p) =>_byOrd.indexWhere((e) => p(e.a));
+	int lastIndexWhere(Predicate<T> p) =>_byOrd.lastIndexWhere((e) => p(e.$1));
+	int indexWhere(Predicate<T> p) =>_byOrd.indexWhere((e) => p(e.$1));
 
-	/** See util.binarySearch */
-	int binarySearch(Predicate<T> p) => util.binarySearch(_byOrd, (e) => p(e.a));
-	/** See util.binarySearchLast */
-	int binarySearchLast(Predicate<T> p) => util.binarySearchLast(_byOrd, (e) => p(e.a));
+	/** See util.$2inarySearch */
+	int binarySearch(Predicate<T> p) => util.binarySearch(_byOrd, (e) => p(e.$1));
+	/** See util.$2inarySearchLast */
+	int binarySearchLast(Predicate<T> p) => util.binarySearchLast(_byOrd, (e) => p(e.$1));
 
-	T operator[] (int idx) => _byOrd[idx].a;
+	T operator[] (int idx) => _byOrd[idx].$1;
 
 }
