@@ -106,6 +106,7 @@ class _SettingsCardState extends State<SettingsView> {
 						child: ListView(
 							children: [
 								...cardHeader("Settings"),
+								listGroupHeader("General"),
 								ListTile(
 									leading: const Icon(Icons.notifications),
 									title: const Text("Enable notifications"),
@@ -167,11 +168,6 @@ class _SettingsCardState extends State<SettingsView> {
 									onTap: () => setState((){
 										set = set.defaults()..save();
 									}),
-								),
-								ListTile(
-									leading: const Icon(Icons.sync),
-									title: const Text("Resync"),
-									onTap: () => model.resetModel(),
 								),
 								ListTile(
 									leading: const Icon(Icons.data_array),
@@ -258,6 +254,11 @@ class _SettingsCardState extends State<SettingsView> {
 									leading: const Icon(Icons.download),
 									title: const Text("Load model..."),
 									onTap: loadModel,
+								),
+								ListTile(
+									leading: const Icon(Icons.sync),
+									title: const Text("Resync"),
+									onTap: () => model.resetModel(),
 								),
 								listGroupHeader("Security"),
 								ListTile(

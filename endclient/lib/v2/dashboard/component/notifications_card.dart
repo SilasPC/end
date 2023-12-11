@@ -19,7 +19,9 @@ class NotificationsCard extends StatelessWidget {
 			child: Column(
 				children: [
 					...cardHeader("Notifications"),
-					Container(
+					if (model.model.errors.isEmpty)
+					emptyListText("No notifications"),
+					/* Container(
 						decoration: BoxDecoration(
 							border: Border.all(
 								color: Colors.green,
@@ -36,7 +38,7 @@ class NotificationsCard extends StatelessWidget {
 								onPressed: () {},
 							),
 						),
-					),
+					), */
 					for (var err in model.model.errors)
 					ListTile(
 						title: Text("Warning"),

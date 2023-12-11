@@ -1,20 +1,17 @@
 
 
-import 'package:common/EnduranceEvent.dart';
-import 'package:common/util/unix.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:esys_client/v2/dashboard/arrival_view.dart';
 import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
 import 'package:esys_client/v2/dashboard/data_view.dart';
+import 'package:esys_client/v2/dashboard/departure_view.dart';
 import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/helpers.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:esys_client/v2/dashboard/side_menu.dart';
-import 'package:esys_client/v2/dashboard/timing_list_gate_view.dart';
 import 'package:esys_client/v2/dashboard/vet_view.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'settings_view.dart';
 
@@ -39,13 +36,11 @@ class _DashboardState extends State<Dashboard> {
 			label: "Data",
 			view: DataView(),
 		),
-		/* NavItem(
+		const NavItem(
 			icon: Icons.flag,
 			label: "Depature gate",
-			view: TimingListGateView(
-				predicate: (eq) => eq.status.isRESTING,
-			),
-		), */
+			view: DepartureView(),
+		),
 		const NavItem(
 			icon: Icons.flag,
 			label: "Arrival gate",
@@ -147,7 +142,7 @@ class _DashboardState extends State<Dashboard> {
 					),
 					const Spacer(),
 					IconButton(
-						icon: const Icon(Icons.lock_open),
+						icon: const Icon(Icons.logout),
 						onPressed: () {
 							Navigator.of(context).pop();
 						},

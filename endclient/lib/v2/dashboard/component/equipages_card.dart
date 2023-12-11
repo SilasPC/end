@@ -10,11 +10,13 @@ import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
+import 'package:esys_client/v2/equipage_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EquipagesCard extends StatefulWidget {
 
+	final Predicate<Equipage>? forcedFilter;
 	final Predicate<Equipage>? filter;
 	final EquipageTile Function(BuildContext, EquipagesCard, Equipage, Color?) builder;
 	final void Function(Equipage)? onTap;
@@ -25,6 +27,7 @@ class EquipagesCard extends StatefulWidget {
 		this.builder = EquipagesCard.withPlainTiles,
 		this.onTap,
 		this.filter,
+		this.forcedFilter,
 		this.emptyLabel = "None found",
 	});
 
@@ -67,7 +70,11 @@ class _EquipagesCardState extends State<EquipagesCard> {
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
 		var eqs = model.model.equipages.values;
-		if (widget.filter case Predicate<Equipage> filter when filterEnabled) {
+		var useFilter = filterEnabled/*  || widget.forceFilter */;
+		if (widget.forcedFilter case Predicate<Equipage> filter) {
+			eqs = eqs.where(filter);
+		}
+		if (widget.filter case Predicate<Equipage> filter when useFilter) {
 			eqs = eqs.where(filter);
 		}
 		return Card(
@@ -78,8 +85,8 @@ class _EquipagesCardState extends State<EquipagesCard> {
 					...cardHeaderWithTrailing("Equipages", [
 						if (widget.filter != null)
 						IconButton(
-							icon: Icon(filterEnabled ? Icons.filter_list : Icons.filter_list_off),
-							onPressed: () => setState(() => filterEnabled ^= true),
+							icon: Icon(useFilter ? Icons.filter_list : Icons.filter_list_off),
+							onPressed: /* widget.forceFilter ? null : */ () => setState(() => filterEnabled ^= true),
 						)
 					]),
 					if (widget.filter == null)
@@ -141,6 +148,12 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 						RetireEvent(author, nowUNIX(), eq.eid)
 					]);
 					break;
+				case "show-info":
+					Navigator.of(context)
+						.push(MaterialPageRoute(
+							builder: (context) => EquipagePage(eq),
+						));
+					break;
 				case "change-category":
 					showChoicesModal(
 						context,
@@ -196,6 +209,16 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 						Icon(Icons.edit),
 						SizedBox(width: 10,),
 						Text("Change category..."),
+					]
+				),
+			),
+			PopupMenuItem(
+				value: "show-info",
+				child: const Row(
+					children: [
+						Icon(Icons.info_outline),
+						SizedBox(width: 10,),
+						Text("Show info..."),
 					]
 				),
 			),

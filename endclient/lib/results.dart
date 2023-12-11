@@ -1,5 +1,6 @@
 
 import 'package:common/models/Category.dart';
+import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
@@ -28,26 +29,41 @@ class ResultsPage extends StatelessWidget {
 						dense: true,
 						title: Text("Finished ($fin/${ranks.length})"),
 					),
-               for (var entry in ranks.take(fin))
+               for (var MapEntry(key:eq, value:rank) in ranks.take(fin))
                EquipageTile(
-                  entry.key,
+                  eq,
                   leading: CircleAvatar(
                      backgroundColor: secondaryColor,
                      child: Text(
-								entry.value.toString(),
+								rank.toString(),
 								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
 							),
                   ),
 						noStatus: true,
 						trailing: [
-							// UI: better container
-							CircleAvatar(
-								backgroundColor: primaryColor,
-								child: Text(
-									"${entry.key.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h",
-									style: const TextStyle(color: Colors.white),
-								),
-							),
+							Column(
+								mainAxisSize: MainAxisSize.min,
+								crossAxisAlignment: CrossAxisAlignment.end,
+								children: [
+									if (eq.category.idealSpeed != null)
+									Text(
+										"${maybe(eq.idealTimeError(), unixHMS) ?? "-"} error",
+										style: const TextStyle(
+											fontWeight: FontWeight.bold,
+										)
+									)
+									else
+									Text(
+										"${eq.averageSpeed()?.toStringAsFixed(1) ?? "-"} km/h",
+										style: const TextStyle(
+											fontWeight: FontWeight.bold,
+										)
+									),
+									Text(
+										"${maybe(eq.totalRideTime(), unixHMS) ?? "-"} ridetime",
+									),
+								],
+							)
 						],
                ),
 					if (ranks.length > fin)

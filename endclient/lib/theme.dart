@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 
 (ThemeData, ThemeData) themeData() {
 
+	var swatch = _createMaterialColor(primaryColor);
+
 	ColorScheme colorScheme = ColorScheme.fromSwatch(
-		primarySwatch: _createMaterialColor(primaryColor),
+		primarySwatch: swatch,
+		backgroundColor: swatch.shade50,
 	).copyWith(
 		secondary: secondaryColor,
 	);

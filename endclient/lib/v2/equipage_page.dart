@@ -1,6 +1,7 @@
 
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/equipage/equipage.dart' as old;
 import 'package:esys_client/v2/dashboard/exam_gate/loop_card.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
@@ -10,11 +11,8 @@ import 'package:common/consts.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
-import '../secretary/category.dart';
 import '../services/settings.dart';
-import '../util/chip_strip.dart';
 import '../util/timer.dart';
-import '../util/util.dart';
 
 import '../local_model/LocalModel.dart';
 
@@ -74,6 +72,8 @@ class EquipagePageState extends State<EquipagePage> {
 
 	@override
 	Widget build(BuildContext context) {
+		return old.EquipagePage(widget.equipage);
+		// UI: new equipage page
 		context.watch<LocalModel>();
 		checkStatusUpdate();
 		return Container(

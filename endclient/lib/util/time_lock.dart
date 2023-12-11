@@ -15,7 +15,7 @@ class TimeLock extends StatelessWidget {
 	Widget build(BuildContext context) =>
 		switch (time) {
 			null => IconButton(
-				icon: const Icon(Icons.timer, color: Colors.green),
+				icon: Icon(Icons.timer, color: Theme.of(context).primaryColor),
 				onPressed: () => onChanged(DateTime.now()),
 			),
 			var time => GestureDetector(

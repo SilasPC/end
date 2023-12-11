@@ -32,6 +32,7 @@ class HmsPickerState extends State<HmsPicker> {
 		SizedBox(
 			height: 200,
 			child: Row(
+				mainAxisSize: MainAxisSize.min,
 				mainAxisAlignment: MainAxisAlignment.center,
 				crossAxisAlignment: CrossAxisAlignment.center,
 				children: [

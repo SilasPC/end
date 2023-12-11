@@ -8,7 +8,6 @@ import 'package:esys_client/local_model/LocalModel.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/settings_view.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +61,6 @@ class Landing extends StatelessWidget {
 					height: 200,
 					width: 400,
 					child: Card(
-						color: Colors.black26,
 						child: Column(
 							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 							children: [
@@ -86,29 +84,20 @@ class Landing extends StatelessWidget {
 											Navigator.of(context)
 												.push(MaterialPageRoute(builder: (context) => const Dashboard()));
 										}),
-										labelIconButton("SETTINGS", Icons.login, onPressed: () {
+										labelIconButton("SETTINGS", Icons.settings, onPressed: () {
 											showModal(
 												context: context,
 												builder: (context) => SettingsView(mainAxisAlignment: MainAxisAlignment.center),
 											);
 										}),
 									]
-								),/* 
-								Row(
-									mainAxisAlignment: MainAxisAlignment.spaceAround,
-									children: [
-										labelIconButton("EXAM DATA", Icons.login, onPressed: () {
-											Navigator.of(context)
-												.push(MaterialPageRoute(builder: (context) => const ExamGateView()));
-										}),
-									]
-								), */
+								),
 							]
 						)
 					),
 				),
 				SizedBox(
-					height: MediaQuery.sizeOf(context).height - 250, // UI: alternative to -250 ?
+					height: MediaQuery.sizeOf(context).height - 250, // IGNORED: UI: alternative to -250 ?
 					width: 400,
 					child: EquipagesCard(
 						builder: EquipagesCard.withChevrons,

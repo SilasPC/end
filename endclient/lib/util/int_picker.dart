@@ -19,6 +19,7 @@ class IntPickerState extends State<IntPicker> {
 
 	@override
 	Widget build(BuildContext context) => Column(
+		mainAxisSize: MainAxisSize.min,
 		children: [
 			Padding(
 				padding: const EdgeInsets.all(10),

@@ -82,7 +82,8 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 						child: EquipagesCard(
 							builder: EquipagesCard.withChevrons,
 							// UI: this will move around !!!
-							filter: (eq) => !widget.predicate(eq) && !equipages.contains(eq),
+							forcedFilter: (eq) => !equipages.contains(eq),
+							filter: (eq) => !widget.predicate(eq),
 							onTap: (eq) {
 								if (!equipages.contains(eq)) {
 									setState(() {
@@ -94,81 +95,81 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 					),
 					SizedBox(
 						width: 400,
-						child: Card(
-							child: Column(
-								children: [
-									...cardHeaderWithTrailing(
-										"Timings", [
-											/* IconButton(
-												icon: Icon(Icons.sort),
-												onPressed: refresh,
-											), */
-											SubmitButton(
-												onPressed: () {
-													int l = min(timerList.length, equipages.length);
-													var data = [
-														for (int i = 0; i < l; i++)
-														(equipages[i], timerList.times[i])
-													];
-													var submission = widget.submit(data);
-													setState(() {
-														equipages = [];
-														timerList.times.clear();
-													});
-													return submission;
-												},
-												disabled: timerList.isEmpty,
-											),
-										]
-									),
-									TimingList(
-										timers: timerList.times,
-										onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
-										onReorder: (i,j) => setState(() => reorder(i,j,equipages)),
-										onReorderRow: (i,dt) => setState(() {
-											timerList.times.removeAt(i);
-											int j = timerList.times.indexWhere((t) => dt.isBefore(t));
-											if (j == -1) j = timerList.times.length;
-											timerList.times.insert(j, dt);
-											swap(i, j, equipages);
-										}),
-										height: EquipageTile.height,
-										children: [
-											for (Equipage eq in equipages)
-											Padding(
-												key: ValueKey("EID${eq.eid}"),
-												padding: const EdgeInsets.only(right: 24),
-												child: EquipageTile(
-													eq,
-													onTap: () {
-														if (timerList.length < equipages.length) {
-															setState(() {
-																swap(equipages.indexOf(eq), timerList.length, equipages);
-																timerList.addNow();
-															});
-														}
+						child: Scaffold(
+							backgroundColor: Colors.transparent,
+							body: Card(
+								child: ListView(
+									children: [
+										...cardHeaderWithTrailing(
+											"Timings", [
+												/* IconButton(
+													icon: Icon(Icons.sort),
+													onPressed: refresh,
+												), */
+												SubmitButton(
+													onPressed: () {
+														int l = min(timerList.length, equipages.length);
+														var data = [
+															for (int i = 0; i < l; i++)
+															(equipages[i], timerList.times[i])
+														];
+														var submission = widget.submit(data);
+														setState(() {
+															equipages = [];
+															timerList.times.clear();
+														});
+														return submission;
 													},
+													disabled: timerList.isEmpty,
 												),
-											)
-										]
-									),
-								],
-							)
+											]
+										),
+										TimingList(
+											timers: timerList.times,
+											onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
+											onReorder: (i,j) => setState(() => reorder(i,j,equipages)),
+											onReorderRow: (i,dt) => setState(() {
+												timerList.times.removeAt(i);
+												int j = timerList.times.indexWhere((t) => dt.isBefore(t));
+												if (j == -1) j = timerList.times.length;
+												timerList.times.insert(j, dt);
+												swap(i, j, equipages);
+											}),
+											height: EquipageTile.height,
+											children: [
+												for (Equipage eq in equipages)
+												Padding(
+													key: ValueKey("EID${eq.eid}"),
+													padding: const EdgeInsets.only(right: 24),
+													child: EquipageTile(
+														eq,
+														onTap: () {
+															if (timerList.length < equipages.length) {
+																setState(() {
+																	swap(equipages.indexOf(eq), timerList.length, equipages);
+																	timerList.addNow();
+																});
+															}
+														},
+													),
+												)
+											]
+										),
+									],
+								)
+							),
+							floatingActionButton: FloatingActionButton.large(
+								child: const Icon(Icons.timer),
+								onPressed: () {
+									setState(() {
+										timerList.addNow();
+									});
+								},
+							),
 						),
-					)
+					),
 				],
 			);
-			/* 
-			// floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-			floatingActionButton: FloatingActionButton.large(
-				child: const Icon(Icons.timer),
-				onPressed: () {
-					setState(() {
-						timerList.addNow();
-					});
-				},
-			),
-		) */
 	}
 
 }
