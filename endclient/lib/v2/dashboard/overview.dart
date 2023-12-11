@@ -32,10 +32,10 @@ class OverviewView extends StatelessWidget {
 							Column(
 								mainAxisSize: MainAxisSize.min,
 								children: [
-									SessionSummaryCard(),
+									const SessionSummaryCard(),
 									SizedBox(
 										height: constraints.maxHeight - SessionSummaryCard.height,
-										child: EquipagesCard(builder: EquipagesCard.withAdminChoices)
+										child: const EquipagesCard(builder: EquipagesCard.withAdminChoices)
 									),
 								],
 							),

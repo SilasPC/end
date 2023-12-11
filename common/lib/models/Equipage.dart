@@ -59,9 +59,9 @@ class Equipage extends IJSON {
 			null => null
 		};
 
-	@JsonKey(ignore: true)
+	@JsonKey(includeFromJson: false, includeToJson: false)
 	late Category _category;
-	@JsonKey(ignore: true)
+	@JsonKey(includeFromJson: false, includeToJson: false)
 	Category get category => _category;
 	set category(Category cat) {
 		_category = cat;

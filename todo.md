@@ -4,6 +4,7 @@
  - ui improvements
  - test gate skipping (more)
  - coverage
+ - WakeLock throws (of course it does -_-)
 
 # Other
  - cryto security

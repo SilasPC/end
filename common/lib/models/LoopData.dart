@@ -23,7 +23,7 @@ enum LoopGate {
 @JsonSerializable(constructor: "raw")
 class LoopData extends IJSON {
 
-	@JsonKey(ignore: true)
+	@JsonKey(includeFromJson: false, includeToJson: false)
 	LoopGate? nextGate;
 
 	int? expDeparture;
@@ -32,7 +32,7 @@ class LoopData extends IJSON {
 	int? vet;
 	VetData? data;
 
-	@JsonKey(ignore: true)
+	@JsonKey(includeFromJson: false, includeToJson: false)
 	late Loop loop;
 
 	LoopData(this.loop) {

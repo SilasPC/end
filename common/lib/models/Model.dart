@@ -15,7 +15,7 @@ class Model extends IJSON {
 	String rideName = "";
 	int? equipeId;
 	Map<String, Category> categories = {};
-	@JsonKey(ignore: true)
+	@JsonKey(includeFromJson: false, includeToJson: false)
 	SplayTreeMap<int, Equipage> equipages = SplayTreeMap();
 	List<EventError> errors = [];
 
