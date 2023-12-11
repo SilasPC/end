@@ -5,14 +5,14 @@ import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/results.dart';
 import 'package:esys_client/services/settings.dart';
-import 'package:esys_client/util/MyIcons.dart';
+import 'package:esys_client/util/my_icons.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../local_model/LocalModel.dart';
+import '../local_model/local_model.dart';
 import '../equipage/equipage.dart';
 import '../equipage/equipage_tile.dart';
 import 'util.dart';

@@ -7,7 +7,7 @@ void main() {
 	group("endurance model", () {
 
 		const HOUR = 3600;
-		const FIVE_MINS = 5 * 60;
+		// const FIVE_MINS = 5 * 60;
 
 		test("time limits", () {
 

@@ -1,11 +1,10 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
@@ -45,7 +44,7 @@ class EquipagesCard extends StatefulWidget {
 		EquipageTile(
 			eq,
 			color: color,
-			trailing: [
+			trailing: const [
 				Icon(Icons.chevron_right),
 			],
 			onTap: self.onTap != null ? () => self.onTap!(eq) : null,
@@ -212,9 +211,9 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 					]
 				),
 			),
-			PopupMenuItem(
+			const PopupMenuItem(
 				value: "show-info",
-				child: const Row(
+				child: Row(
 					children: [
 						Icon(Icons.info_outline),
 						SizedBox(width: 10,),

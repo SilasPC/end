@@ -1,10 +1,9 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/v2/equipage_page.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
@@ -36,7 +35,7 @@ class Landing extends StatelessWidget {
 								builder: (context) => const Dashboard()
 							));
 						}
-						body = Center(
+						body = const Center(
 							child: SpinKitCubeGrid(
 								color: primaryColor,
 							),
@@ -64,19 +63,11 @@ class Landing extends StatelessWidget {
 						child: Column(
 							mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 							children: [
-								Container(
-									alignment: Alignment.center,
-									padding: const EdgeInsets.all(8),
-									child: Text(
+								...cardHeader(
 										inSession
 											? model.model.rideName
 											: "No active session",
-										style: TextStyle(
-											fontSize: 20
-										)
-									),
 								),
-								Divider(),
 								Row(
 									mainAxisAlignment: MainAxisAlignment.spaceAround,
 									children: [
@@ -87,7 +78,7 @@ class Landing extends StatelessWidget {
 										labelIconButton("SETTINGS", Icons.settings, onPressed: () {
 											showModal(
 												context: context,
-												builder: (context) => SettingsView(mainAxisAlignment: MainAxisAlignment.center),
+												builder: (context) => const SettingsView(mainAxisAlignment: MainAxisAlignment.center),
 											);
 										}),
 									]

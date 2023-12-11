@@ -1,13 +1,7 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'dart:convert';
-import 'package:common/EnduranceEvent.dart';
-import 'package:common/event_model/Event.dart';
-import 'package:common/models/Model.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/util/input_modals.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/v2/dashboard/component/event_tile.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
@@ -53,17 +47,7 @@ class DataView extends StatelessWidget {
 						width: 350,
 						child: Column(
 							children: [
-								Container(
-									alignment: Alignment.center,
-									padding: const EdgeInsets.all(8),
-									child: Text(
-										"Model tree",
-										style: TextStyle(
-											fontSize: 20
-										)
-									),
-								),
-								Divider(),
+								...cardHeader("Model tree"),
 								Expanded(
 									child: TreeView(
 										controller: ctrl

@@ -2,7 +2,7 @@
 import 'package:common/models/Category.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

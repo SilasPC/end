@@ -1,5 +1,5 @@
 
-part of 'LocalModel.dart';
+part of 'local_model.dart';
 
 class ServerConnection extends ChangeNotifier {
 

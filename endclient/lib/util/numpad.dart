@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
 
@@ -7,7 +6,7 @@ class Numpad extends StatefulWidget {
 	final void Function(String n) onAccept;
 	final void Function(String n)? onChange;
 	
-	Numpad({this.onChange, required this.onAccept, super.key});
+	const Numpad({this.onChange, required this.onAccept, super.key});
 
 	@override
 	State<Numpad> createState() => _NumpadState();

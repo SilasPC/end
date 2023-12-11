@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors
 
 import 'package:esys_client/consts.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +34,7 @@ import 'package:flutter/material.dart';
 				return colorScheme.background;
 			})
 		),
-		elevatedButtonTheme: ElevatedButtonThemeData(
+		elevatedButtonTheme: const ElevatedButtonThemeData(
 			/* style: ElevatedButton.styleFrom(
 				backgroundColor: colorScheme.surface,
 			) */

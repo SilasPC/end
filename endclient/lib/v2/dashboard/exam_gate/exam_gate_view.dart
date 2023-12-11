@@ -1,12 +1,10 @@
 
-import 'package:animations/animations.dart';
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/services/settings.dart';
-import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/util/int_picker.dart';
 import 'package:esys_client/util/numpad.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';

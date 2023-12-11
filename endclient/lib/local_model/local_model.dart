@@ -6,7 +6,7 @@ import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
-import 'package:esys_client/p2p/ServerPeer.dart';
+import 'package:esys_client/p2p/server_peer.dart';
 import 'package:flutter/widgets.dart';
 
 part 'states.dart';

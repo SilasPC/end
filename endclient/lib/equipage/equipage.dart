@@ -15,7 +15,7 @@ import '../util/timer.dart';
 import '../util/util.dart';
 import 'equipage_tile.dart';
 
-import '../local_model/LocalModel.dart';
+import '../local_model/local_model.dart';
 
 class EquipagePage extends StatefulWidget {
 

@@ -1,5 +1,4 @@
 
-// ignore_for_file: prefer_const_constructors
 
 import 'dart:math';
 
@@ -14,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:wakelock/wakelock.dart';
-import '../../local_model/LocalModel.dart';
+import '../../local_model/local_model.dart';
 import '../../util/timing_list.dart';
 import '../../gates/gate_controller.dart';
 

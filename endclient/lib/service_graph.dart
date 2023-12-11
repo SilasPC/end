@@ -110,7 +110,8 @@ class PipeEdge<F extends Object, T extends Object> extends Edge<F,T> {
 
 class Service<T extends Object> extends ChangeNotifier {
 
-	ServiceGraph _graph;
+	// ignore: unused_field
+	final ServiceGraph _graph;
 
 	T? _value;
 	T? get value => _value;

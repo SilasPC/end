@@ -7,7 +7,7 @@ import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'local_model/LocalModel.dart';
+import 'local_model/local_model.dart';
 import 'services/nearby.dart';
 import 'services/settings.dart';
 

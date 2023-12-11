@@ -1,9 +1,8 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:math';
 
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/v2/dashboard/component/category_card.dart';
 import 'package:esys_client/v2/dashboard/component/session_summary_card.dart';
 import 'package:esys_client/v2/dashboard/component/notifications_card.dart';
@@ -53,21 +52,21 @@ class OverviewView extends StatelessWidget {
 						Expanded(
 							child: Column(
 								children: [
-									SessionSummaryCard(),
+									const SessionSummaryCard(),
 									Expanded(
 										child: _catsGrid,
 									)
 								]
 							),
 						),
-						SizedBox(
+						const SizedBox(
 							width: eqCardWidth,
 							child: EquipagesCard(
 								builder: EquipagesCard.withAdminChoices
 							),
 						),
 						if (showNotifs)
-						SizedBox(
+						const SizedBox(
 							width: notifCardWidth,
 							child: NotificationsCard(),
 						)

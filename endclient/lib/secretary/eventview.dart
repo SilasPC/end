@@ -1,6 +1,4 @@
 
-import 'dart:convert';
-
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
@@ -10,7 +8,7 @@ import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../local_model/LocalModel.dart';
+import '../local_model/local_model.dart';
 
 class EventView extends StatefulWidget {
 	const EventView({super.key});

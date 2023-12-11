@@ -1,6 +1,4 @@
 
-import 'dart:io';
-
 import 'package:common/models/glob.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/services/settings.dart';
@@ -9,7 +7,7 @@ import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
-import '../local_model/LocalModel.dart';
+import '../local_model/local_model.dart';
 import 'category.dart';
 import 'eventview.dart';
 import 'modelview.dart';
@@ -24,7 +22,7 @@ class SecretaryPage extends StatefulWidget {
 
 class SecretaryPageState extends State<SecretaryPage> {
 
-	List<Category> _finishedCats = [];
+	final List<Category> _finishedCats = [];
 
 	Widget textCol(String title, String subtitle) =>
 		Column(

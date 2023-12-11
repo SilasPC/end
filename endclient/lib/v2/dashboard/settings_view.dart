@@ -1,5 +1,4 @@
 
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:io';
 
@@ -7,7 +6,7 @@ import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/util/unix.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
@@ -53,8 +52,7 @@ class _SettingsCardState extends State<SettingsView> {
 	Future<void> loadModel() async {
 		var m = context.read<LocalModel>();
 		var meets = await EquipeMeeting.loadRecent();
-		// ignore: use_build_context_synchronously
-		showChoicesModal(
+				showChoicesModal(
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
@@ -182,7 +180,7 @@ class _SettingsCardState extends State<SettingsView> {
 									)
 								],
 								ListTile(
-									title: Text("Protocol version"),
+									title: const Text("Protocol version"),
 									trailing: Text(SyncProtocol.VERSION.toString()),
 								),
 							],

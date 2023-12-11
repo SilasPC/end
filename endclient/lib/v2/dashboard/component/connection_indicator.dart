@@ -1,6 +1,5 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,15 +26,15 @@ class ConnectionIndicator2 extends StatelessWidget {
 			// true when peerCount == 0 => _icon(conn),
 			true =>
 				Badge.count(
+					count: peerCount,
 					child: _icon(conn),
-					count: peerCount
 				),
 			false =>
 				ListTile(
 					leading: _icon(conn),
 					title: Text(
 						conn.connected ? "Connected" : "Disconnected",
-						style: TextStyle(
+						style: const TextStyle(
 							color: Colors.grey
 						)
 					),

@@ -1,7 +1,6 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:esys_client/local_model/LocalModel.dart';
-import 'package:esys_client/util/MyIcons.dart';
+import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/util/my_icons.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +23,7 @@ class SessionSummaryCard extends StatelessWidget {
 						...cardHeader(model.model.rideName),
 						if (model.model.equipeId case int equipeId)
 						IconButton(
-							icon: Icon(MyIcons.equipe),
+							icon: const Icon(MyIcons.equipe),
 							onPressed: () {
 								var uri = Uri.parse("https://online.equipe.com/da/competitions/$equipeId");
 								launchUrl(uri);

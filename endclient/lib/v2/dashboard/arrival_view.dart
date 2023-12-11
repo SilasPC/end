@@ -1,7 +1,7 @@
 
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/util/unix.dart';
-import 'package:esys_client/local_model/LocalModel.dart';
+import 'package:esys_client/local_model/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/v2/dashboard/timing_list_gate_view.dart';
 import 'package:flutter/material.dart';
