@@ -1,12 +1,12 @@
 
 # Immediate
- - tablet ui
+ - phone ui
  - ui improvements
- - cryto security
  - test gate skipping (more)
  - coverage
 
 # Other
+ - cryto security
  - ftq/dsq ga me ...
  - confirm closing with unsaved data (WillPopScope)
  - more icons (?)
@@ -33,9 +33,14 @@
  - Event based
 	- Force unexpected events
  - Equipe
- - Security unimplemented
+ - Unimplemented
+	- Security
+	- Multiday rides
+	- Reinspection / Re-exam
  - Tablet/layout
- - Checkpoints
+ - Future
+	- Checkpoints
+	- Hardware
 
 # Production concerns
  - data integrity
@@ -46,7 +51,6 @@
 # Future
  - Tablet layout
  - Multiple gate interface choices
- - Isolate mutable model
  - Device auth
  - Security
  - Auto events

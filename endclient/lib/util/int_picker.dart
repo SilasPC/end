@@ -25,7 +25,7 @@ class IntPickerState extends State<IntPicker> {
 				padding: const EdgeInsets.all(10),
 				child: Row(
 					mainAxisAlignment: MainAxisAlignment.center,
-					children: [Text(n, style: const TextStyle(fontSize: 30),)]
+					children: [Text(n.isEmpty ? "-" : n, style: const TextStyle(fontSize: 30),)]
 				)
 			),
 			Expanded(
