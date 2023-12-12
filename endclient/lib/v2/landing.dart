@@ -20,7 +20,7 @@ class Landing extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) => 
 		FutureBuilder(
-			future: context.read<IdentityService>().isAuthorized(),
+			future: context.read<IdentityService>().isAuthorized(), // TODO: wait for localmodel.manager.ready
 			builder: (context, snapshot) {
 				Widget body;
 				switch (snapshot.data) {

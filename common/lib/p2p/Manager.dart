@@ -177,6 +177,8 @@ class PeerManager<M extends IJSON> {
 
 	late final Handle<M> handle;
 
+	late final Future<void> ready;
+
 	PeerManager(
 		this.peerId,
 		AsyncProducer<EventDatabase<M>> createDb,
@@ -191,10 +193,10 @@ class PeerManager<M extends IJSON> {
 			innerHandle
 		);
 		_em = EventModel(handle);
-		_initDatabase(createDb);
+		ready = _initDatabase(createDb);
 	}
 
-	void _initDatabase(AsyncProducer<EventDatabase<M>> createDb) {
+	Future <void> _initDatabase(AsyncProducer<EventDatabase<M>> createDb) =>
 		_mutex.protect(() async {
 			_db = await createDb();
 			var (syncMsg, preSyncMsg) = await _db.loadData(this.peerId);
@@ -208,7 +210,6 @@ class PeerManager<M extends IJSON> {
 			_lastDbSave = _em.syncState;
 			await _save();
 		});
-	}
 
 	Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
 		if (evs.isEmpty && dels.isEmpty) return;
