@@ -40,7 +40,7 @@ class _TimingListGateViewState extends State<GenericGateView> implements GateSta
 	@override
 	void dispose() {
 		super.dispose();
-		Wakelock.disable();
+		Wakelock.disable().catchError((_) {});
 	}
 	
 	@override
@@ -66,7 +66,7 @@ class _TimingListGateViewState extends State<GenericGateView> implements GateSta
 	@override
 	Widget build(BuildContext context) {
 		if (context.read<Settings>().useWakeLock) {
-			Wakelock.enable();
+			Wakelock.enable().catchError((_) {});
 		}
 		var model = context.watch<LocalModel>();
 
@@ -81,17 +81,25 @@ class _TimingListGateViewState extends State<GenericGateView> implements GateSta
 					SizedBox(
 						width: 400,
 						child: EquipagesCard(
-							builder: EquipagesCard.withChevrons,
-							// UI: this will move around !!!
-							preFilter: (eq) => !equipages.contains(eq),
-							filter: (eq) => !widget.predicate(eq),
-							onTap: (eq) {
-								if (!equipages.contains(eq)) {
-									setState(() {
-										equipages.add(eq);
-									});
-								}
-							}
+							builder: (context, self, eq, color) {
+								var inList = equipages.contains(eq);
+								return EquipageTile(
+									eq,
+									trailing: !inList ? const [
+										Icon(Icons.chevron_right)
+									] : const [
+										Icon(null)
+									],
+									onTap: () {
+										if (!inList) {
+											setState(() {
+												equipages.add(eq);
+											});
+										}
+									},
+								);
+							},
+							filter: (eq) => widget.predicate(eq),
 						),
 					),
 					SizedBox(

@@ -4,7 +4,6 @@
  - ui improvements
  - test gate skipping (more)
  - coverage
- - WakeLock throws (of course it does -_-)
 
 # Other
  - cryto security
@@ -13,6 +12,7 @@
  - more icons (?)
  - make warnings visible
  - list animations (great_list_view)
+ - reuse widgets for performance
 
 # UI guidelines
  - simple to use/understand

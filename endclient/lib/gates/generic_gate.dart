@@ -42,7 +42,7 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 	@override
 	void dispose() {
 		super.dispose();
-		Wakelock.disable();
+		Wakelock.disable().catchError((_) {});
 	}
 
 	@override
@@ -107,7 +107,7 @@ class _GenericGateState extends State<GenericGate> implements GateState {
 	@override
 	Widget build(BuildContext context) {
 		if (context.read<Settings>().useWakeLock) {
-			Wakelock.enable();
+			Wakelock.enable().catchError((_) {});
 		}
 		return Scaffold(
 			// backgroundColor: Colors.transparent,

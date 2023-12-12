@@ -3,6 +3,9 @@
 /// In this case the year 3000.
 const UNIX_FUTURE = 32503676400;
 
+/// Five minutes in seconds (300)
+const FIVE_MINS = 5 * 60;
+
 extension on DateTime {
 
    int get unix => (millisecondsSinceEpoch / 1000).floor();

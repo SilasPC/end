@@ -39,7 +39,7 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 	@override
 	void dispose() {
 		super.dispose();
-		Wakelock.disable();
+		Wakelock.disable().catchError((_) {});
 	}
 
 	@override
@@ -64,7 +64,7 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 	@override
 	Widget build(BuildContext context) {
 		if (context.read<Settings>().useWakeLock) {
-			Wakelock.enable();
+			Wakelock.enable().catchError((_) {});
 		}
 		var model = context.watch<LocalModel>();
 
@@ -79,24 +79,25 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 					SizedBox(
 						width: 400,
 						child: EquipagesCard(
-							builder: (context, self, eq, color) =>
-								EquipageTile(
+							builder: (context, self, eq, color) {
+								var inList = equipages.contains(eq);
+								return EquipageTile(
 									eq,
-									trailing: const [
+									trailing: !inList ? const [
 										Icon(Icons.chevron_right)
+									] : const [
+										Icon(null)
 									],
-									color: equipages.contains(eq)
-										? Color.lerp(Colors.red, color, 0.9)
-										: color,
-								),
-							filter: (eq) => !widget.predicate(eq),
-							onTap: (eq) {
-								if (!equipages.contains(eq)) {
-									setState(() {
-										equipages.add(eq);
-									});
-								}
-							}
+									onTap: () {
+										if (!inList) {
+											setState(() {
+												equipages.add(eq);
+											});
+										}
+									},
+								);
+							},
+							filter: (eq) => widget.predicate(eq),
 						),
 					),
 					SizedBox(

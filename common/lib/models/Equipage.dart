@@ -9,7 +9,10 @@ part "Equipage.g.dart";
 enum EquipageStatus {
 	WAITING,
 	RIDING,
-	VET,
+	// PRE_EXAM,
+	// RE_EXAM,
+	// RE_INSP,
+	EXAM,
 	DNF,
 	FINISHED,
 	COOLING,
@@ -18,7 +21,7 @@ enum EquipageStatus {
 
 	bool get isWAITING => this == WAITING;
 	bool get isRIDING => this == RIDING;
-	bool get isVET => this == VET;
+	bool get isEXAM => this == EXAM;
 	bool get isDNF => this == DNF;
 	bool get isFINISHED => this == FINISHED;
 	bool get isCOOLING => this == COOLING;

@@ -215,7 +215,7 @@ class ExamEvent extends EnduranceEvent {
 				}
 			}
 		}
-		else if (eq.status != EquipageStatus.VET) {
+		else if (eq.status != EquipageStatus.EXAM) {
 			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
 		}
 		if (loopHint case int loopHint when loopHint != cl) {
@@ -224,11 +224,10 @@ class ExamEvent extends EnduranceEvent {
 				cl = eq.currentLoop = loopHint;
 			}
 		}
-		bool p = data.passed;
 		if (eq.currentLoopData case LoopData ld) {
 			// regular gate
 			ld.data = data;
-			if (p) {
+			if (data.passed) {
 				if (eq.currentLoop case int currentLoop when !eq.isFinalLoop) {
 					// next loop
 					var next = eq.currentLoop = currentLoop + 1;
@@ -251,17 +250,18 @@ class ExamEvent extends EnduranceEvent {
 			} else {
 				eq.status = EquipageStatus.DNF;
 			}
-			if (ld.vet case int vetTime when p && time > vetTime + COOL_TIME) {
+			if (ld.vet case int vetTime when data.passed && time > vetTime + COOL_TIME) {
 				m.model.errors.add(EventError(m.buildIndex, "too late to pass exam"));
 			}
 			ld.nextGate = null;
 		} else {
 			// preExam
-			if (p) eq.currentLoop = 0;
+			if (data.passed) eq.currentLoop = 0;
 			eq.preExam = data;
-			eq.status = p ? EquipageStatus.RESTING : EquipageStatus.DNF;
+			eq.status = data.passed ? EquipageStatus.RESTING : EquipageStatus.DNF;
 			eq.loops.first.expDeparture = eq.category.startTime;
 		}
+		// FEAT: check for missing data when ended
 	}
 
 	bool affectsEquipage(int eid) => eid == this.eid;
@@ -311,7 +311,7 @@ class VetEvent extends EnduranceEvent {
 		if (eq.currentLoopData case LoopData ld) {
 			ld.vet = time;
 			ld.nextGate = LoopGate.EXAM;
-			eq.status = EquipageStatus.VET;
+			eq.status = EquipageStatus.EXAM;
 		}
 	}
 
@@ -392,7 +392,7 @@ class StartClearanceEvent extends EnduranceEvent {
 			if (eq.status != EquipageStatus.WAITING) {
 				m.model.errors.add(EventError(m.buildIndex, "Cannot clear $eid for start"));
 			} else {
-				eq.status = EquipageStatus.VET;
+				eq.status = EquipageStatus.EXAM;
 			}
 		}
 	}
@@ -440,8 +440,12 @@ class DepartureEvent extends EnduranceEvent {
 			}
 		}
 		var expDep = eq.currentLoopData?.expDeparture;
-		if (expDep != null && time - expDep > MAX_DEPART_DELAY) {
-			m.model.errors.add(EventError(m.buildIndex, "$eid late departure"));
+		if (expDep case int expDep) {
+			if (time - expDep > MAX_DEPART_DELAY) {
+				m.model.errors.add(EventError(m.buildIndex, "$eid late departure"));
+			} else if (time < expDep) {
+				m.model.errors.add(EventError(m.buildIndex, "$eid early departure"));
+			}
 		}
 		if (eq.currentLoopData case LoopData ld) {
 			ld.departure = time;

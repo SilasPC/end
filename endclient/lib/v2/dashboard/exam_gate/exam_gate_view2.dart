@@ -56,36 +56,23 @@ class _ExamGateViewState extends State<ExamGateView2> {
 					children: [
 						SizedBox(
 							width: 300,
-							child: Column(
-								children: [
-									Expanded(
-										child: EquipagesCard(
-											builder: (context, self, eq, color) {
-												if (eq == equipage) {
-													return EquipageTile(
-														eq,
-														onTap: () => self.onTap!(eq),
-														color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
-														trailing: const [
-															Icon(Icons.chevron_right)
-														],
-													);
-												}
-												return EquipagesCard.withChevrons(context, self, eq, color);
-											},
-											onTap: (eq) => setState(() {equipage = eq;}),
-											filter: (e) => e.status == EquipageStatus.VET,
-											emptyLabel: "None ready for examination",
-										),
-									),
-									Card(
-										child: AspectRatio(
-											aspectRatio: 1.37,
-											// UI: use this for searching
-											child: Numpad(onAccept: (_) {}),
-										)
-									)
-								],
+							child: EquipagesCard(
+								builder: (context, self, eq, color) {
+									if (eq == equipage) {
+										return EquipageTile(
+											eq,
+											onTap: () => self.onTap!(eq),
+											color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
+											trailing: const [
+												Icon(Icons.chevron_right)
+											],
+										);
+									}
+									return EquipagesCard.withChevrons(context, self, eq, color);
+								},
+								onTap: (eq) => setState(() {equipage = eq;}),
+								filter: (e) => e.status == EquipageStatus.EXAM,
+								emptyLabel: "None ready for examination",
 							),
 						),
 						if (!narrow)

@@ -71,7 +71,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 										return EquipagesCard.withChevrons(context, self, eq, color);
 									},
 									onTap: (eq) => setState(() {equipage = eq;}),
-									filter: (e) => e.status == EquipageStatus.VET,
+									filter: (e) => e.status == EquipageStatus.EXAM,
 									emptyLabel: "None ready for examination",
 								),
 							),

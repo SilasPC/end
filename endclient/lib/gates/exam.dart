@@ -25,7 +25,7 @@ class _ExamPageState extends State<ExamPage> {
       GenericGate(
          title: const Text("Exam gate"),
          comparator: comparator,
-         predicate: (eq) => eq.status == EquipageStatus.VET,
+         predicate: (eq) => eq.status == EquipageStatus.EXAM,
          onSubmit: null,
 			controller: _ctrl,
          builder: (eq, ok) {

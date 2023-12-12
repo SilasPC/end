@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 
 class EquipagesCard extends StatefulWidget {
 
-	final Predicate<Equipage>? preFilter;
 	final bool forceFilter;
 	final Predicate<Equipage>? filter;
 	final EquipageTile Function(BuildContext, EquipagesCard, Equipage, Color?) builder;
@@ -27,7 +26,6 @@ class EquipagesCard extends StatefulWidget {
 		this.builder = EquipagesCard.withPlainTiles,
 		this.onTap,
 		this.filter,
-		this.preFilter,
 		this.forceFilter = false,
 		this.emptyLabel = "None found",
 	});
@@ -72,11 +70,11 @@ class _EquipagesCardState extends State<EquipagesCard> {
 		LocalModel model = context.watch();
 		var eqs = model.model.equipages.values;
 		var useFilter = filterEnabled || widget.forceFilter;
-		if (widget.preFilter case Predicate<Equipage> filter) {
-			eqs = eqs.where(filter);
-		}
 		if (widget.filter case Predicate<Equipage> filter when useFilter) {
 			eqs = eqs.where(filter);
+		}
+		if (cat case Category cat) {
+			eqs = eqs.where((eq) => eq.category == cat);
 		}
 		return Card(
 			// needed because the tiles have a background color
@@ -103,15 +101,14 @@ class _EquipagesCardState extends State<EquipagesCard> {
 							)
 						]
 					),
-					SearchBar(
+					/* SearchBar(
 						leading: Icon(Icons.search),
 						hintText: "awd",
-					),
+					), */
 					Expanded(
 						child: ListView(
 							children: [
 								for (var (i, eq) in eqs.indexed)
-								if (cat == null || eq.category == cat)
 								widget.builder(context, widget, eq, i % 2 == 0 ? Theme.of(context).focusColor : null),
 								if (widget.emptyLabel case String label when eqs.isEmpty)
 								emptyListText(label)

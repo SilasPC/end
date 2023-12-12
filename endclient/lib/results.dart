@@ -18,6 +18,7 @@ class ResultsPage extends StatelessWidget {
       context.watch<LocalModel>();
       var ranks = cat.rankings();
 		var fin = ranks.takeWhile((e) => e.key.isFinished).length;
+		var notEnded = ranks.skip(fin).takeWhile((e) => !e.key.isEnded).length;
       return Scaffold(
 			// backgroundColor: Colors.transparent,
          appBar: AppBar(
@@ -69,9 +70,25 @@ class ResultsPage extends StatelessWidget {
 					if (ranks.length > fin)
 					ListTile(
 						dense: true,
-						title: Text("Unfinished (${ranks.length - fin}/${ranks.length})"),
+						title: Text("Unfinished ($notEnded/${ranks.length})"),
 					),
-					for (var entry in ranks.skip(fin))
+					for (var entry in ranks.skip(fin).take(notEnded))
+					EquipageTile(
+                  entry.key,
+                  leading: CircleAvatar(
+                     backgroundColor: secondaryColor,
+                     child: Text(
+								entry.value.toString(),
+								style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)
+							),
+                  )
+               ),
+					if (ranks.length > fin + notEnded)
+					ListTile(
+						dense: true,
+						title: Text("Out of competition (${ranks.length - fin - notEnded}/${ranks.length})"),
+					),
+					for (var entry in ranks.skip(fin + notEnded))
 					EquipageTile(
                   entry.key,
                   leading: CircleAvatar(

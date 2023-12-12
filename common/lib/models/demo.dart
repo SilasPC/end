@@ -5,8 +5,6 @@ import 'package:common/util.dart';
 import '../EnduranceEvent.dart';
 import '../EventModel.dart';
 
-const FIVE_MINS = 5 * 60;
-
 List<Event<Model>> demoInitEvent(int startTime) =>
 	[InitEvent(startTime - FIVE_MINS, "demo", demoModel())];
 
@@ -23,14 +21,14 @@ Model demoModel() {
 	var c3 = Category(null, "Lang fri", [Loop(1, 3), Loop(1, 3)], now + FIVE_MINS);
 
 	var eqs = [
-		Equipage(1, "Anna", "Amouroq", c1),
-		Equipage(2, "Bjarke", "Børge", c1),
+		Equipage(1, "Anna Andersen", "Aladdin", c1),
+		Equipage(2, "Bent Hansen", "Børge", c1),
 
-		Equipage(10, "Cathrine", "Comeback", c2),
-		Equipage(11, "Didde", "Donnager", c2),
+		Equipage(10, "Camilla Clausen", "Candy", c2),
+		Equipage(11, "Didde Dybkjær", "Diego", c2),
 
-		Equipage(21, "Erik", "Enhjørningen", c3),
-		Equipage(22, "Freja", "Felix", c3),
+		Equipage(21, "Emma Eriksen", "Etopia", c3),
+		Equipage(22, "Freja Frost", "Fargo", c3),
 	];
 
 	var m = Model()

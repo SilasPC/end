@@ -107,19 +107,25 @@ class LoopCard extends StatelessWidget {
 		);
 
 	Widget grid() =>
-		AspectRatio(
-			aspectRatio: 3/2,
-			child: GridView.count(
-				crossAxisCount: 3,
-				children: [
-					txtCol([maybe(loopData.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
-					txtCol(["${loopData.data?.hr1 ?? "-"}/${loopData.data?.hr2 ?? "-"}","Heartrate"]),
-					txtCol([maybe(loopData.speed(finish: isFinish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
-					txtCol([maybe(loopData.expDeparture, unixHMS) ?? "-","Departure"]),
-					txtCol([maybe(loopData.arrival, unixHMS) ?? "-","Arrival"]),
-					txtCol([maybe(loopData.vet, unixHMS) ?? "-","Vet"]),
-				].map(wrapTxtCol).toList(),
-			),
+		LayoutBuilder(
+			builder: (context, constraints) {
+				var crossAxisCount = constraints.maxWidth < 290 ? 2 : 3;
+				var mainAxisCount = (6 / crossAxisCount).ceil();
+				return AspectRatio(
+					aspectRatio: crossAxisCount / mainAxisCount,
+					child: GridView.count(
+						crossAxisCount: crossAxisCount,
+						children: [
+							txtCol([maybe(loopData.recoveryTime, unixDifToMS) ?? "-","Recovery"]),
+							txtCol(["${loopData.data?.hr1 ?? "-"}/${loopData.data?.hr2 ?? "-"}","Heartrate"]),
+							txtCol([maybe(loopData.speed(finish: isFinish)?.toStringAsFixed(1), (s) => "$s km/h") ?? "-", "Speed"]),
+							txtCol([maybe(loopData.expDeparture, unixHMS) ?? "-","Departure"]),
+							txtCol([maybe(loopData.arrival, unixHMS) ?? "-","Arrival"]),
+							txtCol([maybe(loopData.vet, unixHMS) ?? "-","Vet"]),
+						].map(wrapTxtCol).toList(),
+					),
+				);
+			},
 		);
 
 }

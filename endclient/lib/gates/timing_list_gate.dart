@@ -45,7 +45,7 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 	@override
 	void dispose() {
 		super.dispose();
-		Wakelock.disable();
+		Wakelock.disable().catchError((_) {});
 	}
 	
 	@override
@@ -71,7 +71,7 @@ class _TimingListGateState extends State<TimingListGate> implements GateState {
 	@override
 	Widget build(BuildContext context) {
 		if (context.read<Settings>().useWakeLock) {
-			Wakelock.enable();
+			Wakelock.enable().catchError((_) {});
 		}
 		var model = context.watch<LocalModel>();
 
