@@ -5,6 +5,7 @@ import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/theme.dart';
 import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'services/local_model.dart';
@@ -25,6 +26,15 @@ Future<void> main() async {
 	if (Platform.isWindows || Platform.isLinux) {
 		sqfliteFfiInit();
 		databaseFactory = databaseFactoryFfi;
+	}
+
+	if (Platform.isAndroid || Platform.isIOS) {
+		SystemChrome.setEnabledSystemUIMode(
+			SystemUiMode.manual,
+			overlays: [
+				SystemUiOverlay.bottom
+			]
+		);
 	}
 
 	runApp(

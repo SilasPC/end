@@ -221,14 +221,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
-  flutter_nearby_connections:
-    dependency: "direct main"
-    description:
-      name: flutter_nearby_connections
-      sha256: "9058faf42281b7e896fdef039adab3937c542820a5ed7cfc6b77b9f6d6e4c4a1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -399,14 +391,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
-  nearby_connections:
-    dependency: "direct main"
-    description:
-      name: nearby_connections
-      sha256: "7a7237421c4654867a60a0a3314f150962097c0383ebab8ad2d5942cedd54da6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
   nested:
     dependency: transitive
     description:

@@ -28,9 +28,7 @@ dependencies:
   path: ^1.8.2
   mutex: ^3.0.1
   sqflite_common_ffi: ^2.2.5
-  flutter_nearby_connections: ^1.1.1
   wakelock: ^0.6.2
-  nearby_connections: ^4.0.1
   permission_handler: ^11.0.0
   location: ^5.0.3
   package_info_plus: ^3.1.2

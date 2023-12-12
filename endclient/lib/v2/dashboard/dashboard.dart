@@ -69,15 +69,14 @@ class _DashboardState extends State<Dashboard> {
 	Widget build(BuildContext context) {
 		var size = MediaQuery.sizeOf(context);
 		bool narrow = size.width < 800;
-		return /* Provider.value(
-			value: narrow ? DashLayout.narrow : DashLayout.wide,
-			child:  */narrow ? narrowLayout() : wideLayout()/* ,
-		) */;
+		return Material(
+			child: narrow ? narrowLayout() : wideLayout(),
+		);
 	}
 	
 	Widget wideLayout() =>
-		Material(
-			child: Row(
+		Scaffold(
+			body: Row(
 				children: [
 					DashboardMenu(
 						navItems: navItems,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class EquipageTile extends StatelessWidget {
 
-	static const double height = 65;
+	static const double height = 66;
 
 	final VoidCallback? onTap;
 	final VoidCallback? onLongPress;

@@ -20,26 +20,26 @@ class Landing extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) => 
 		FutureBuilder(
-			future: context.read<IdentityService>().isAuthorized(), // TODO: wait for localmodel.manager.ready
+			future: context.read<LocalModel>().manager.ready
+				.then((_) => context.read<IdentityService>().isAuthorized()),
 			builder: (context, snapshot) {
 				Widget body;
-				switch (snapshot.data) {
-					case false:
+				if (snapshot.data == false) {
 						var model = context.watch<LocalModel>();
 						// var conn = context.watch<ServerConnection>();
 						var inSession = model.model.rideName != "";
 						body = _view(context, inSession, model);
-					case true || null:
-						if (snapshot.data == true) {
-							Navigator.push(context, MaterialPageRoute(
-								builder: (context) => const Dashboard()
-							));
-						}
-						body = const Center(
-							child: SpinKitCubeGrid(
-								color: primaryColor,
-							),
-						);
+				} else {
+					if (snapshot.data == true) {
+						Navigator.push(context, MaterialPageRoute(
+							builder: (context) => const Dashboard()
+						));
+					}
+					body = const Center(
+						child: SpinKitCubeGrid(
+							color: primaryColor,
+						),
+					);
 				}
 				return Material(
 					child: Container(
