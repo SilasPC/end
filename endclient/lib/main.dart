@@ -14,14 +14,6 @@ import 'services/settings.dart';
 
 Future<void> main() async {
 
-	var graph = defineServices();
-
-	FlutterError.onError = (details) {
-		FlutterError.presentError(details);
-		// graph.get<ServerConnection>().value?.reportError();
-		// IGNORED: TODO: custom exception handler
-	};
-
 	WidgetsFlutterBinding.ensureInitialized();
 	if (Platform.isWindows || Platform.isLinux) {
 		sqfliteFfiInit();
@@ -36,6 +28,14 @@ Future<void> main() async {
 			]
 		);
 	}
+
+	var graph = defineServices();
+
+	FlutterError.onError = (details) {
+		FlutterError.presentError(details);
+		// graph.get<ServerConnection>().value?.reportError();
+		// IGNORED: TODO: custom exception handler
+	};
 
 	runApp(
 		ServiceGraphProvider.value(
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
 
 		return MaterialApp(
 			title: 'eSys Endurance',
-			
+
 			theme: lightTheme,
 			darkTheme: darkTheme,
 			themeMode: dark ? ThemeMode.dark : ThemeMode.light,
@@ -94,7 +94,7 @@ ServiceGraph defineServices() {
 	b.pipe((Settings set, NearbyManager nm) {
 		nm.enabled = set.useP2P;
 	});
-	
+
 	b.addListenableDep(ServerConnection.new);
 	b.addListenableDep((LocalModel m) => PeerStates(m.manager));
 	b.addListenableDep((LocalModel m) => SessionState(m.manager));
@@ -103,7 +103,7 @@ ServiceGraph defineServices() {
 		nm.autoConnect = !conn.inSync;
 	});
 
-	b.addListenable(IdentityService());	
+	b.addListenable(IdentityService());
 
 	return b;
 }

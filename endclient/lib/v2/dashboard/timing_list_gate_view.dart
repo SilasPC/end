@@ -41,7 +41,7 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 		super.dispose();
 		Wakelock.disable();
 	}
-	
+
 	@override
 	void initState() {
 		super.initState();
@@ -79,9 +79,16 @@ class _TimingListGateViewState extends State<TimingListGateView> implements Gate
 					SizedBox(
 						width: 400,
 						child: EquipagesCard(
-							builder: EquipagesCard.withChevrons,
-							// UI: this will move around !!!
-							preFilter: (eq) => !equipages.contains(eq),
+							builder: (context, self, eq, color) =>
+								EquipageTile(
+									eq,
+									trailing: const [
+										Icon(Icons.chevron_right)
+									],
+									color: equipages.contains(eq)
+										? Color.lerp(Colors.red, color, 0.9)
+										: color,
+								),
 							filter: (eq) => !widget.predicate(eq),
 							onTap: (eq) {
 								if (!equipages.contains(eq)) {
