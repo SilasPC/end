@@ -6,7 +6,7 @@ import 'package:esys_client/v2/dashboard/arrival_view.dart';
 import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
 import 'package:esys_client/v2/dashboard/data_view.dart';
 import 'package:esys_client/v2/dashboard/departure_view.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view2.dart';
+import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/helpers.dart';
 import 'package:esys_client/v2/dashboard/overview.dart';
 import 'package:esys_client/v2/dashboard/side_menu.dart';
@@ -54,7 +54,7 @@ class _DashboardState extends State<Dashboard> {
 		const NavItem(
 			icon: Icons.monitor_heart,
 			label: "Exam gate",
-			view: ExamGateView2(),
+			view: ExamGateView(),
 		),
 		const NavItem(
 			icon: Icons.settings,

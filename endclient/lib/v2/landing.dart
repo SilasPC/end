@@ -2,6 +2,7 @@
 
 import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
+import 'package:esys_client/landing.dart';
 import 'package:esys_client/v2/equipage_page.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/identity.dart';
@@ -57,7 +58,6 @@ class Landing extends StatelessWidget {
 			crossAxisAlignment: WrapCrossAlignment.center,
 			children: [
 				SizedBox(
-					height: 200,
 					width: 400,
 					child: Card(
 						child: Column(
@@ -68,21 +68,30 @@ class Landing extends StatelessWidget {
 											? model.model.rideName
 											: "No active session",
 								),
-								Row(
-									mainAxisAlignment: MainAxisAlignment.spaceAround,
-									children: [
-										labelIconButton("LOGIN", Icons.login, onPressed: () {
-											Navigator.of(context)
-												.push(MaterialPageRoute(builder: (context) => const Dashboard()));
-										}),
-										labelIconButton("SETTINGS", Icons.settings, onPressed: () {
-											showModal(
-												context: context,
-												builder: (context) => const SettingsView(mainAxisAlignment: MainAxisAlignment.center),
-											);
-										}),
-									]
-								),
+								Padding(
+									padding: const EdgeInsets.all(10),
+									child: Wrap(
+										spacing: 10,
+										runSpacing: 10,
+										alignment: WrapAlignment.spaceEvenly,
+										children: [
+											labelIconButton("LOGIN", Icons.login, onPressed: () {
+												Navigator.of(context)
+													.push(MaterialPageRoute(builder: (context) => const Dashboard()));
+											}),
+											labelIconButton("SETTINGS", Icons.settings, onPressed: () {
+												showModal(
+													context: context,
+													builder: (context) => const SettingsView(mainAxisAlignment: MainAxisAlignment.center),
+												);
+											}),
+											labelIconButton("OLD", Icons.login, onPressed: () {
+												Navigator.of(context)
+													.push(MaterialPageRoute(builder: (context) => const LandingPage()));
+											}),
+										]
+									),
+								)
 							]
 						)
 					),

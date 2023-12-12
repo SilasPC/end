@@ -6,6 +6,7 @@ import 'gates/departure.dart';
 import 'util/connection_indicator.dart';
 import 'gates/arrival.dart';
 import 'gates/exam.dart';
+import 'settings.dart';
 import 'gates/vet.dart';
 import 'secretary/secretary.dart';
 
@@ -24,6 +25,7 @@ class LandingPageState extends State<LandingPage> {
 		Text("Exam"),
 		Text("Vet"),
 		Text("Arrival"),
+		Text("Settings"),
 	];
 	static const List<Widget> pages = [
 		SecretaryPage(),
@@ -31,6 +33,7 @@ class LandingPageState extends State<LandingPage> {
 		ExamPage(),
 		VetPage(),
 		ArrivalPage(),
+		SettingsPage(),
 	];
 
 	@override

@@ -6,7 +6,6 @@ import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/int_picker.dart';
-import 'package:esys_client/util/numpad.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/exam_gate/loop_card.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
@@ -33,7 +32,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 			int now = nowUNIX();
 			model.addSync([
 				ExamEvent(author, now, equipage.eid, data, equipage.currentLoop),
-				if (retire)
+				if (retire && !equipage.isFinalLoop)
 					RetireEvent(author, now + 1, equipage.eid)
 			]);
 			setState(() {
@@ -45,76 +44,77 @@ class _ExamGateViewState extends State<ExamGateView> {
 	
 	@override
 	Widget build(BuildContext context) {
-
-		// LocalModel model = context.watch();
-
 		// UI: flex width => layout change when needed
-		return Row(
-			children: [
-				SizedBox(
-					width: 300,
-					child: Column(
-						children: [
-							Expanded(
-								child: EquipagesCard(
-									builder: (context, self, eq, color) {
-										if (eq == equipage) {
-											return EquipageTile(
-												eq,
-												onTap: () => self.onTap!(eq),
-												color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
-												trailing: const [
-													Icon(Icons.chevron_right)
-												],
-											);
-										}
-										return EquipagesCard.withChevrons(context, self, eq, color);
-									},
-									onTap: (eq) => setState(() {equipage = eq;}),
-									filter: (e) => e.status == EquipageStatus.EXAM,
-									emptyLabel: "None ready for examination",
+		return LayoutBuilder(
+			builder: (context, constraints) {
+
+				var narrow = constraints.maxWidth < 900;
+				var veryNarrow = constraints.maxWidth < 650;
+
+				return Row(
+					children: [
+						SizedBox(
+							width: 300,
+							child: EquipagesCard(
+								builder: (context, self, eq, color) {
+									if (eq == equipage) {
+										return EquipageTile(
+											eq,
+											onTap: () => self.onTap!(eq),
+											color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
+											trailing: const [
+												Icon(Icons.chevron_right)
+											],
+										);
+									}
+									return EquipagesCard.withChevrons(context, self, eq, color);
+								},
+								onTap: (eq) => setState(() {equipage = eq;}),
+								filter: (e) => e.status == EquipageStatus.EXAM,
+								emptyLabel: "None ready for examination",
+							),
+						),
+						if (!narrow)
+						SizedBox(
+							width: 400,
+							child: ExamDataCard(
+								submit: submit,
+							),
+						)
+						else if (!veryNarrow)
+						Expanded(
+							child: ExamDataCard(
+								submit: submit
+							)
+						),
+						if (!narrow)
+						Expanded(
+							child: Card( // UI: flex/wrap whatever layout
+								child: Column(
+									children: [
+										...cardHeader("Equipage info"),
+										if (equipage case Equipage equipage) ...[
+											EquipageTile(equipage),
+											ListTile(
+												title: const Text("Loop"),
+												trailing: Text("${equipage.currentLoopOneIndexed ?? "-"}/${equipage.category.loops.length}"),
+											),
+											Expanded(
+												child: ListView(
+													children: loopCards(equipage),
+												),
+											)
+										]
+										else
+										emptyListText("Select an equipage")
+									],
 								),
 							),
-							Card(
-								child: AspectRatio(
-									aspectRatio: 1.37,
-									// UI: use this for searching
-									child: Numpad(onAccept: (_) {}),
-								)
-							)
-						],
-					),
-				),
-				SizedBox(
-					width: 400,
-					child: ExamDataCard(
-						submit: submit,
-					),
-				),
-				Expanded(
-					child: Card( // UI: flex/wrap whatever layout
-						child: Column(
-							children: [
-								...cardHeader("Equipage info"),
-								if (equipage case Equipage equipage) ...[
-									EquipageTile(equipage),
-									ListTile(
-										title: const Text("Loop"),
-										trailing: Text("${equipage.currentLoopOneIndexed ?? "-"}/${equipage.category.loops.length}"),
-									),
-									Expanded(
-										child: ListView(
-											children: loopCards(equipage),
-										),
-									)
-								]
-								else
-								emptyListText("Select an equipage")
-							],
-						),
-					),
-				)
-			],
+						)
+					],
+				);
+
+			},
 		);
 	}
 	
