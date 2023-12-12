@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:wakelock/wakelock.dart';
 
-import '../local_model/local_model.dart';
+import '../services/local_model.dart';
 import '../util/submit_button.dart';
 import '../util/text_clock.dart';
 import '../util/timing_list.dart';

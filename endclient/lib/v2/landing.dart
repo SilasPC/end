@@ -3,7 +3,7 @@
 import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/v2/equipage_page.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';

@@ -1,4 +1,5 @@
 
+import 'package:common/consts.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../util.dart';
@@ -17,33 +18,60 @@ class VetData extends IJSON {
 
 	VetData clone() => VetData.fromJson(toJson());
 
-	List<VetFieldValue> remarks([bool returnHr = false]) =>
+	VetData.fromList(this.passed, List<VetFieldValue> data) {
+		for (var VetFieldValue(:field, :value) in data) {
+			switch (field) {
+				case VetField.HR1:		hr1			= value; break;
+				case VetField.HR2:		hr2			= value; break;
+				case VetField.RESP:		resp			= value; break;
+				case VetField.MUC_MEM:	mucMem		= value; break;
+				case VetField.CAP:		cap			= value; break;
+				case VetField.JUG:		jug			= value; break;
+				case VetField.HYDR:		hydr			= value; break;
+				case VetField.GUT:		gut			= value; break;
+				case VetField.SORE:		sore			= value; break;
+				case VetField.WNDS:		wounds		= value; break;
+				case VetField.GAIT:		gait			= value; break;
+				case VetField.ATT:		attitude		= value; break;
+			}
+		}
+	}
+
+	List<VetFieldValue> toList() =>
 		[
-			if (hr1 case int hr1 when returnHr)
+			if (hr1 case int hr1)
 				VetField.HR1.withValue(hr1),
-			if (hr2 case int hr2 when returnHr)
+			if (hr2 case int hr2)
 				VetField.HR2.withValue(hr2),
-			if (resp case int resp when resp != 1)
+			if (resp case int resp)
 				VetField.RESP.withValue(resp),
-			if (mucMem case int mucMem when mucMem != 1)
+			if (mucMem case int mucMem)
 				VetField.MUC_MEM.withValue(mucMem),
-			if (cap case int cap when cap != 1)
+			if (cap case int cap)
 				VetField.CAP.withValue(cap),
-			if (jug case int jug when jug != 1)
+			if (jug case int jug)
 				VetField.JUG.withValue(jug),
-			if (hydr case int hydr when hydr != 1)
+			if (hydr case int hydr)
 				VetField.HYDR.withValue(hydr),
-			if (gut case int gut when gut != 1)
+			if (gut case int gut)
 				VetField.GUT.withValue(gut),
-			if (sore case int sore when sore != 1)
+			if (sore case int sore)
 				VetField.SORE.withValue(sore),
-			if (wounds case int wounds when wounds != 1)
+			if (wounds case int wounds)
 				VetField.WNDS.withValue(wounds),
-			if (gait case int gait when gait != 1)
+			if (gait case int gait)
 				VetField.GAIT.withValue(gait),
-			if (attitude case int attitude when attitude != 1)
+			if (attitude case int attitude)
 				VetField.ATT.withValue(attitude),
 		];
+
+	List<VetFieldValue> remarks([bool returnHr = false]) =>
+		toList()
+		.where((val) => val.isRemark() || switch (val.field) {
+			VetField.HR1 || VetField.HR2 => returnHr,
+			_ => false
+		})
+		.toList();
 
 	JSON toJson() => _$VetDataToJson(this);
 	factory VetData.fromJson(JSON json) =>
@@ -87,6 +115,12 @@ class VetFieldValue {
 	final int value;
 	
 	const VetFieldValue(this.field, this.value);
+
+	bool isRemark() =>
+		switch (field) {
+			VetField.HR1 || VetField.HR2 => value > MAX_HEART_RATE,
+			_ => value > 1
+		};
 
 	@override
 	String toString() {

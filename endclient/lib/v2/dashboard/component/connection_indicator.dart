@@ -1,5 +1,5 @@
 
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

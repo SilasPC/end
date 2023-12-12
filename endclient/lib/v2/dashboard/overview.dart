@@ -2,7 +2,7 @@
 
 import 'dart:math';
 
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/v2/dashboard/component/category_card.dart';
 import 'package:esys_client/v2/dashboard/component/session_summary_card.dart';
 import 'package:esys_client/v2/dashboard/component/notifications_card.dart';

@@ -4,7 +4,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
@@ -15,7 +15,8 @@ import 'package:provider/provider.dart';
 
 class EquipagesCard extends StatefulWidget {
 
-	final Predicate<Equipage>? forcedFilter;
+	final Predicate<Equipage>? preFilter;
+	final bool forceFilter;
 	final Predicate<Equipage>? filter;
 	final EquipageTile Function(BuildContext, EquipagesCard, Equipage, Color?) builder;
 	final void Function(Equipage)? onTap;
@@ -26,7 +27,8 @@ class EquipagesCard extends StatefulWidget {
 		this.builder = EquipagesCard.withPlainTiles,
 		this.onTap,
 		this.filter,
-		this.forcedFilter,
+		this.preFilter,
+		this.forceFilter = false,
 		this.emptyLabel = "None found",
 	});
 
@@ -69,8 +71,8 @@ class _EquipagesCardState extends State<EquipagesCard> {
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
 		var eqs = model.model.equipages.values;
-		var useFilter = filterEnabled/*  || widget.forceFilter */;
-		if (widget.forcedFilter case Predicate<Equipage> filter) {
+		var useFilter = filterEnabled || widget.forceFilter;
+		if (widget.preFilter case Predicate<Equipage> filter) {
 			eqs = eqs.where(filter);
 		}
 		if (widget.filter case Predicate<Equipage> filter when useFilter) {
@@ -85,7 +87,7 @@ class _EquipagesCardState extends State<EquipagesCard> {
 						if (widget.filter != null)
 						IconButton(
 							icon: Icon(useFilter ? Icons.filter_list : Icons.filter_list_off),
-							onPressed: /* widget.forceFilter ? null : */ () => setState(() => filterEnabled ^= true),
+							onPressed: widget.forceFilter ? null : () => setState(() => filterEnabled ^= true),
 						)
 					]),
 					if (widget.filter == null)
@@ -100,6 +102,10 @@ class _EquipagesCardState extends State<EquipagesCard> {
 								})
 							)
 						]
+					),
+					SearchBar(
+						leading: Icon(Icons.search),
+						hintText: "awd",
 					),
 					Expanded(
 						child: ListView(

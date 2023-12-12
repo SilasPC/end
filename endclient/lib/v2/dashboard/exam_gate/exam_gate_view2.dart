@@ -14,14 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 // UI: phone layout
-class ExamGateView extends StatefulWidget {
-	const ExamGateView({super.key});
+class ExamGateView2 extends StatefulWidget {
+	const ExamGateView2({super.key});
 
 	@override
-	State<ExamGateView> createState() => _ExamGateViewState();
+	State<ExamGateView2> createState() => _ExamGateViewState();
 }
 
-class _ExamGateViewState extends State<ExamGateView> {
+class _ExamGateViewState extends State<ExamGateView2> {
 
 	Equipage? equipage;
 
@@ -45,76 +45,90 @@ class _ExamGateViewState extends State<ExamGateView> {
 	
 	@override
 	Widget build(BuildContext context) {
-
-		// LocalModel model = context.watch();
-
 		// UI: flex width => layout change when needed
-		return Row(
-			children: [
-				SizedBox(
-					width: 300,
-					child: Column(
-						children: [
-							Expanded(
-								child: EquipagesCard(
-									builder: (context, self, eq, color) {
-										if (eq == equipage) {
-											return EquipageTile(
-												eq,
-												onTap: () => self.onTap!(eq),
-												color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
-												trailing: const [
-													Icon(Icons.chevron_right)
-												],
-											);
-										}
-										return EquipagesCard.withChevrons(context, self, eq, color);
-									},
-									onTap: (eq) => setState(() {equipage = eq;}),
-									filter: (e) => e.status == EquipageStatus.VET,
-									emptyLabel: "None ready for examination",
+		return LayoutBuilder(
+			builder: (context, constraints) {
+
+				var narrow = constraints.maxWidth < 900;
+				var veryNarrow = constraints.maxWidth < 650;
+
+				return Row(
+					children: [
+						SizedBox(
+							width: 300,
+							child: Column(
+								children: [
+									Expanded(
+										child: EquipagesCard(
+											builder: (context, self, eq, color) {
+												if (eq == equipage) {
+													return EquipageTile(
+														eq,
+														onTap: () => self.onTap!(eq),
+														color: Theme.of(context).colorScheme.secondary, //Color.fromARGB(255, 78, 137, 80),
+														trailing: const [
+															Icon(Icons.chevron_right)
+														],
+													);
+												}
+												return EquipagesCard.withChevrons(context, self, eq, color);
+											},
+											onTap: (eq) => setState(() {equipage = eq;}),
+											filter: (e) => e.status == EquipageStatus.VET,
+											emptyLabel: "None ready for examination",
+										),
+									),
+									Card(
+										child: AspectRatio(
+											aspectRatio: 1.37,
+											// UI: use this for searching
+											child: Numpad(onAccept: (_) {}),
+										)
+									)
+								],
+							),
+						),
+						if (!narrow)
+						SizedBox(
+							width: 400,
+							child: ExamDataCard(
+								submit: submit,
+							),
+						)
+						else if (!veryNarrow)
+						Expanded(
+							child: ExamDataCard(
+								submit: submit
+							)
+						),
+						if (!narrow)
+						Expanded(
+							child: Card( // UI: flex/wrap whatever layout
+								child: Column(
+									children: [
+										...cardHeader("Equipage info"),
+										if (equipage case Equipage equipage) ...[
+											EquipageTile(equipage),
+											ListTile(
+												title: const Text("Loop"),
+												trailing: Text("${equipage.currentLoopOneIndexed ?? "-"}/${equipage.category.loops.length}"),
+											),
+											Expanded(
+												child: ListView(
+													children: loopCards(equipage),
+												),
+											)
+										]
+										else
+										emptyListText("Select an equipage")
+									],
 								),
 							),
-							Card(
-								child: AspectRatio(
-									aspectRatio: 1.37,
-									// UI: use this for searching
-									child: Numpad(onAccept: (_) {}),
-								)
-							)
-						],
-					),
-				),
-				SizedBox(
-					width: 400,
-					child: ExamDataCard(
-						submit: submit,
-					),
-				),
-				Expanded(
-					child: Card( // UI: flex/wrap whatever layout
-						child: Column(
-							children: [
-								...cardHeader("Equipage info"),
-								if (equipage case Equipage equipage) ...[
-									EquipageTile(equipage),
-									ListTile(
-										title: const Text("Loop"),
-										trailing: Text("${equipage.currentLoopOneIndexed ?? "-"}/${equipage.category.loops.length}"),
-									),
-									Expanded(
-										child: ListView(
-											children: loopCards(equipage),
-										),
-									)
-								]
-								else
-								emptyListText("Select an equipage")
-							],
-						),
-					),
-				)
-			],
+						)
+					],
+				);
+
+			},
 		);
 	}
 	

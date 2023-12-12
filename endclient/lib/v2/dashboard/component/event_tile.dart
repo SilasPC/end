@@ -3,7 +3,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/event_model/Event.dart';
 import 'package:common/models/Model.dart';
 import 'package:common/util.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

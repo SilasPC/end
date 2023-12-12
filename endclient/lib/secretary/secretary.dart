@@ -7,7 +7,7 @@ import 'package:esys_client/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
-import '../local_model/local_model.dart';
+import '../services/local_model.dart';
 import 'category.dart';
 import 'eventview.dart';
 import 'modelview.dart';

@@ -6,7 +6,7 @@ import 'package:common/Equipe.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/util/unix.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';

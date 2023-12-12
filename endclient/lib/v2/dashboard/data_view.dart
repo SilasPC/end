@@ -1,7 +1,7 @@
 
 
 import 'package:common/util.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/v2/dashboard/component/event_tile.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';

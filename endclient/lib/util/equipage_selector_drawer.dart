@@ -3,7 +3,7 @@ import 'package:common/models/glob.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../local_model/local_model.dart';
+import '../services/local_model.dart';
 import '../equipage/equipage_tile.dart';
 
 class EquipageSelectorDrawer extends StatefulWidget {

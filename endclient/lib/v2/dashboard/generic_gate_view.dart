@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:wakelock/wakelock.dart';
-import '../../local_model/local_model.dart';
+import '../../services/local_model.dart';
 import '../../gates/gate_controller.dart';
 
 class GenericGateView extends StatefulWidget {
@@ -83,7 +83,7 @@ class _TimingListGateViewState extends State<GenericGateView> implements GateSta
 						child: EquipagesCard(
 							builder: EquipagesCard.withChevrons,
 							// UI: this will move around !!!
-							forcedFilter: (eq) => !equipages.contains(eq),
+							preFilter: (eq) => !equipages.contains(eq),
 							filter: (eq) => !widget.predicate(eq),
 							onTap: (eq) {
 								if (!equipages.contains(eq)) {

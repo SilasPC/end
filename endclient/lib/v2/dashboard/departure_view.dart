@@ -3,7 +3,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/Equipage.dart';
 import 'package:common/util/unix.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/local_model/local_model.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/time_lock.dart';
 import 'package:esys_client/util/timer.dart';

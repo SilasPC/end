@@ -6,7 +6,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
-import '../local_model/local_model.dart';
+import '../services/local_model.dart';
 import '../services/settings.dart';
 
 class VetPage extends StatelessWidget {
