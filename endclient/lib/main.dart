@@ -10,14 +10,17 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'services/local_model.dart';
 import 'services/nearby.dart';
 import 'services/settings.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 Future<void> main() async {
 
-	WidgetsFlutterBinding.ensureInitialized();
+	var widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 	if (Platform.isWindows || Platform.isLinux) {
 		sqfliteFfiInit();
 		databaseFactory = databaseFactoryFfi;
 	}
+
+	FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
 	var graph = defineServices();
 

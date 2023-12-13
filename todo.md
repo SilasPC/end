@@ -13,6 +13,7 @@
  - make warnings visible
  - list animations (great_list_view)
  - reuse widgets for performance
+ - language
 
 # UI guidelines
  - simple to use/understand

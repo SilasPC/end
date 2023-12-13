@@ -14,9 +14,9 @@ const double eqCardWidth = 400;
 const double notifCardWidth = 250;
 const double maxGridCardWidth = 160;
 
-class OverviewView extends StatelessWidget {
+class SecretaryView extends StatelessWidget {
 
-	OverviewView({super.key});
+	SecretaryView({super.key});
 
 	@override
 	Widget build(BuildContext context) =>
@@ -29,13 +29,12 @@ class OverviewView extends StatelessWidget {
 				if (stacked) {
 					return ListView(
 						children: [
-							Column(
+							const Column(
 								mainAxisSize: MainAxisSize.min,
 								children: [
-									const SessionSummaryCard(),
-									SizedBox(
-										height: constraints.maxHeight - SessionSummaryCard.height,
-										child: const EquipagesCard(builder: EquipagesCard.withAdminChoices)
+									SessionSummaryCard(),
+									Expanded(
+										child: EquipagesCard(builder: EquipagesCard.withAdminChoices),
 									),
 								],
 							),

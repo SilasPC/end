@@ -11,27 +11,40 @@ dependencies:
     sdk: flutter
   common:
     path: ../common
-  flutter_native_splash: ^2.2.10+1
-  socket_io_client: ^1.0.0
-  shared_preferences: ^2.0.15
-  flutter_spinkit: ^5.1.0
-  flutter_treeview: ^1.0.7
-  animations: ^2.0.5
+
+  # convenience
   provider: ^6.0.4
+  package_info_plus: ^3.1.2  
+
+  # ui
+  animations: ^2.0.5
   numberpicker: ^2.1.2
-  bottom_drawer: ^0.0.5
-  locally: ^1.0.5
-  marquee: ^2.2.3
-  path_provider: ^2.1.0
-  url_launcher: ^6.1.11
-  sqflite: ^2.2.8+4
-  path: ^1.8.2
-  mutex: ^3.0.1
-  sqflite_common_ffi: ^2.2.5
-  wakelock: ^0.6.2
-  permission_handler: ^11.0.0
+  flutter_treeview: ^1.0.7
+  # flutter_spinkit: ^5.1.0
+  # bottom_drawer: ^0.0.5
+  # marquee: ^2.2.3
+
+  # p2p
   location: ^5.0.3
-  package_info_plus: ^3.1.2
+  permission_handler: ^11.0.0
+  # flutter_nearby_connections: ^1.1.1
+  # nearby_connections: ^4.0.1
+
+  # persistence
+  shared_preferences: ^2.0.15
+  sqflite: ^2.2.8+4
+  sqflite_common_ffi: ^2.2.5
+
+  # other
+  wakelock: ^0.6.2
+  mutex: ^3.0.1
+  flutter_native_splash: ^2.3.8
+  locally: ^1.0.5
+  path_provider: ^2.1.0
+  path: ^1.8.2
+  url_launcher: ^6.1.11
+  socket_io_client: ^1.0.0
+  
 
 dev_dependencies:
   flutter_test:

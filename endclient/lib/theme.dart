@@ -51,7 +51,10 @@ import 'package:flutter/material.dart';
 	ThemeData darkTheme = ThemeData.dark().copyWith(
 		colorScheme: colorScheme,
 		focusColor: black27,
-		// UI: textTheme: Typography.whiteHelsinki,
+		appBarTheme: const AppBarTheme(
+			color: black27,
+			titleTextStyle: TextStyle(color: Colors.white),
+		),
 		bottomNavigationBarTheme: const BottomNavigationBarThemeData(
 			backgroundColor: black27,
 		),

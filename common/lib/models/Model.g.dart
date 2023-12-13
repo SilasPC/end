@@ -8,6 +8,7 @@ part of 'Model.dart';
 
 Model _$ModelFromJson(Map<String, dynamic> json) => Model()
   ..rideName = json['rideName'] as String
+  ..equipeId = json['equipeId'] as int?
   ..categories = (json['categories'] as Map<String, dynamic>).map(
     (k, e) => MapEntry(k, Category.fromJson(e as Map<String, dynamic>)),
   )
@@ -15,8 +16,19 @@ Model _$ModelFromJson(Map<String, dynamic> json) => Model()
       .map((e) => EventError.fromJson(e as Map<String, dynamic>))
       .toList();
 
-Map<String, dynamic> _$ModelToJson(Model instance) => <String, dynamic>{
-      'rideName': instance.rideName,
-      'categories': instance.categories,
-      'errors': instance.errors,
-    };
+Map<String, dynamic> _$ModelToJson(Model instance) {
+  final val = <String, dynamic>{
+    'rideName': instance.rideName,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('equipeId', instance.equipeId);
+  val['categories'] = instance.categories;
+  val['errors'] = instance.errors;
+  return val;
+}

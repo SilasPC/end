@@ -1,19 +1,11 @@
 
-
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/util/text_clock.dart';
-import 'package:esys_client/v2/dashboard/arrival_view.dart';
 import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
-import 'package:esys_client/v2/dashboard/data_view.dart';
-import 'package:esys_client/v2/dashboard/departure_view.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/exam_gate_view.dart';
 import 'package:esys_client/v2/dashboard/helpers.dart';
-import 'package:esys_client/v2/dashboard/overview.dart';
-import 'package:esys_client/v2/dashboard/side_menu.dart';
-import 'package:esys_client/v2/dashboard/vet_view.dart';
+import 'package:esys_client/v2/dashboard/side_bar.dart';
+import 'package:esys_client/v2/dashboard/views/glob.dart';
 import 'package:flutter/material.dart';
-
-import 'settings_view.dart';
 
 class Dashboard extends StatefulWidget {
 
@@ -27,9 +19,9 @@ class _DashboardState extends State<Dashboard> {
 
 	static List<NavItem> navItems = [
 		NavItem(
-			icon: Icons.grid_view,
-			label: "Overview",
-			view: OverviewView(),
+			icon: Icons.post_add,
+			label: "Secretary",
+			view: SecretaryView(),
 		),
 		const NavItem(
 			icon: Icons.data_array,
@@ -63,7 +55,7 @@ class _DashboardState extends State<Dashboard> {
 		),
 	];
 
-	int currentView = 0;
+	NavItem currentView = navItems.first;
 
 	@override
 	Widget build(BuildContext context) {
@@ -75,29 +67,27 @@ class _DashboardState extends State<Dashboard> {
 	}
 	
 	Widget wideLayout() =>
-		Scaffold(
-			body: Row(
-				children: [
-					DashboardMenu(
-						navItems: navItems,
-						itemSelected: (newView) => setState(() { currentView = newView; }),
-						currentItem: currentView,
-					),
-					Expanded(
-						child: Container(
-							decoration: backgroundGradient,
-							child: navItems[currentView].view
-						)
-					),
-				],
-			)
+		Row(
+			children: [
+				SideBar(
+					navItems: navItems,
+					itemSelected: (newView) => setState(() { currentView = newView; }),
+					currentItem: currentView,
+				),
+				Expanded(
+					child: Container(
+						decoration: backgroundGradient,
+						child: currentView.view
+					)
+				),
+			],
 		);
 		
 	Widget narrowLayout() {
 		var color = BottomNavigationBarTheme.of(context).backgroundColor;
 		return Scaffold(
 			bottomNavigationBar: BottomNavigationBar(
-				currentIndex: currentView,
+				currentIndex: navItems.indexOf(currentView),
 				items: [
 					for (var navItem in navItems)
 					BottomNavigationBarItem(
@@ -106,52 +96,35 @@ class _DashboardState extends State<Dashboard> {
 						backgroundColor: color,
 					),
 				],
-				onTap: (index) => setState(() { currentView = index; })
+				onTap: (index) => setState(() { currentView = navItems[index]; })
 			),
-			body: Column(
-				children: [
-					topBar(),
-					Expanded(
-						child: Container(
-							decoration: backgroundGradient,
-							child: navItems[currentView].view,
-						),
-					)
-				]
-			)
-		);
-	}
-
-	Widget topBar() =>
-		Container(
-			padding: const EdgeInsets.symmetric(
-				horizontal: 12
+			drawerEnableOpenDragGesture: false,
+			drawer: SideBar(
+				noClock: true,
+				navItems: navItems,
+				itemSelected: (newView) => setState(() { currentView = newView; }),
+				currentItem: currentView,
 			),
-			height: 65,
-			color: Theme.of(context).canvasColor,
-			child: Row(
-				children: [
-					Container(
-						height: 65,
-						padding: const EdgeInsets.only(bottom: 6),
-						child: FittedBox(
-							fit: BoxFit.fitHeight,
-							child: TextClock(),
-						),
+			appBar: AppBar(
+				title: Container(
+					height: 65,
+					padding: const EdgeInsets.only(bottom: 6),
+					child: FittedBox(
+						child: TextClock(),
 					),
-					const Spacer(),
-					IconButton(
-						icon: const Icon(Icons.logout),
-						onPressed: () {
-							Navigator.of(context).pop();
-						},
-					),
-					const SizedBox(width: 10,),
-					const ConnectionIndicator2(
+				),
+				actions: const [
+					ConnectionIndicator2(
 						iconOnly: true,
 					)
 				],
 			),
+			body: Container(
+				decoration: backgroundGradient,
+				child: currentView.view,
+			),
 		);
+	}
+
 
 }

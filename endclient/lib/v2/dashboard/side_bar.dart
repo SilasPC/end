@@ -7,14 +7,19 @@ import 'package:flutter/material.dart';
 
 import 'package:esys_client/util/text_clock.dart';
 
-class DashboardMenu extends StatelessWidget {
+class SideBar extends StatelessWidget {
 
 	final List<NavItem> navItems;
-	final int currentItem;
-	final void Function(int) itemSelected;
+	final NavItem currentItem;
+	final void Function(NavItem) itemSelected;
+	final bool noClock;
 
-	const DashboardMenu({
-		super.key, required this.navItems, required this.itemSelected, required this.currentItem,
+	const SideBar({
+		super.key,
+		required this.navItems,
+		required this.itemSelected,
+		required this.currentItem,
+		this.noClock = false,
 	});
 
 	@override
@@ -40,18 +45,19 @@ class DashboardMenu extends StatelessWidget {
 					Expanded(
 						child: ListView(
 							children: [
-								for (var (i, navItem) in navItems.indexed)
+								for (var navItem in navItems)
 								ListTile(
 									leading: Icon(navItem.icon),
 									title: Text(navItem.label),
-									selected: currentItem == i,
+									selected: currentItem == navItem,
 									onTap: () => {
-										if (i != currentItem) itemSelected(i)
+										if (navItem != currentItem) itemSelected(navItem)
 									}
 								),
 							],
 						),
 					),
+					if (!noClock)
 					SizedBox(
 						width: 150,
 						child: FittedBox(

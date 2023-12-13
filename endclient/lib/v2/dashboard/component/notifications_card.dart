@@ -38,17 +38,21 @@ class NotificationsCard extends StatelessWidget {
 							),
 						),
 					), */
-					for (var err in model.model.errors)
-					ListTile(
-						title: const Text("Warning"),
-						subtitle: Text(err.description),
-						trailing: IconButton(
-							splashRadius: splashRadius,
-							color: Colors.white30,
-							icon: const Icon(Icons.close),
-							onPressed: () {},
-						),
-					),
+					Expanded(
+						child: ListView(children: [
+							for (var err in model.model.errors)
+							ListTile(
+								title: const Text("Warning"),
+								subtitle: Text(err.description),
+								trailing: IconButton(
+									splashRadius: splashRadius,
+									color: Colors.white30,
+									icon: const Icon(Icons.close),
+									onPressed: () {},
+								),
+							),
+						]),
+					)
 				],
 			),
 		);

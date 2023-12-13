@@ -2,6 +2,8 @@
 
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/gates/gate_controller.dart';
+import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/submit_button.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
@@ -10,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
 import 'package:wakelock/wakelock.dart';
-import '../../services/local_model.dart';
-import '../../gates/gate_controller.dart';
 
 class GenericGateView extends StatefulWidget {
 

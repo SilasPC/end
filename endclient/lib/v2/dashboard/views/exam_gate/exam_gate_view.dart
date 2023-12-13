@@ -7,7 +7,7 @@ import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/int_picker.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/loop_card.dart';
+import 'package:esys_client/v2/dashboard/views/exam_gate/loop_card.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

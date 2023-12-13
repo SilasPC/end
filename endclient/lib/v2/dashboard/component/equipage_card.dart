@@ -1,7 +1,7 @@
 
 import 'package:common/models/glob.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
-import 'package:esys_client/v2/dashboard/exam_gate/loop_card.dart';
+import 'package:esys_client/v2/dashboard/views/exam_gate/loop_card.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
 

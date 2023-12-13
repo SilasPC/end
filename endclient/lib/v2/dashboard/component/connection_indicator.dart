@@ -1,4 +1,5 @@
 
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,14 @@ class ConnectionIndicator2 extends StatelessWidget {
 		return switch (iconOnly) {
 			// true when peerCount == 0 => _icon(conn),
 			true =>
-				Badge.count(
-					count: peerCount,
-					child: _icon(conn),
+				IconButton(
+					splashRadius: splashRadius,
+					icon: Badge.count(
+						isLabelVisible: peerCount > 0,
+						count: peerCount,
+						child: _icon(conn),
+					),
+					onPressed: () {},
 				),
 			false =>
 				ListTile(

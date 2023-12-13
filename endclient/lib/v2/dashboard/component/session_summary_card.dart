@@ -8,16 +8,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SessionSummaryCard extends StatelessWidget {
 
-	static double height = 100;
-
 	const SessionSummaryCard({super.key});
 	
 	@override
 	Widget build(BuildContext context) {
 		LocalModel model = context.watch();
-		return SizedBox(
-			height: height,
-			child: Card(
+		return Card(
 				child: Column(
 					children: [
 						...cardHeader(model.model.rideName),
@@ -31,7 +27,6 @@ class SessionSummaryCard extends StatelessWidget {
 						)
 					]
 				)
-			),
 		);
 	}
 

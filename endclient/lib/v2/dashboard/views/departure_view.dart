@@ -7,7 +7,7 @@ import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/time_lock.dart';
 import 'package:esys_client/util/timer.dart';
-import 'package:esys_client/v2/dashboard/generic_gate_view.dart';
+import 'package:esys_client/v2/dashboard/views/generic_gate_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
