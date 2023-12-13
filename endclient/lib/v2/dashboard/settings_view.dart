@@ -51,8 +51,8 @@ class _SettingsCardState extends State<SettingsView> {
 
 	Future<void> loadModel() async {
 		var m = context.read<LocalModel>();
-		var meets = await EquipeMeeting.loadRecent();
-				showChoicesModal(
+		var meets = await EquipeMeeting.loadMany();
+		showChoicesModal(
 			context,
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {

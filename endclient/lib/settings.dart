@@ -213,7 +213,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
 	Future<void> loadModel() async {
 		var m = context.read<LocalModel>();
-		var meets = await EquipeMeeting.loadRecent();
+		var meets = await EquipeMeeting.loadMany();
 		// ignore: use_build_context_synchronously
 		showChoicesModal(
 			context,

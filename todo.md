@@ -38,6 +38,7 @@
 	- Security
 	- Multiday rides
 	- Reinspection / Re-exam
+	- Equipe upload
  - Tablet/layout
  - Future
 	- Checkpoints

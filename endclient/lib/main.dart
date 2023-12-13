@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:esys_client/service_graph.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/theme.dart';
@@ -20,15 +19,6 @@ Future<void> main() async {
 		databaseFactory = databaseFactoryFfi;
 	}
 
-	if (Platform.isAndroid || Platform.isIOS) {
-		SystemChrome.setEnabledSystemUIMode(
-			SystemUiMode.manual,
-			overlays: [
-				SystemUiOverlay.bottom
-			]
-		);
-	}
-
 	var graph = defineServices();
 
 	FlutterError.onError = (details) {
@@ -46,28 +36,55 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+
 	const MyApp({super.key});
 
 	@override
 	Widget build(BuildContext context) {
 
-		var dark = context.select((Settings set) => set.darkTheme);
+		if (Platform.isAndroid || Platform.isIOS) {
+			
+			SystemChrome.setEnabledSystemUIMode(
+				SystemUiMode.manual,
+				overlays: [
+					SystemUiOverlay.bottom
+				]
+			);
 
-		var (lightTheme, darkTheme) = themeData();
+			final phoneSized = MediaQuery.sizeOf(context).shortestSide < 550;
+			if (phoneSized) {
+				SystemChrome.setPreferredOrientations([
+					DeviceOrientation.portraitUp,
+					DeviceOrientation.portraitDown,
+				]);
+			}
 
-		// IGNORED: FEAT: use largeUI
-		// context.select((Settings set) => set.largeUI);
+		}
 
-		return MaterialApp(
-			title: 'eSys Endurance',
+		return Builder(
+			builder: (context) {
 
-			theme: lightTheme,
-			darkTheme: darkTheme,
-			themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+				var dark = context.select((Settings set) => set.darkTheme);
 
-			debugShowCheckedModeBanner: false,
-			home: const Landing(),
+				var (lightTheme, darkTheme) = themeData();
+
+				// IGNORED: FEAT: use largeUI
+				// context.select((Settings set) => set.largeUI);
+
+				return MaterialApp(
+					title: 'eSys Endurance',
+
+					theme: lightTheme,
+					darkTheme: darkTheme,
+					themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+
+					debugShowCheckedModeBanner: false,
+					home: const Landing(),
+				);
+
+			}
 		);
+
 	}
 
 }

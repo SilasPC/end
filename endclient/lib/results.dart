@@ -67,7 +67,7 @@ class ResultsPage extends StatelessWidget {
 							)
 						],
                ),
-					if (ranks.length > fin)
+					if (notEnded > 0)
 					ListTile(
 						dense: true,
 						title: Text("Unfinished ($notEnded/${ranks.length})"),
