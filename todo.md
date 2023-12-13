@@ -57,3 +57,8 @@
  - Security
  - Auto events
  - Checkpoints
+
+# Security
+ - sign all events
+ - drop connection if sync contains invalid signatures
+ - set max data per sync
