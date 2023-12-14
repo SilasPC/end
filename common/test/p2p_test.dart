@@ -1,6 +1,7 @@
 
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
+import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/msg_encoder.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:test/test.dart';
@@ -10,7 +11,7 @@ import 'str.dart';
 void main() {
 
 	var manager = (String id, int sessionId) => PeerManager<StrModel>(
-		PrivatePeerIdentity.server(id),
+		PrivatePeerIdentity.client(id),
 		() => NullDatabase<StrModel>(id, sessionId),
       StrHandle(),
 	)..autoConnect = true;
@@ -72,37 +73,61 @@ void main() {
 
 	});
 
+	test("self identity", () {
+		var c = manager("c", 1);
+		assert(c.id.verifySignature(serverPubKey));
+	});
+
+	test("pre sync", () async {
+		var (ps, pc) = LocalPeer.pair();
+		var s = manager("s", 1);
+		var c = manager("c", 1);
+		
+		await c.addPeer(ps);
+		await s.addPeer(pc);
+		await pumpEventQueue();
+
+		expect(ps.state, PeerState.SYNC);
+		expect(pc.state, PeerState.SYNC);
+	});
+
+	test("pre sync conflict", () async {
+		var (ps, pc) = LocalPeer.pair();
+		var s = manager("s", 1);
+		var c = manager("c", 2);
+		
+		await c.addPeer(ps);
+		await s.addPeer(pc);
+		await pumpEventQueue();
+
+		expect(ps.state, PeerState.CONFLICT);
+		expect(pc.state, PeerState.CONFLICT);
+	});
+
 	test("two way simple", () async {
 
 		var (p1, p2) = LocalPeer.pair();
-		var c1 = manager("server", 1);
-		var c2 = manager("client", 1);
+		var s = manager("s", 1);
+		var c = manager("c", 1);
 		
-		await c1.add([StrEv.dig(1)]);
-		expect(c1.model.result, "1");
-		expect(c2.model.result, "");
+		await s.add([StrEv.dig(1, "s")]);
 
-		await c2.addPeer(p1);
-		await c1.addPeer(p2);
+		await c.addPeer(p1);
+		await s.addPeer(p2);
 		await pumpEventQueue();
 
-		expect(c2.sessionId, c1.sessionId);
-		expect(c2.sessionId, 1);
-		expect(p1.state, PeerState.SYNC);
-		expect(p2.state, PeerState.SYNC);
+		expect(s.model.result, "1");
+		expect(c.model.result, "1");
 
-		expect(c1.model.result, "1");
-		expect(c2.model.result, "1");
-
-		await c1.add([StrEv.dig(2)]);
+		await s.add([StrEv.dig(2, "s")]);
 		await pumpEventQueue();
-		expect(c1.model.result, "12");
-		expect(c2.model.result, "12");
+		expect(s.model.result, "12");
+		expect(c.model.result, "12");
 		
-		await c2.add([StrEv.dig(3)]);
+		await c.add([StrEv.dig(3, "c")]);
 		await pumpEventQueue();
-		expect(c1.model.result, "123");
-		expect(c2.model.result, "123");
+		expect(s.model.result, "123");
+		expect(c.model.result, "123");
 
 	});
 
@@ -120,19 +145,19 @@ void main() {
 		await p2.addPeer(con2.$2);
 		await pumpEventQueue();
 
-		await p1.add([StrEv.dig(1)]);
+		await p1.add([StrEv.dig(1, "p1")]);
 		await pumpEventQueue();
 		expect(p1.model.result, "1");
 		expect(p2.model.result, "1");
 		expect(p3.model.result, "1");
 
-		await p2.add([StrEv.dig(2)]);
+		await p2.add([StrEv.dig(2, "p2")]);
 		await pumpEventQueue();
 		expect(p1.model.result, "12");
 		expect(p2.model.result, "12");
 		expect(p3.model.result, "12");
 
-		await p3.add([StrEv.dig(3)]);
+		await p3.add([StrEv.dig(3, "p3")]);
 		await pumpEventQueue();
 		expect(p1.model.result, "123");
 		expect(p2.model.result, "123");
@@ -142,14 +167,14 @@ void main() {
 
 	test("two way reset", () async {
 
-		var (p1, p2) = LocalPeer.pair();
-		var s = manager("server", 1);
-		var c = manager("client", 1);
+		var (ps, pc) = LocalPeer.pair();
+		var s = manager("s", 1);
+		var c = manager("c", 1);
 
-		await c.addPeer(p1);
-		await s.addPeer(p2);
+		await c.addPeer(ps);
+		await s.addPeer(pc);
 
-		await s.add([StrEv.dig(1)]);
+		await s.add([StrEv.dig(1, "s")]);
 		await pumpEventQueue();
 		expect(s.model.result, "1");
 		expect(c.model.result, "1");
@@ -163,19 +188,19 @@ void main() {
 
 	test("conflict", () async {
 
-		var (p1, p2) = LocalPeer.pair();
-		var s = manager("server", 1);
-		var c = manager("client", 2);
+		var (ps, pc) = LocalPeer.pair();
+		var s = manager("s", 1);
+		var c = manager("c", 2);
 
-		await c.addPeer(p1);
-		await s.addPeer(p2);
+		await c.addPeer(ps);
+		await s.addPeer(pc);
 
-		await s.add([StrEv.dig(1)]);
+		await s.add([StrEv.dig(1, "s")]);
 		await pumpEventQueue();
 		expect(s.model.result, "1");
 		expect(c.model.result, "");
 
-		var yielded = await c.yieldTo(p1);
+		var yielded = await c.yieldTo(ps);
 		expect(yielded, true);
 		expect(c.sessionId, s.sessionId);
 

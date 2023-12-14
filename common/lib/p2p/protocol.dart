@@ -58,8 +58,11 @@ class PeerIdentity extends IJSON {
 	late final Signature signature;
 	// TODO: name is not id, key is
 	final String name;
+	@JsonKey(includeFromJson: false, includeToJson: false)
+	final Verifier<PublicKey> verifier;
 
-	PeerIdentity(this.key, this.signature, this.name);
+	PeerIdentity(this.key, this.signature, this.name):
+		verifier = key.createVerifier(SIGNING_ALG);
 
 	// TODO: should not be available
 	factory PeerIdentity.server(String name) =>
@@ -69,7 +72,8 @@ class PeerIdentity extends IJSON {
 	factory PeerIdentity.client(String name) =>
 		PeerIdentity.signed(name, clientPubKey, serverSigner);
 	
-	PeerIdentity.signed(this.name, this.key, Signer<PrivateKey> signer) {
+	PeerIdentity.signed(this.name, this.key, Signer<PrivateKey> signer):
+		verifier = key.createVerifier(SIGNING_ALG) {
 		// TODO: proper signature instead of this incorrect trash
 		var data =  [
 			...key.exponent.toString().codeUnits,
@@ -92,11 +96,21 @@ class PeerIdentity extends IJSON {
 	JSON toJson() => _$PeerIdentityToJson(this);
 	factory PeerIdentity.fromJson(JSON json) => _$PeerIdentityFromJson(json);
 
+	bool isSameAs(PeerIdentity other) =>
+		name == other.name &&
+		key.exponent == other.key.exponent &&
+		key.modulus == other.key.modulus &&
+		listEq(signature.data, other.signature.data);
+
+	@override
+	String toString() => "PeerIdentity($name)";
+
 }
 
 @JsonSerializable()
 class PreSyncMsg extends IJSON {
 
+	// final PeerIdentity serverIdentity;
 	final PeerIdentity identity;
 	final int protocolVersion;
 	final int sessionId;
@@ -115,12 +129,15 @@ class SyncMsg<M extends IJSON> extends IJSON {
 
 	final List<Event<M>> evs, dels; // VULN: dels unsigned
 	final List<Signature> sigs;
-	SyncMsg(this.evs, this.dels, this.sigs);
+	final List<PeerIdentity> authors;
+
+	SyncMsg(this.evs, this.dels, this.sigs, this.authors);
 
 	JSON toJson() => {
 		"evs": evs,
 		"dels": dels,
-		"sigs": sigs.map(SignatureConverter().toJson).toList()
+		"sigs": sigs.map(SignatureConverter().toJson).toList(),
+		"authors": listj(authors),
 	};
 
 	bool get isEmpty => evs.isEmpty && dels.isEmpty;
@@ -132,6 +149,7 @@ class SyncMsg<M extends IJSON> extends IJSON {
 			jlist_map(json["evs"], reviver),
 			jlist_map(json["dels"], reviver),
 			jlist_map(json["sigs"], (s) => SignatureConverter().fromJson(s as String)),
+			jlist_map(json["authors"], PeerIdentity.fromJson),
 		);
 
 }

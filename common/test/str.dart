@@ -3,33 +3,30 @@ import 'package:common/EventModel.dart';
 import 'package:common/util.dart';
 import 'package:equatable/equatable.dart';
 
-class StrEv with EquatableMixin, JsonMixin implements Event<StrModel> {
+class StrEv extends Event<StrModel> with EquatableMixin {
 	
-	final int _time;
 	final String str;
-	StrEv(this.str, this._time);
+	StrEv(this.str, super.time, super.author);
 
-	@override
-	int get time => _time;
-	
-	factory StrEv.dig(int dig) {
+	factory StrEv.dig(int dig, String author) {
 		assert(dig >= 0, "Digit must be non-negative");
 		String str = dig.toRadixString(36);
 		assert(str.length == 1, "Digit must be in range 0..36");
-		return StrEv(str, dig);
+		return StrEv(str, dig, author);
 	}
 
 	@override
 	JSON toJson() => {
 		"time": time,
-		"char": str
+		"char": str,
+		"author": author,
 	};
 
 	factory StrEv.fromJson(JSON json) =>
-		StrEv(json['char'], json['time']);
+		StrEv(json['char'], json['time'], json["author"]);
 
 	@override
-	String toString() => "[$time;$str]";
+	String toString() => "[$time;$str@$author]";
 
 	@override
 	bool build(EventModel<StrModel> m) {

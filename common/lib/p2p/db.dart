@@ -26,7 +26,7 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
 	Future<(SyncMsg<M>, PreSyncMsg?)> loadData(String peerId)
 		=> Future.value(
 				(
-					SyncMsg<M>([], [], []),
+					SyncMsg<M>([], [], [], []),
 					PreSyncMsg(
 						PeerIdentity.client(peerId),
 						sessionId,

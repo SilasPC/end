@@ -70,7 +70,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			_db.batch()
 				..query("events", columns: ["json"])
 				..query("deletes", columns: ["json"])
-				..query("peers", where: "id = ?", whereArgs: [peerId])
+				..query("peers")
 		).commit();
 
 		var [events, deletes, peers] = data.cast<List>();
@@ -84,11 +84,17 @@ class SqliteDatabase extends EventDatabase<Model> {
 		var dels = deletes
 			.map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
 			.toList();
-		var self = peers
+		var preSyncs = peers
 			.map((d) => PreSyncMsg.fromJson(jsonDecode(d["preSync"])))
+			.toList();
+		var self = preSyncs
+			.where((p) => p.identity.name == peerId)
 			.firstOrNull;
+		var identities = preSyncs
+			.map((d) => d.identity)
+			.toList();
 		
-		return (SyncMsg(evs, dels, sigs), self);
+		return (SyncMsg(evs, dels, sigs, identities), self);
 	}
 
 	static Future<Database> _createDB() async {
@@ -98,7 +104,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			onCreate: (db, _) => _resetDatabase(db),
 			onUpgrade: (db, _, __) => _resetDatabase(db),
 			onDowngrade: (db, _, __) => _resetDatabase(db),
-			version: 12
+			version: 13
 		);
 		return db;
 	}

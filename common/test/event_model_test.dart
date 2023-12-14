@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import 'str.dart';
 
 void main() {
-	var dig = StrEv.dig;
+	var dig = (dig) => StrEv.dig(dig, "");
 	test("empty model", () {
 		var s = Model();
 		expect(s.model.result, "");

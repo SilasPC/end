@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 typedef JSON = Map<String, dynamic>;
 typedef Reviver<T> = T Function(JSON);
@@ -8,6 +9,7 @@ abstract mixin class JsonMixin {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
 	List<int> toJsonBin() => toJsonString().codeUnits;
+	Uint8List toJsonBytes() => Uint8List.fromList(toJsonString().codeUnits);
 }
 
 abstract class IJSON with JsonMixin {

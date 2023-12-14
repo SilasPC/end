@@ -54,7 +54,7 @@ class PublicKeyConverter
 
 	@override
 	String toJson(RsaPublicKey object) =>
-		jsonEncode([_bigIntToList(object.exponent), _bigIntToList(object.modulus)]);
+		jsonEncode([object.exponent.toString(), object.modulus.toString()]);
 
 }
 
@@ -90,34 +90,12 @@ class PrivateKeyConverter
 	@override
 	String toJson(RsaPrivateKey object) => 
 		jsonEncode([
-			_bigIntToList(object.firstPrimeFactor),
-			_bigIntToList(object.secondPrimeFactor),
-			_bigIntToList(object.privateExponent),
-			_bigIntToList(object.modulus)
+			object.firstPrimeFactor.toString(),
+			object.secondPrimeFactor.toString(),
+			object.privateExponent.toString(),
+			object.modulus.toString(),
 		]);
 }
 
 List<BigInt> _parseBigInts(String json)
-	=>	(jsonDecode(json) as List).map((e) => (e as List).cast<int>()).map(_bigIntFromList).toList();
-
-List<int> _bigIntToList(BigInt n) {
-	var out = Uint32List((n.bitLength / 32).ceil());
-
-	for (int i = 0; i < out.length; i++) {
-		out[i] = n.toInt() & 0xFFFFFFFF;
-		n >>= 32;
-	}
-
-	return out;
-}
-
-BigInt _bigIntFromList(List<int> list) {
-	var out = BigInt.from(0);
-
-	for (int n in list) {
-		out <<= 32;
-		out |= BigInt.from(n);
-	}
-
-	return out;
-}
+	=>	(jsonDecode(json) as List).map((s) => BigInt.parse(s as String)).toList();

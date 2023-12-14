@@ -2,7 +2,6 @@ library common;
 
 import 'package:common/consts.dart';
 import 'package:common/util.dart';
-import 'package:crypto_keys/crypto_keys.dart';
 import 'package:equatable/equatable.dart';
 import 'EventModel.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -13,13 +12,11 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part 'EnduranceEvent.g.dart';
 
-sealed class EnduranceEvent extends IJSON with EquatableMixin implements Event<Model> {
+sealed class EnduranceEvent extends Event<Model> with EquatableMixin {
 
 	final String kind;
-	final int time;
-	final String author;
 
-	EnduranceEvent(this.time, this.kind, this.author/* , super.signer */);
+	EnduranceEvent(super.time, this.kind, super.author/* , super.signer */);
 
 	@override
 	void build(EventModel<Model> m) {
@@ -28,13 +25,6 @@ sealed class EnduranceEvent extends IJSON with EquatableMixin implements Event<M
 		} catch (e, t) {
 			m.model.errors.add(EventError(m.buildIndex, "$e $t"));
 		}
-	}
-
-	int compareTo(Event<Model> rhs)  {
-		int i = time - rhs.time;
-		if (i == 0) i = runtimeType.hashCode - runtimeType.hashCode;
-		if (i == 0) i = hashCode - rhs.hashCode;
-		return i;
 	}
 
 	EnduranceEvent copyWithTime(int time) =>
