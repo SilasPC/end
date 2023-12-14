@@ -30,10 +30,8 @@ abstract class SyncProtocol {
 
 }
 
-@JsonSerializable()
 class PrivatePeerIdentity {
 
-	@PrivateKeyConverter()
 	final RsaPrivateKey privateKey;
 	final PeerIdentity identity; 
 	final Signer<PrivateKey> signer;

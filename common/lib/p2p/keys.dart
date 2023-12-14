@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:common/p2p/protocol.dart';
-import 'package:common/util.dart';
 import 'package:crypto_keys/crypto_keys.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -46,8 +45,11 @@ class PublicKeyConverter
 
 	@override
 	RsaPublicKey fromJson(String json) {
-		var [exp, mod] = jsonDecode(json);
-		return RsaPublicKey(exponent: _bigIntFromList((exp as List).cast<int>()), modulus: _bigIntFromList((mod as List).cast<int>()));
+		var [exp, mod] = _parseBigInts(json);
+		return RsaPublicKey(
+			exponent: exp,
+			modulus: mod
+		);
 	}
 
 	@override
@@ -70,28 +72,33 @@ class SignatureConverter
 }
 
 class PrivateKeyConverter
-	extends JsonConverter<RsaPrivateKey, List<List<int>>> {
+	extends JsonConverter<RsaPrivateKey, String> {
 
 	const PrivateKeyConverter();
 
 	@override
-	RsaPrivateKey fromJson(List<List<int>> json) =>
-		RsaPrivateKey(
-			firstPrimeFactor: _bigIntFromList(json[0]),
-			secondPrimeFactor: _bigIntFromList(json[1]),
-			privateExponent: _bigIntFromList(json[2]),
-			modulus: _bigIntFromList(json[3]),
+	RsaPrivateKey fromJson(String json) {
+		var [p, q, e, n] = _parseBigInts(json);
+		return RsaPrivateKey(
+			firstPrimeFactor: p,
+			secondPrimeFactor: q,
+			privateExponent: e,
+			modulus: n,
 		);
+	}
 
 	@override
-	List<List<int>> toJson(RsaPrivateKey object) => 
-		[
+	String toJson(RsaPrivateKey object) => 
+		jsonEncode([
 			_bigIntToList(object.firstPrimeFactor),
 			_bigIntToList(object.secondPrimeFactor),
 			_bigIntToList(object.privateExponent),
 			_bigIntToList(object.modulus)
-		];
+		]);
 }
+
+List<BigInt> _parseBigInts(String json)
+	=>	(jsonDecode(json) as List).map((e) => (e as List).cast<int>()).map(_bigIntFromList).toList();
 
 List<int> _bigIntToList(BigInt n) {
 	var out = Uint32List((n.bitLength / 32).ceil());

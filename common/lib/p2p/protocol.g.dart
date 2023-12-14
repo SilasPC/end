@@ -9,7 +9,7 @@ part of 'protocol.dart';
 PrivatePeerIdentity _$PrivatePeerIdentityFromJson(Map<String, dynamic> json) =>
     PrivatePeerIdentity(
       const PrivateKeyConverter()
-          .fromJson(json['privateKey'] as List<List<int>>),
+          .fromJson(json['privateKey'] as String),
       PeerIdentity.fromJson(json['identity'] as Map<String, dynamic>),
     );
 
