@@ -69,7 +69,7 @@ class CategoryViewState extends State<CategoryView> {
 	Widget createEquipagePopupMenu(Equipage eq, BuildContext context) =>
 		PopupMenuButton<String>(
 			onSelected: (value) {
-				var model = context.read<LocalModel>();
+				/* var model = context.read<LocalModel>();
 				var author = context.read<Settings>().author;
 				switch (value) {
 					case 'start-clearance':
@@ -104,7 +104,7 @@ class CategoryViewState extends State<CategoryView> {
 							}
 						);
 						break;
-				}
+				} */
 			},
 			itemBuilder: (context) => [
 				PopupMenuItem(

@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'package:common/p2p/protocol.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:common/p2p/Manager.dart';
 

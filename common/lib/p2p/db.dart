@@ -1,5 +1,5 @@
 
-import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/protocol.dart';
 import '../event_model/EventModel.dart';
 import '../util.dart';
 
@@ -26,9 +26,9 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
 	Future<(SyncMsg<M>, PreSyncMsg?)> loadData(String peerId)
 		=> Future.value(
 				(
-					SyncMsg<M>([], []),
+					SyncMsg<M>([], [], []),
 					PreSyncMsg(
-						peerId,
+						PeerIdentity.client(peerId),
 						sessionId,
 						0
 					),

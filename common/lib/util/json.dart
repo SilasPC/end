@@ -4,11 +4,14 @@ import 'dart:convert';
 typedef JSON = Map<String, dynamic>;
 typedef Reviver<T> = T Function(JSON);
 
-abstract class IJSON {
-	const IJSON();
+abstract mixin class JsonMixin {
 	JSON toJson();
 	String toJsonString() => jsonEncode(toJson());
 	List<int> toJsonBin() => toJsonString().codeUnits;
+}
+
+abstract class IJSON with JsonMixin {
+	const IJSON();
 	static JSON fromBin(List<int> bin) =>
 		jsonDecode(String.fromCharCodes(bin));
 }

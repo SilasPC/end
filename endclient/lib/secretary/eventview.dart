@@ -126,7 +126,7 @@ class _EventViewState extends State<EventView> {
 											mainAxisAlignment: MainAxisAlignment.center,
 											children: [
 												Text(unixHMS(e.time)),
-												Text(e.author, style: const TextStyle(color: Colors.grey)),
+												// Text(e.author, style: const TextStyle(color: Colors.grey)),
 											]
 										),
 										title: Text(

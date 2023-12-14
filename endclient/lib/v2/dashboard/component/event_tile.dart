@@ -60,7 +60,7 @@ class EventTile extends StatelessWidget {
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: [
 					Text(unixHMS(event.time)),
-					SizedBox(
+					/* SizedBox(
 						width: 50,
 						child: Text(
 							event.author, 
@@ -68,7 +68,7 @@ class EventTile extends StatelessWidget {
 							maxLines: 1, overflow: TextOverflow.ellipsis, 
 							// style: const TextStyle(color: Colors.grey)
 						),
-					)
+					) */
 				]
 			),
 			title: Text(

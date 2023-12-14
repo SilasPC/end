@@ -2,7 +2,8 @@
 import 'dart:async';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
-import 'package:common/p2p/sqlite_db.dart';
+import 'package:common/p2p/db.dart';
+import 'package:common/p2p/protocol.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -13,8 +14,8 @@ Future<void> main() async {
 	databaseFactory = databaseFactoryFfi;
 
 	var man = PeerManager<Model>(
-		"root-server",
-		SqliteDatabase.create,
+		PrivatePeerIdentity.server("eSys"),
+		() => NullDatabase("server", 0),//SqliteDatabase.create,
       MetaModel(),
 	);
 
@@ -101,9 +102,9 @@ class SocketPeer extends Peer {
 void setJsonAck2<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<T?>? Function(T) handler) {
 	client.on(msg, (data) async {
 		List dataList = data as List;
-		var json = dataList.first;
+		var reqData = dataList.first;
 		var ack = dataList.last;
-		var res = await handler(reviver(IJSON.fromBin(json)));
+		var res = await handler(reviver(IJSON.fromBin(reqData)));
 		if (res != null) {
 			ack(res.toJsonBin());
 		}
@@ -113,9 +114,21 @@ void setJsonAck2<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver
 void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<String?>? Function(T) handler) {
 	client.on(msg, (data) async {
 		List dataList = data as List;
-		var json = dataList.first;
+		var reqData = dataList.first;
 		var ack = dataList.last;
-		var res = await handler(reviver(IJSON.fromBin(json)));
+		var res = await handler(reviver(IJSON.fromBin(reqData)));
+		if (res != null) {
+			ack(res);
+		}
+	});
+}
+
+void setStringAck(dynamic client, String msg, FutureOr<String?>? Function(String) handler) {
+	client.on(msg, (data) async {
+		List dataList = data as List;
+		var reqData = dataList.first;
+		var ack = dataList.last;
+		var res = await handler(reqData);
 		if (res != null) {
 			ack(res);
 		}
@@ -125,9 +138,9 @@ void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver,
 void setBinAck<T extends IJSON>(dynamic client, String msg, FutureOr<List<int>?>? Function(List<int>) handler) {
 	client.on(msg, (data) async {
 		List dataList = data as List;
-		var bin = (dataList.first as List).cast<int>();
+		var reqData = (dataList.first as List).cast<int>();
 		var ack = (dataList.last) as void Function(dynamic);
-		var res = await handler(bin);
+		var res = await handler(reqData);
 		if (res != null) {
 			ack(res);
 		}

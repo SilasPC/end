@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 import 'package:common/event_model/OrderedSet.dart';
-import 'package:common/p2p/Manager.dart';
 import '../util.dart';
 import 'Event.dart';
 
@@ -161,10 +160,10 @@ class EventModel<M extends IJSON> {
 
 	}
 
-	SyncMsg<M> getNewer(SyncInfo lastSync) {
+	(List<Event<M>>, List<Event<M>>) getNewer(SyncInfo lastSync) {
 		var evs = _events.iteratorInsertion.skip(lastSync.evLen).toList();
 		var dls = deletes.skip(lastSync.delLen).toList();
-		return SyncMsg(evs, dls);
+		return (evs, dls);
 	}
 
 	SyncInfo get syncState => SyncInfo(_events.length, deletes.length);

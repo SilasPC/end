@@ -2,6 +2,7 @@
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/p2p/msg_encoder.dart';
+import 'package:common/p2p/protocol.dart';
 import 'package:test/test.dart';
 
 import 'str.dart';
@@ -9,7 +10,7 @@ import 'str.dart';
 void main() {
 
 	var manager = (String id, int sessionId) => PeerManager<StrModel>(
-		id,
+		PrivatePeerIdentity.server(id),
 		() => NullDatabase<StrModel>(id, sessionId),
       StrHandle(),
 	)..autoConnect = true;
@@ -71,37 +72,37 @@ void main() {
 
 	});
 
-	test("two way", () async {
+	test("two way simple", () async {
 
-		var pair = LocalPeer.pair();
-		var s = manager("server", 1);
-		var c = manager("client", 1);
+		var (p1, p2) = LocalPeer.pair();
+		var c1 = manager("server", 1);
+		var c2 = manager("client", 1);
 		
-		await s.add([StrEv.dig(1)]);
-		expect(s.model.result, "1");
-		expect(c.model.result, "");
+		await c1.add([StrEv.dig(1)]);
+		expect(c1.model.result, "1");
+		expect(c2.model.result, "");
 
-		await c.addPeer(pair.$1);
-		await s.addPeer(pair.$2);
+		await c2.addPeer(p1);
+		await c1.addPeer(p2);
 		await pumpEventQueue();
 
-		expect(c.sessionId, s.sessionId);
-		expect(c.sessionId, 1);
-		expect(pair.$1.state.isSync, true);
-		expect(pair.$2.state.isSync, true);
+		expect(c2.sessionId, c1.sessionId);
+		expect(c2.sessionId, 1);
+		expect(p1.state, PeerState.SYNC);
+		expect(p2.state, PeerState.SYNC);
 
-		expect(s.model.result, "1");
-		expect(c.model.result, "1");
+		expect(c1.model.result, "1");
+		expect(c2.model.result, "1");
 
-		await s.add([StrEv.dig(2)]);
+		await c1.add([StrEv.dig(2)]);
 		await pumpEventQueue();
-		expect(s.model.result, "12");
-		expect(c.model.result, "12");
+		expect(c1.model.result, "12");
+		expect(c2.model.result, "12");
 		
-		await c.add([StrEv.dig(3)]);
+		await c2.add([StrEv.dig(3)]);
 		await pumpEventQueue();
-		expect(s.model.result, "123");
-		expect(c.model.result, "123");
+		expect(c1.model.result, "123");
+		expect(c2.model.result, "123");
 
 	});
 
@@ -141,12 +142,12 @@ void main() {
 
 	test("two way reset", () async {
 
-		var pair = LocalPeer.pair();
+		var (p1, p2) = LocalPeer.pair();
 		var s = manager("server", 1);
 		var c = manager("client", 1);
 
-		await c.addPeer(pair.$1);
-		await s.addPeer(pair.$2);
+		await c.addPeer(p1);
+		await s.addPeer(p2);
 
 		await s.add([StrEv.dig(1)]);
 		await pumpEventQueue();
@@ -162,19 +163,19 @@ void main() {
 
 	test("conflict", () async {
 
-		var pair = LocalPeer.pair();
+		var (p1, p2) = LocalPeer.pair();
 		var s = manager("server", 1);
 		var c = manager("client", 2);
 
-		await c.addPeer(pair.$1);
-		await s.addPeer(pair.$2);
+		await c.addPeer(p1);
+		await s.addPeer(p2);
 
 		await s.add([StrEv.dig(1)]);
 		await pumpEventQueue();
 		expect(s.model.result, "1");
 		expect(c.model.result, "");
 
-		var yielded = await c.yieldTo(pair.$1);
+		var yielded = await c.yieldTo(p1);
 		expect(yielded, true);
 		expect(c.sessionId, s.sessionId);
 

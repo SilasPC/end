@@ -2,6 +2,8 @@ library common;
 
 import 'package:common/consts.dart';
 import 'package:common/util.dart';
+import 'package:crypto_keys/crypto_keys.dart';
+import 'package:equatable/equatable.dart';
 import 'EventModel.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'models/glob.dart';
@@ -11,8 +13,13 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part 'EnduranceEvent.g.dart';
 
-abstract class EnduranceEvent extends Event<Model> {
-	EnduranceEvent(super.time, super.kind, super.author);
+sealed class EnduranceEvent extends IJSON with EquatableMixin implements Event<Model> {
+
+	final String kind;
+	final int time;
+	final String author;
+
+	EnduranceEvent(this.time, this.kind, this.author/* , super.signer */);
 
 	@override
 	void build(EventModel<Model> m) {
@@ -21,6 +28,13 @@ abstract class EnduranceEvent extends Event<Model> {
 		} catch (e, t) {
 			m.model.errors.add(EventError(m.buildIndex, "$e $t"));
 		}
+	}
+
+	int compareTo(Event<Model> rhs)  {
+		int i = time - rhs.time;
+		if (i == 0) i = runtimeType.hashCode - runtimeType.hashCode;
+		if (i == 0) i = hashCode - rhs.hashCode;
+		return i;
 	}
 
 	EnduranceEvent copyWithTime(int time) =>
@@ -67,7 +81,8 @@ EnduranceEvent eventFromJSON(JSON json) {
 @JsonSerializable()
 class InitEvent extends EnduranceEvent {
 	final Model model;
-	InitEvent(int time, String author, this.model) : super(time, "init", author);
+	InitEvent(int time, String author, this.model/* , Signer<PrivateKey> signer */):
+		super(time, "init", author/* , signer */);
 
 	JSON toJson() => _$InitEventToJson(this);
 	factory InitEvent.fromJson(JSON json) =>
@@ -94,8 +109,8 @@ class InitEvent extends EnduranceEvent {
 class DisqualifyEvent extends EnduranceEvent {
 	final int eid;
 	final String reason;
-	DisqualifyEvent(String author, int time, this.eid, this.reason):
-		super(time, "disqualify", author);
+	DisqualifyEvent(String author, int time, this.eid, this.reason/* , Signer<PrivateKey> signer */):
+		super(time, "disqualify", author/* , signer */);
 
 	JSON toJson() => _$DisqualifyEventToJson(this);
 	factory DisqualifyEvent.fromJson(JSON json) =>
@@ -126,8 +141,8 @@ class DisqualifyEvent extends EnduranceEvent {
 class ChangeCategoryEvent extends EnduranceEvent {
 	final int eid;
 	final String category;
-	ChangeCategoryEvent(String author, int time, this.eid, this.category):
-		super(time, "change-category", author);
+	ChangeCategoryEvent(String author, int time, this.eid, this.category/* , Signer<PrivateKey> signer */):
+		super(time, "change-category", author/* , signer */);
 
 	JSON toJson() => _$ChangeCategoryEventToJson(this);
 	factory ChangeCategoryEvent.fromJson(JSON json) =>
@@ -163,8 +178,8 @@ class ChangeCategoryEvent extends EnduranceEvent {
 class RetireEvent extends EnduranceEvent {
 
 	final int eid;
-	RetireEvent(String author, int time, this.eid):
-		super(time, "retire", author);
+	RetireEvent(String author, int time, this.eid/* , Signer<PrivateKey> signer */):
+		super(time, "retire", author/* , signer */);
 
 	JSON toJson() => _$RetireEventToJson(this);
 	factory RetireEvent.fromJson(JSON json) =>
@@ -194,8 +209,8 @@ class ExamEvent extends EnduranceEvent {
 	final int eid;
 	final int? loopHint;
 	final VetData data;
-	ExamEvent(String author, int time, this.eid, this.data, this.loopHint):
-		super(time, "exam", author);
+	ExamEvent(String author, int time, this.eid, this.data, this.loopHint/* , Signer<PrivateKey> signer */):
+		super(time, "exam", author/* , signer */);
 
 	JSON toJson() => _$ExamEventToJson(this);
 	factory ExamEvent.fromJson(JSON json) =>
@@ -279,8 +294,8 @@ class ExamEvent extends EnduranceEvent {
 class VetEvent extends EnduranceEvent {
 	final int eid;
 	final int? loopHint;
-	VetEvent(String author, int time,this.eid,this.loopHint):
-		super(time, "vet", author);
+	VetEvent(String author, int time,this.eid,this.loopHint/* , Signer<PrivateKey> signer */):
+		super(time, "vet", author/* , signer */);
 
 	JSON toJson() => _$VetEventToJson(this);
 	factory VetEvent.fromJson(JSON json) =>
@@ -329,8 +344,8 @@ class VetEvent extends EnduranceEvent {
 class ArrivalEvent extends EnduranceEvent {
 	final int? loopHint;
 	final int eid;
-	ArrivalEvent(String author, int time,this.eid,this.loopHint):
-		super(time, "arrival", author);
+	ArrivalEvent(String author, int time,this.eid,this.loopHint/* , Signer<PrivateKey> signer */):
+		super(time, "arrival", author/* , signer */);
 
 	JSON toJson() => _$ArrivalEventToJson(this);
 	factory ArrivalEvent.fromJson(JSON json) =>
@@ -378,8 +393,8 @@ class ArrivalEvent extends EnduranceEvent {
 @JsonSerializable()
 class StartClearanceEvent extends EnduranceEvent {
 	final List<int> eids;
-	StartClearanceEvent(String author, int time, this.eids):
-		super(time, "start-clearance", author);
+	StartClearanceEvent(String author, int time, this.eids/* , Signer<PrivateKey> signer */):
+		super(time, "start-clearance", author/* , signer */);
 
 	JSON toJson() => _$StartClearanceEventToJson(this);
 	factory StartClearanceEvent.fromJson(JSON json) =>
@@ -411,8 +426,8 @@ class StartClearanceEvent extends EnduranceEvent {
 class DepartureEvent extends EnduranceEvent {
 	final int eid;
 	final int? loopHint;
-	DepartureEvent(String author, int time, this.eid, this.loopHint):
-		super(time, "departure", author);
+	DepartureEvent(String author, int time, this.eid, this.loopHint/* , Signer<PrivateKey> signer */):
+		super(time, "departure", author/* , signer */);
 
 	JSON toJson() => _$DepartureEventToJson(this);
 	factory DepartureEvent.fromJson(JSON json) =>

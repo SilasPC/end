@@ -5,6 +5,7 @@ import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/protocol.dart';
 import 'package:common/p2p/sqlite_db.dart';
 import 'package:esys_client/p2p/server_peer.dart';
 import 'package:flutter/widgets.dart';
@@ -34,7 +35,7 @@ class LocalModel with ChangeNotifier {
 
 	LocalModel() {
 		manager = PeerManager(
-			Platform.localHostname,
+			PrivatePeerIdentity.client(Platform.localHostname),
 			SqliteDatabase.create,
 			metaModel,
 		);

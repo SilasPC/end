@@ -3,56 +3,11 @@ import 'dart:async';
 import 'dart:math';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
+import 'package:crypto_keys/crypto_keys.dart';
 import 'package:mutex/mutex.dart';
 import '../util.dart';
 import 'db.dart';
-
-class PreSyncMsg extends IJSON {
-
-	final int protocolVersion;
-	final String peerId;
-	final int sessionId;
-	final int resetCount;
-	PreSyncMsg(this.peerId, this.sessionId, this.resetCount, {this.protocolVersion = SyncProtocol.VERSION});
-
-	JSON toJson() => {
-		"protocolVersion": protocolVersion,
-		"peerId": peerId,
-		"sessionId": sessionId,
-		"resetCount": resetCount,
-	};
-
-	factory PreSyncMsg.fromBin(List<int> bin) => PreSyncMsg.fromJson(IJSON.fromBin(bin));
-	factory PreSyncMsg.fromJson(JSON json) =>
-		PreSyncMsg(
-			json["peerId"],
-			json["sessionId"],
-			json["resetCount"],
-			protocolVersion: json["protocolVersion"]
-		);
-}
-
-class SyncMsg<M extends IJSON> extends IJSON {
-
-	final List<Event<M>> evs, dels;
-	SyncMsg(this.evs, this.dels);
-
-	JSON toJson() => {
-		"evs": evs,
-		"dels": dels,
-	};
-
-	bool get isEmpty => evs.isEmpty && dels.isEmpty;
-	bool get isNotEmpty => !isEmpty;
-
-	factory SyncMsg.fromBin(List<int> bin, Reviver<Event<M>> reviver) => SyncMsg.fromJson(IJSON.fromBin(bin), reviver);
-	factory SyncMsg.fromJson(JSON json, Reviver<Event<M>> reviver) =>
-		SyncMsg(
-			jlist_map(json["evs"], reviver),
-			jlist_map(json["dels"], reviver),
-		);
-
-}
+import 'protocol.dart';
 
 enum PeerState {
 
@@ -79,7 +34,7 @@ abstract class Peer {
 	bool get disconnected => !__state.connected;
 
 	int? get sessionId => _lastKnownState?.sessionId;
-	String? get id => _lastKnownState?.peerId;
+	String? get id => _lastKnownState?.identity.name;
 	PreSyncMsg? _lastKnownState;
 	PeerManager? _man;
 
@@ -116,25 +71,6 @@ abstract class Peer {
 
 }
 
-abstract class SyncProtocol {
-
-	/// Current version of the protocol
-	static const int VERSION = 1;
-
-	/// SyncMsg payload
-	static const String SYNC = "sync";
-	/// PreSyncMsg payload
-	static const String PRE_SYNC = "presync";
-	/// no payload
-	static const String ACK_SYNC = "syncack";
-
-	static const List<int> OK = const [1];
-	static const List<int> NOT_OK = const [0];
-
-	static Iterable<String> get events => [SYNC, PRE_SYNC, ACK_SYNC];
-
-}
-
 // TODO: deal with exceptions
 class PeerManager<M extends IJSON> {
 
@@ -158,7 +94,8 @@ class PeerManager<M extends IJSON> {
 	Stream<Null> get updateStream => _onUpdate.stream;
 	Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
-	final String peerId;
+	final PrivatePeerIdentity _id;
+	PeerIdentity get id => _id.identity;
 
 	late int _sessionId;
 	int get sessionId => _sessionId;
@@ -170,6 +107,7 @@ class PeerManager<M extends IJSON> {
 	List<Peer> _peers = [];
 	List<Peer> get peers => _peers;
 	late EventModel<M> _em;
+	final List<Signature> _eventSignatures = [];
 
 	M get model => _em.model;
 	ReadOnlyOrderedSet<Event<M>> get events => _em.events;
@@ -180,7 +118,7 @@ class PeerManager<M extends IJSON> {
 	late final Future<void> ready;
 
 	PeerManager(
-		this.peerId,
+		this._id,
 		AsyncProducer<EventDatabase<M>> createDb,
 		EventModelHandle<M> innerHandle,
 	) {
@@ -199,7 +137,7 @@ class PeerManager<M extends IJSON> {
 	Future <void> _initDatabase(AsyncProducer<EventDatabase<M>> createDb) =>
 		_mutex.protect(() async {
 			_db = await createDb();
-			var (syncMsg, preSyncMsg) = await _db.loadData(this.peerId);
+			var (syncMsg, preSyncMsg) = await _db.loadData(this.id.name);
 			_em.add(syncMsg.evs, syncMsg.dels);
 			if (preSyncMsg case PreSyncMsg preSyncMsg) {
 				_resetCount = preSyncMsg.resetCount;
@@ -211,15 +149,20 @@ class PeerManager<M extends IJSON> {
 			await _save();
 		});
 
-	Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
-		if (evs.isEmpty && dels.isEmpty) return;
+	Future<bool> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async
+		=> _addSigned(evs, dels, evs.map((e) => _id.signer.sign(e.toJsonBin())));
+
+	Future<bool> _addSigned(List<Event<M>> evs, List<Event<M>> dels, Iterable<Signature> signatures) async {
+		if (evs.isEmpty && dels.isEmpty) return true;
 		await _mutex.protect(() async {
 			var ss = _em.syncState;
 			_em.add(evs, dels);
+			_eventSignatures.addAll(signatures);
 			if (ss == _em.syncState) return;
 			await _save();
 			_broadcastSync();
 		});
+		return true;
 	}
 
 	/// mutex order manager -> all peers
@@ -238,6 +181,7 @@ class PeerManager<M extends IJSON> {
 		await _mutex.protect(() async {
 			await _db.clear(keepPeers: true);
 			_em.reset();
+			_eventSignatures.clear();
 			_resetCount = Random().nextInt(1 << 30);
 			for (var p in _peers) {
 				p._mutex.protect(() async {
@@ -248,9 +192,18 @@ class PeerManager<M extends IJSON> {
 		});
 	}
 
+	SyncMsg<M> _getNewer(SyncInfo info) {
+		var (evs, dels) = _em.getNewer(info);
+		return SyncMsg(
+			evs,
+			dels,
+			_eventSignatures.sublist(info.evLen)
+		);
+	}
+
 	/// must have manager lock
 	Future<void> _save() async {
-		var data = _em.getNewer(_lastDbSave);
+		var data = _getNewer(_lastDbSave);
 		var curState = _em.syncState;
 		if (data.isNotEmpty) {
 			await _db.add(data);
@@ -276,8 +229,8 @@ class PeerManager<M extends IJSON> {
 				// print("nothing to sync with ${p.id}");
 				return;
 			}
-			var data = _em.getNewer(p._lastLocal);
-			// print("send ${data.evs} to ${p.id}");
+			var data = _getNewer(p._lastLocal);
+			// print("send ${data.toJsonString()} to ${p.id}");
 			var res = await p.send(
 				SyncProtocol.SYNC,
 				data.toJsonBin()
@@ -337,7 +290,7 @@ class PeerManager<M extends IJSON> {
 
 	PreSyncMsg _curPreSyncMsg() =>
 		PreSyncMsg(
-			peerId,
+			id,
 			_sessionId,
 			_resetCount
 		);
@@ -348,19 +301,19 @@ class PeerManager<M extends IJSON> {
 			// print("protocol version conflict");
 			return;
 		}
-		var conflict = _peers.where((p2) => p2.id == ps.peerId && p2 != p).firstOrNull;
+		var conflict = _peers.where((p2) => p2.id == ps.identity.name && p2 != p).firstOrNull;
 		if (conflict != null) {
 			_peers.remove(conflict);
 			// disconnect ?
 		}
 		if (p._lastKnownState == null) {
-			if (await _db.loadPeer(ps.peerId) case (var preSyncMsg, var syncInfo)) {
+			if (await _db.loadPeer(ps.identity.name) case (var preSyncMsg, var syncInfo)) {
 				p._lastKnownState = preSyncMsg;
 				p._lastLocal = syncInfo;
 			}
 		}
 		var last = p._lastKnownState ?? ps;
-		if (last.peerId != ps.peerId) {
+		if (last.identity.name != ps.identity.name) {
 			// TODO: client changed peer id
 		}
 		p._lastKnownState = ps;
@@ -402,7 +355,11 @@ class PeerManager<M extends IJSON> {
 					}
 					var msg = SyncMsg<M>.fromBin(data, handle.reviveEvent);
 					var upToDate = _em.syncState == p._lastLocal;
-					await add(msg.evs, msg.dels);
+					if (msg.sigs.length != msg.evs.length) {
+						p.disconnect();
+						return null;
+					}
+					await _addSigned(msg.evs, msg.dels, msg.sigs);
 					if (upToDate) {
 						p._lastLocal = _em.syncState;
 					} else {
@@ -460,6 +417,7 @@ class PeerManager<M extends IJSON> {
 				p._lastLocal = SyncInfo.zero();
 			}
 			_em.reset();
+			_eventSignatures.clear();
 			_resetCount = Random().nextInt(1 << 30);
 			_sessionId = newSession ?? Random().nextInt(1 << 30);
 			_onSessionUpdate.add(_sessionId);
