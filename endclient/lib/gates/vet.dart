@@ -7,7 +7,6 @@ import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../services/local_model.dart';
-import '../services/settings.dart';
 
 class VetPage extends StatelessWidget {
 	const VetPage({super.key});
@@ -18,7 +17,8 @@ class VetPage extends StatelessWidget {
 			title: const Text("Vet gate"),
 			predicate: (e) => e.status == EquipageStatus.COOLING,
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
-				var author = context.read<Settings>().author;
+				LocalModel model = context.read();
+				final author = model.id;
 				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {
 					evs.add(VetEvent(author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop));

@@ -66,13 +66,13 @@ class LocalModel with ChangeNotifier {
 		serverUpdateStream.add(null);
 	}
 
+	String get id => manager.id.name;
+
 	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []])
 		=> manager.add(evs, dels);
 
 	Set<Event<Model>> get deletes => manager.deletes;
-
 	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
-
 	Model get model => manager.model;
 
 	void resetModel() => manager.resetModel();

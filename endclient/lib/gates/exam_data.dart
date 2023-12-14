@@ -26,8 +26,8 @@ class _ExamDataPageState extends State<ExamDataPage> {
 	VetData data = VetData.empty();
 
 	Future<void> submit(BuildContext context, bool passed, {bool retire = false}) async {
-		var author = context.read<Settings>().author;
-		var model = context.read<LocalModel>();
+		LocalModel model = context.read();
+		final author = model.id;
 		data.passed = passed;
 		int now = nowUNIX();
 		model.addSync([

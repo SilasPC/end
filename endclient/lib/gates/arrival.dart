@@ -18,7 +18,8 @@ class ArrivalPage extends StatelessWidget {
 			title: const Text("Arrival gate"),
 			predicate: (e) => e.status == EquipageStatus.RIDING,
 			submit: (List<Equipage> equipages, List<DateTime> times) async {
-				var author = context.read<Settings>().author;
+				LocalModel model = context.read();
+				final author = model.id;
 				List<EnduranceEvent> evs = [];
 				for (int i = 0; i < times.length; i++) {
 					evs.add(ArrivalEvent(author, toUNIX(times[i]), equipages[i].eid, equipages[i].currentLoop));

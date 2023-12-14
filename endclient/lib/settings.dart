@@ -224,7 +224,7 @@ class _SettingsPageState extends State<SettingsPage> {
 				} else {
 					var meet = meets.firstWhere((e) => e.name == name);
 					try {
-						var evs = await meet.loadEvents();
+						var evs = await meet.loadEvents(m.id);
 						await m.addSync(evs);
 					} catch (e, s) {
 						print(e);

@@ -126,8 +126,8 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 	PopupMenuButton<String>(
 		splashRadius: splashRadius,
 		onSelected: (value) {
-			var model = context.read<LocalModel>();
-			var author = context.read<Settings>().author;
+			LocalModel model = context.read();
+			final author = model.id;
 			switch (value) {
 				case 'start-clearance':
 					model.addSync([

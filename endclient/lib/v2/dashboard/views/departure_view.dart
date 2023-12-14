@@ -30,9 +30,9 @@ class _DepartureViewState extends State<DepartureView> {
 			predicate: (eq) => eq.status.isRESTING,
 			comparator: comparator,
 			submit: () async {
-				var author = context.read<Settings>().author;
-				List<EnduranceEvent> evs = [];
 				LocalModel model = context.read();
+				final author = model.id;
+				List<EnduranceEvent> evs = [];
 				for (var MapEntry(:key, :value) in timers.entries) {
 					var eq = model.model.equipages[key]!;
 					evs.add(DepartureEvent(author, toUNIX(value), eq.eid, eq.currentLoop));

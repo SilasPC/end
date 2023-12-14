@@ -26,8 +26,8 @@ class _ExamGateViewState extends State<ExamGateView> {
 
 	Future<void> submit(VetData data, bool passed, {bool retire = false}) async {
 		if (equipage case Equipage equipage) {
-			var author = context.read<Settings>().author;
-			var model = context.read<LocalModel>();
+			LocalModel model = context.read();
+			final author = model.id;
 			data.passed = passed;
 			int now = nowUNIX();
 			model.addSync([

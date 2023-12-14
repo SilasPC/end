@@ -16,12 +16,13 @@ class VetView extends StatelessWidget {
 		TimingListGateView(
 			predicate: (eq) => eq.status.isCOOLING,
 			submit: (data) async {
-				var author = context.read<Settings>().author;
+				LocalModel model = context.read();
+				final author = model.id;
 				List<EnduranceEvent> evs = [];
 				for (var (eq, dt) in data) {
 					evs.add(VetEvent(author, toUNIX(dt), eq.eid, eq.currentLoop));
 				}
-				await context.read<LocalModel>().addSync(evs);
+				await model.addSync(evs);
 			},
 		);
 }

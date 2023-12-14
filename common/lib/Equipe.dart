@@ -16,7 +16,7 @@ class EquipeMeeting {
 
 	EquipeMeeting(this.name, this.id);
 
-	Future<List<Event<Model>>> loadEvents() => _loadModelEvents(id);
+	Future<List<Event<Model>>> loadEvents(String author) => _loadModelEvents(id, author);
 
 	@override
 	String toString() => "Meeting($name)";
@@ -37,13 +37,13 @@ Future<List<EquipeMeeting>> _loadMeetings(String uri) async {
 /// IGNORED: TODO: determine actual rest time?
 const TYPICAL_REST_TIME = 40;
 
-Future<List<Event<Model>>> _loadModelEvents(int classId) async {
+Future<List<Event<Model>>> _loadModelEvents(int classId, String author) async {
 	dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");
 	if (schd["discipline"] != "endurance")
 		throw Exception("Could not load a non-endurance event");
 
 	Model m = Model()..equipeId = classId;
-	List<Event<Model>> mevs = [InitEvent(0, "equipe", m)];
+	List<Event<Model>> mevs = [InitEvent(0, author, m)];
 	m.rideName = schd["display_name"];
 
 	var days = [schd];
@@ -62,7 +62,7 @@ Future<List<Event<Model>>> _loadModelEvents(int classId) async {
 
 		try {
 
-			var startTimes = _parseEquipages(cls["starts"], cat, mevs);
+			var startTimes = _parseEquipages(cls["starts"], cat, mevs, author);
 
 			var catDist = cat.distance();
 			if (catDist == 0) {
@@ -153,7 +153,7 @@ void _guessCategoryLoops(Category cat, int dist) {
 	cat.loops.add(Loop(fdist, TYPICAL_REST_TIME));
 }
 
-Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> evs) {
+Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> evs, String author) {
 	bool hasResults = false;
 	Map<Equipage, int> startTimes = {};
 	for (var eq in equipages) {
@@ -196,21 +196,21 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 
 						if (nullOrEmpty(res["arrival"])) break;
 						dsqPreExam = false;
-						evs.add(DepartureEvent("equipe", expDep + 60, eid, loop));
-						evs.add(ArrivalEvent("equipe", hmsToUNIX(res["arrival"]), eid, loop));
+						evs.add(DepartureEvent(author, expDep + 60, eid, loop));
+						evs.add(ArrivalEvent(author, hmsToUNIX(res["arrival"]), eid, loop));
 
 						if (nullOrEmpty(res["pulse_time"])) break;
 						// FIXME: in ranum23, 404, MA, loop 1, this is null,
 						//      : despite FTQ-GA for loop 1, thus the ftq is not registered
 						var vetTime = hmsToUNIX(res["pulse_time"]);
-						evs.add(VetEvent("equipe", vetTime, eid, loop));
+						evs.add(VetEvent(author, vetTime, eid, loop));
 						var vetdata = VetData(
 							passed
 						)..hr1 = res["pulse"];
 
-						evs.add(ExamEvent("equipe", vetTime + 60, eid, vetdata, loop));
+						evs.add(ExamEvent(author, vetTime + 60, eid, vetdata, loop));
 						if (retire)
-							evs.add(RetireEvent("equipe", vetTime + 61, eid));
+							evs.add(RetireEvent(author, vetTime + 61, eid));
 						loop++;
 						if (!vetdata.passed || retire) {
 							loopDists = null;
@@ -219,9 +219,9 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 					}
 				}
 
-				evs.add(ExamEvent("equipe", hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
+				evs.add(ExamEvent(author, hmsToUNIX("00:00:02"), eid, VetData(!dsqPreExam), null));
 				if (retirePreExam)
-					evs.add(RetireEvent("equipe", hmsToUNIX("00:00:03"), eid));
+					evs.add(RetireEvent(author, hmsToUNIX("00:00:03"), eid));
 
 				if (loopDists != null && loopDists.length > cat.loops.length) {
 					cat.loops = loopDists.map((d) => Loop(d, TYPICAL_REST_TIME)).toList();
@@ -238,7 +238,7 @@ Map<Equipage, int> _parseEquipages(dynamic equipages, Category cat, List<Event> 
 	}
 	List<int> eids = cat.equipages.map((e) => e.eid).toList();
 	if (hasResults) {
-		evs.add(StartClearanceEvent("equipe", hmsToUNIX("00:00:01"), eids));
+		evs.add(StartClearanceEvent(author, hmsToUNIX("00:00:01"), eids));
 	}
 	return startTimes;
 }

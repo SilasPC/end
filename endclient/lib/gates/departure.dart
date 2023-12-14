@@ -24,12 +24,12 @@ class _DeparturePageState extends State<DeparturePage> {
 	Map<int, DateTime> timers = {};
 
 	Future<void> submit(BuildContext ctx) async {
-		LocalModel m = ctx.read<LocalModel>();
-		var author = ctx.read<Settings>().author;
+		LocalModel model = context.read();
+		final author = model.id;
 		List<EnduranceEvent> evs = timers.entries
-			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, m.model.equipages[kv.key]?.currentLoop))
+			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, model.model.equipages[kv.key]?.currentLoop))
 			.toList();
-		await m.addSync(evs);
+		await model.addSync(evs);
 		timers.clear();
 	}
 

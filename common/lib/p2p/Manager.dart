@@ -157,12 +157,12 @@ class PeerManager<M extends IJSON> {
 			await _save();
 		});
 
-	Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
-		if (evs.any((e) => e.author != id.name)) {
-			print("my id = ${id.name} $evs");
+	Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const [], PrivatePeerIdentity? author]) async {
+		var theAuthor = author ?? _id;
+		if (evs.any((e) => e.author != theAuthor.identity.name)) {
 			throw Exception("event authors must match manager identifier for signing");
 		}
-		var signer = _id.signer;
+		var signer = theAuthor.signer;
 		_addSigned(evs, dels, evs.map((e) => signer.sign(e.toJsonBin())).toList());
 	}
 
@@ -338,7 +338,7 @@ class PeerManager<M extends IJSON> {
 			// print("check certificate ${ps.identity}");
 			// note: this check does not run when loaded from database
 			if (!ps.identity.verifySignature(serverPubKey)) {
-				print("bad certificate");
+				// print("bad certificate");
 				return;
 			}
 		}
