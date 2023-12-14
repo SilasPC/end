@@ -2,8 +2,11 @@
 
 import 'dart:math';
 
-import 'package:esys_client/services/local_model.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:esys_client/consts.dart';
 import 'package:esys_client/v2/dashboard/component/category_card.dart';
+import 'package:esys_client/services/local_model.dart';
+import 'package:esys_client/util/my_icons.dart';
 import 'package:esys_client/v2/dashboard/component/session_summary_card.dart';
 import 'package:esys_client/v2/dashboard/component/notifications_card.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
@@ -27,22 +30,51 @@ class SecretaryView extends StatelessWidget {
 				var stacked = constraints.maxWidth < eqCardWidth + maxGridCardWidth;
 
 				if (stacked) {
-					return ListView(
+					var cats = context.watch<LocalModel>().model.categories;
+					return Column(
 						children: [
-							const Column(
-								mainAxisSize: MainAxisSize.min,
-								children: [
-									SessionSummaryCard(),
-									Expanded(
-										child: EquipagesCard(builder: EquipagesCard.withAdminChoices),
-									),
+							SessionSummaryCard(),
+							CarouselSlider(
+								items: [
+									for (var cat in cats.values)
+									Stack(
+										alignment: Alignment.bottomRight,
+										children: [
+											CategoryCard(cat: cat),
+											Row(
+												mainAxisSize: MainAxisSize.min,
+												children: [
+													if (cat.equipeId case int _)
+													IconButton(
+														style: IconButton.styleFrom(
+															backgroundColor: primaryColor,
+														),
+														icon: Icon(MyIcons.equipe, color: secondaryColor),
+														onPressed: () {},
+													),
+													const SizedBox(width: 16,),
+													IconButton(
+														style: IconButton.styleFrom(
+															backgroundColor: primaryColor,
+														),
+														icon: Icon(MyIcons.trophy, color: secondaryColor),
+														onPressed: () {},
+													),
+													const SizedBox(width: 32,),
+												],
+											),
+										],
+									)
 								],
+								options: CarouselOptions(
+									height: 200,
+									enlargeCenterPage: true,
+								),
 							),
-							SizedBox(
-								height: constraints.maxHeight,
-								child: _catsGrid
-							),
-						],
+							Expanded(
+								child: EquipagesCard(builder: EquipagesCard.withAdminChoices)
+							)
+						]
 					);
 				}
 
@@ -51,7 +83,7 @@ class SecretaryView extends StatelessWidget {
 						Expanded(
 							child: Column(
 								children: [
-									const SessionSummaryCard(),
+									SessionSummaryCard(),
 									Expanded(
 										child: _catsGrid,
 									)
