@@ -3,6 +3,7 @@
 import 'package:animations/animations.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/landing.dart';
+import 'package:esys_client/testing.dart';
 import 'package:esys_client/v2/dashboard/views/settings_view.dart';
 import 'package:esys_client/v2/equipage_page.dart';
 import 'package:esys_client/services/local_model.dart';
@@ -88,6 +89,10 @@ class _LandingState extends State<Landing> {
 														Navigator.of(context)
 															.push(MaterialPageRoute(builder: (context) => const LandingPage()));
 													}),
+                                       labelIconButton("TESTING", Icons.login, onPressed: () {
+														Navigator.of(context)
+															.push(MaterialPageRoute(builder: (context) => const TestingPage()));
+													}),
 												]
 											),
 										)
@@ -109,5 +114,5 @@ class _LandingState extends State<Landing> {
 			)
 		);
 	}
-	
+
 }

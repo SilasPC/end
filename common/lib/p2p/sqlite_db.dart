@@ -7,6 +7,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
+import 'package:common/util/json.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -68,8 +69,8 @@ class SqliteDatabase extends EventDatabase<Model> {
 	Future<(SyncMsg<Model>, PreSyncMsg?)> loadData(String peerId) async {
 		var data = await (
 			_db.batch()
-				..query("events", columns: ["json"])
-				..query("deletes", columns: ["json"])
+				..query("events")
+				..query("deletes")
 				..query("peers")
 		).commit();
 
