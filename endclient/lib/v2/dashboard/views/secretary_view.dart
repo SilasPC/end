@@ -34,6 +34,7 @@ class SecretaryView extends StatelessWidget {
 					return Column(
 						children: [
 							SessionSummaryCard(),
+                     if (cats.isNotEmpty)
 							CarouselSlider(
 								items: [
 									for (var cat in cats.values)

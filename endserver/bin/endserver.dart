@@ -61,7 +61,7 @@ class SocketPeer extends Peer {
 			ack(res);
 		}
 	}
-	
+
 	@override
 	bool isOutgoing() => false;
 

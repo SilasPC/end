@@ -16,7 +16,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 	SyncInfo _lastSaved = SyncInfo.zero();
 
 	SyncInfo get lastSaved => _lastSaved;
-	
+
 	SqliteDatabase._(this._db);
 	static Future<SqliteDatabase> create() async {
 		var db = await _createDB();
@@ -93,7 +93,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 		var identities = preSyncs
 			.map((d) => d.identity)
 			.toList();
-		
+
 		return (SyncMsg(evs, dels, sigs, identities), self);
 	}
 
@@ -134,7 +134,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			"""))
 			.commit(noResult: true);
 	}
-	
+
 	@override
 	Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) {
 		var row = {

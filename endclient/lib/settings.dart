@@ -7,6 +7,7 @@ import 'package:common/util.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/connection_indicator.dart';
+import 'package:esys_client/v2/equipe_import_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -184,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
 						ListTile(
 							leading: const Icon(Icons.download),
 							title: const Text("Load model..."),
-							onTap: loadModel,
+							onTap: () => EquipeImportSheet.showAsBottomSheet(context),
 						),
 					],
 					const ListTile(
@@ -220,7 +221,7 @@ class _SettingsPageState extends State<SettingsPage> {
 			["DEMO", ...meets.map((e) => e.name)],
 			(name) async {
 				if (name == "DEMO") {
-					await m.addSync(demoInitEvent(nowUNIX()+300));
+					await m.addSync(demoInitEvent(m.id, nowUNIX()+300));
 				} else {
 					var meet = meets.firstWhere((e) => e.name == name);
 					try {

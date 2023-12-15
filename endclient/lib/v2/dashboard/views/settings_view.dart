@@ -2,15 +2,12 @@
 
 import 'dart:io';
 
-import 'package:common/Equipe.dart';
-import 'package:common/models/demo.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/protocol.dart';
-import 'package:common/util/unix.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
-import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
+import 'package:esys_client/v2/equipe_import_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,7 +24,7 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsCardState extends State<SettingsView> {
-	
+
 	final TextEditingController _servAddr = TextEditingController();
 	final TextEditingController _author = TextEditingController();
 
@@ -48,33 +45,6 @@ class _SettingsCardState extends State<SettingsView> {
 			.then((i) => setState(() => _packageInfo = i))
 			.catchError((_) {});
 		return null;
-	}
-
-	Future<void> loadModel() async {
-		var m = context.read<LocalModel>();
-		var meets = await EquipeMeeting.loadMany();
-		showChoicesModal(
-			context,
-			["DEMO", ...meets.map((e) => e.name)],
-			(name) async {
-				if (name == "DEMO") {
-					await m.addSync(demoInitEvent(nowUNIX()+300));
-				} else {
-					var meet = meets.firstWhere((e) => e.name == name);
-					try {
-						var evs = await meet.loadEvents(m.id);
-						await m.addSync(evs);
-					} catch (e, s) {
-						print(e);
-						print(s);
-						ScaffoldMessenger.of(context)
-							.showSnackBar(const SnackBar(
-								content: Text("Failed to load from Equipe"),
-							));
-					}
-				}
-			}
-		);
 	}
 
 	static Future<void> saveCSV(BuildContext context) async {
@@ -252,7 +222,7 @@ class _SettingsCardState extends State<SettingsView> {
 								ListTile(
 									leading: const Icon(Icons.download),
 									title: const Text("Load model..."),
-									onTap: loadModel,
+							      onTap: () => EquipeImportSheet.showAsBottomSheet(context),
 								),
 								ListTile(
 									leading: const Icon(Icons.sync),
@@ -322,5 +292,5 @@ class _SettingsCardState extends State<SettingsView> {
 					},
 				) : null,
 		);
-	
+
 }

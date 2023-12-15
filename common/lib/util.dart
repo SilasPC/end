@@ -27,11 +27,13 @@ Stream<T> futStream<T>(Iterable<Future<T>> ts) {
          .whenComplete(() {
             if (--i == 0) {
                stream.close();
-            } 
+            }
          });
    }
    if (--i == 0) {
 		stream.close();
-	} 
+	}
    return stream.stream;
 }
+
+bool nullOrEmpty(str) => str == null || str == "";

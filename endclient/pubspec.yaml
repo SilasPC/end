@@ -14,12 +14,13 @@ dependencies:
 
   # convenience
   provider: ^6.0.4
-  package_info_plus: ^3.1.2  
+  package_info_plus: ^3.1.2
 
   # ui
   animations: ^2.0.5
   numberpicker: ^2.1.2
   flutter_treeview: ^1.0.7
+  carousel_slider: ^4.2.1
   # flutter_spinkit: ^5.1.0
   # bottom_drawer: ^0.0.5
   # marquee: ^2.2.3
@@ -38,14 +39,13 @@ dependencies:
   # other
   wakelock: ^0.6.2
   mutex: ^3.0.1
-  flutter_native_splash: ^2.3.8
+  flutter_native_splash: ^2.3.7
   locally: ^1.0.5
   path_provider: ^2.1.0
   path: ^1.8.2
   url_launcher: ^6.1.11
   socket_io_client: ^1.0.0
-  carousel_slider: ^4.2.1
-  
+
 
 dev_dependencies:
   flutter_test:

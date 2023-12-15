@@ -69,6 +69,7 @@ class Equipage extends IJSON {
 	set category(Category cat) {
 		_category = cat;
 		loops = cat.loops.map((l) => LoopData(l)).toList();
+      loops.first.expDeparture = cat.startTime + startOffsetSecs;
 	}
 
 	Equipage(this.eid, this.rider,this.horse, this._category);
@@ -83,7 +84,10 @@ class Equipage extends IJSON {
 				}
 			}
 			currentLoop = cur + 1;
-		}
+		} else {
+         currentLoop = 0;
+         loops.first.expDeparture = category.startTime + startOffsetSecs;
+      }
 		return true;
 	}
 
@@ -143,19 +147,19 @@ class Equipage extends IJSON {
 
 	int get startTime => category.startTime + startOffsetSecs;
 
-	int? idealFinishTime() => 
+	int? idealFinishTime() =>
 		switch (category.idealRideTime()) {
 			int idealRideTime => startTime + idealRideTime + category.totalRestTime(),
 			_ => null
 		};
 
-	int? minFinishTime() => 
+	int? minFinishTime() =>
 		switch (category.minRideTime()) {
 			int minRideTime => startTime + minRideTime + category.totalRestTime(),
 			_ => null
 		};
 
-	int? maxFinishTime() => 
+	int? maxFinishTime() =>
 		switch (category.maxRideTime()) {
 			int maxRideTime => startTime + maxRideTime + category.totalRestTime(),
 			_ => null

@@ -10,7 +10,7 @@ void main() {
 		var meets = await EquipeMeeting.loadMany();
       var futs = futStream(
          meets.map((m) async {
-            var evs = await m.loadEvents();
+            var evs = await m.loadEvents("");
             return (m,evs);
          })
       )
