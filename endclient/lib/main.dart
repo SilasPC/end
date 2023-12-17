@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'package:common/models/MetaModel.dart';
+import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/sqlite_db.dart';
 import 'package:esys_client/service_graph.dart';
 import 'package:esys_client/services/identity.dart';
+import 'package:esys_client/services/states.dart';
 import 'package:esys_client/theme.dart';
 import 'package:esys_client/v2/landing.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +50,7 @@ class MyApp extends StatelessWidget {
 	Widget build(BuildContext context) {
 
 		if (Platform.isAndroid || Platform.isIOS) {
-			
+
 			SystemChrome.setEnabledSystemUIMode(
 				SystemUiMode.manual,
 				overlays: [
@@ -93,22 +97,35 @@ class MyApp extends StatelessWidget {
 }
 
 ServiceGraph defineServices() {
-	var b = ServiceGraph();
+
+   var b = ServiceGraph();
+
+   var id = IdentityService();
+   var pm = PeerManager(
+      id.identity!,
+      SqliteDatabase.create,
+      MetaModel()
+   );
+
+   b.addListenable(id);
+   b.add(pm);
+
+   // TODO: pipe id => peerman
 
 	b.add(SettingsService.createSync());
 	b.deriveListenable((SettingsService s) => s.current);
 
 	b.addListenable(LocalModel());
 
-	b.pipe((Settings set, LocalModel lm) {
-		lm.setServerUri(set.serverURI);
-		lm.autoYield = set.autoYield;
+	b.pipe((Settings set, ServerConnection conn) {
+		conn.setServerUri(set.serverURI);
+		conn.autoYield = set.autoYield;
 	});
 
 	b.addListenable(NearbyManager());
-	b.pipe((NearbyManager nm, LocalModel lm) {
+	b.pipe((NearbyManager nm, PeerManager man) {
 		for (var p in nm.devices) {
-			lm.manager.addPeer(p);
+			man.addPeer(p);
 		}
 	});
 	b.pipe((Settings set, NearbyManager nm) {
@@ -116,14 +133,13 @@ ServiceGraph defineServices() {
 	});
 
 	b.addListenableDep(ServerConnection.new);
-	b.addListenableDep((LocalModel m) => PeerStates(m.manager));
-	b.addListenableDep((LocalModel m) => SessionState(m.manager));
+	b.addListenableDep((PeerManager m) => PeerStates(m));
+	b.addListenableDep((PeerManager m) => SessionState(m));
 
 	b.pipe((ServerConnection conn, NearbyManager nm) {
 		nm.autoConnect = !conn.inSync;
 	});
 
-	b.addListenable(IdentityService());
 
 	return b;
 }

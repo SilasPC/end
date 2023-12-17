@@ -1,6 +1,5 @@
 
 import 'package:common/models/glob.dart';
-import 'package:esys_client/consts.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/results.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
@@ -12,7 +11,7 @@ class CategoryCard extends StatelessWidget {
 	final Category cat;
 
 	const CategoryCard({super.key, required this.cat});
-	
+
 	@override
 	Widget build(BuildContext context) {
 		int len = context.select((LocalModel _) => cat.equipages.length);

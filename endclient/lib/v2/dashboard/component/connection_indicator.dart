@@ -1,13 +1,13 @@
 
 import 'package:esys_client/consts.dart';
-import 'package:esys_client/services/local_model.dart';
+import 'package:esys_client/services/states.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ConnectionIndicator2 extends StatelessWidget {
 
 	final bool iconOnly;
-	
+
 	const ConnectionIndicator2({
 		super.key,
 		this.iconOnly = false,
@@ -15,7 +15,7 @@ class ConnectionIndicator2 extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
-	
+
 		ServerConnection conn = context.watch();
 		PeerStates peers = context.watch();
 		var peerCount = peers.peers
@@ -47,7 +47,7 @@ class ConnectionIndicator2 extends StatelessWidget {
 					subtitle: Text("$peerCount peer(s)"),
 				),
 		};
-	
+
 	}
 
 	Widget _icon(ServerConnection conn) =>

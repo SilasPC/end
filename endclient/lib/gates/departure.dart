@@ -3,6 +3,7 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/gates/generic_gate.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/util/timer.dart';
 import 'package:esys_client/util/time_lock.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:common/models/glob.dart';
 import 'package:provider/provider.dart';
 
 import '../services/local_model.dart';
-import '../services/settings.dart';
 
 class DeparturePage extends StatefulWidget {
 	const DeparturePage({super.key});
@@ -25,7 +25,7 @@ class _DeparturePageState extends State<DeparturePage> {
 
 	Future<void> submit(BuildContext ctx) async {
 		LocalModel model = context.read();
-		final author = model.id;
+		final author = context.read<IdentityService>().author;
 		List<EnduranceEvent> evs = timers.entries
 			.map((kv) => DepartureEvent(author, toUNIX(kv.value), kv.key, model.model.equipages[kv.key]?.currentLoop))
 			.toList();

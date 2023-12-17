@@ -6,6 +6,7 @@ import 'package:common/models/demo.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
+import 'package:esys_client/services/states.dart';
 import 'package:esys_client/util/connection_indicator.dart';
 import 'package:esys_client/v2/equipe_import_sheet.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
 	final TextEditingController _servAddr = TextEditingController();
-	final TextEditingController _author = TextEditingController();
 
 	late Settings set;
 
@@ -34,7 +34,6 @@ class _SettingsPageState extends State<SettingsPage> {
 		super.initState();
 		set = context.read<Settings>().clone();
 		_servAddr.text = set.serverURI;
-		_author.text = set.author;
 	}
 
 	@override
@@ -61,18 +60,6 @@ class _SettingsPageState extends State<SettingsPage> {
 								set.serverURI = val;
 								set.save();
 							},
-						)
-					),
-					ListTile(
-						title: TextField(
-							decoration: const InputDecoration(
-								label: Text("Author"),
-							),
-							controller: _author,
-							onSubmitted: (val) => setState((){
-								set.author = val;
-								set.save();
-							}),
 						)
 					),
 					ListTile(

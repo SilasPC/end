@@ -6,6 +6,7 @@ import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
+import 'package:esys_client/services/states.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:esys_client/v2/equipe_import_sheet.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,6 @@ class SettingsView extends StatefulWidget {
 class _SettingsCardState extends State<SettingsView> {
 
 	final TextEditingController _servAddr = TextEditingController();
-	final TextEditingController _author = TextEditingController();
 
 	late Settings set;
 
@@ -35,7 +35,6 @@ class _SettingsCardState extends State<SettingsView> {
 		super.initState();
 		set = context.read<Settings>().clone();
 		_servAddr.text = set.serverURI;
-		_author.text = set.author;
 	}
 
 	PackageInfo? _packageInfo;
@@ -229,19 +228,6 @@ class _SettingsCardState extends State<SettingsView> {
 									title: const Text("Resync"),
 									onTap: () => model.resetModel(),
 								),
-								listGroupHeader("Security"),
-								ListTile(
-									title: TextField(
-										decoration: const InputDecoration(
-											label: Text("Author"),
-										),
-										controller: _author,
-										onSubmitted: (val) => setState((){
-											set.author = val;
-											set.save();
-										}),
-									)
-								),
 							],
 						),
 					),
@@ -288,7 +274,7 @@ class _SettingsCardState extends State<SettingsView> {
 				? IconButton(
 					icon: const Icon(Icons.cloud_download),
 					onPressed: () {
-						context.read<LocalModel>().manager.yieldTo(p);
+						context.read<PeerManager>().yieldTo(p);
 					},
 				) : null,
 		);

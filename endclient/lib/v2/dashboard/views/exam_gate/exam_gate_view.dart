@@ -3,8 +3,8 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/services/local_model.dart';
-import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/int_picker.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/views/exam_gate/loop_card.dart';
@@ -27,7 +27,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 	Future<void> submit(VetData data, bool passed, {bool retire = false}) async {
 		if (equipage case Equipage equipage) {
 			LocalModel model = context.read();
-			final author = model.id;
+			final author = context.read<IdentityService>().author;
 			data.passed = passed;
 			int now = nowUNIX();
 			model.addSync([
@@ -41,7 +41,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 			});
 		}
 	}
-	
+
 	@override
 	Widget build(BuildContext context) {
 		// UI: flex width => layout change when needed
@@ -117,7 +117,7 @@ class _ExamGateViewState extends State<ExamGateView> {
 			},
 		);
 	}
-	
+
 	List<Widget> loopCards(Equipage equipage) {
 		var lps = equipage.loops;
 		int? cl = equipage.currentLoop;

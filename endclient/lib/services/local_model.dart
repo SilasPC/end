@@ -7,74 +7,40 @@ import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:common/p2p/sqlite_db.dart';
-import 'package:esys_client/p2p/server_peer.dart';
 import 'package:flutter/widgets.dart';
-
-part 'states.dart';
 
 class LocalModel with ChangeNotifier {
 
-	bool _autoYield = false;
-	bool get autoYield => _autoYield;
-	set autoYield (bool value) {
-		if (!_autoYield && value) {
-			if (_master case Peer master when master.state.isConflict) {
-				manager.yieldTo(master);
-			}
-		}
-		_autoYield = value;
-	}
-
 	final MetaModel metaModel = MetaModel() ;
 
-	late PeerManager<Model> manager;
-	ServerPeer? _master;
-	StreamSubscription? _stateChangeSub;
+	late PeerManager<Model> _manager;
 
-	StreamController<void> serverUpdateStream = StreamController.broadcast();
+   StreamSubscription? _sub;
 
 	LocalModel() {
-		manager = PeerManager(
+		_manager = PeerManager(
 			PrivatePeerIdentity.client(Platform.localHostname),
 			SqliteDatabase.create,
 			metaModel,
 		);
-		manager.updateStream.listen((_) => notifyListeners());
-		_stateChangeSub = manager.peerStateChanges
-			.where((p) => p == _master)
-			.listen((master) {
-				if (master.state.isConflict && _autoYield) {
-					manager.yieldTo(master);
-				}
-				serverUpdateStream.add(null);
-			});
+		_sub = _manager.updateStream.listen((_) => notifyListeners());
 	}
 
-	@override
-	void dispose() {
-		super.dispose();
-		_stateChangeSub?.cancel();
-	}
+   @override
+   void dispose() {
+      _sub?.cancel();
+      super.dispose();
+   }
 
-	void setServerUri(String uri) {
-		if (_master?.uri == uri) {
-			return;
-		}
-		_master?.disconnect();
-		manager.addPeer(_master = ServerPeer(uri));
-		notifyListeners();
-		serverUpdateStream.add(null);
-	}
-
-	String get id => manager.id.name;
+	String get id => _manager.id.name;
 
 	Future<void> addSync(List<Event<Model>> evs, [List<Event<Model>> dels = const []])
-		=> manager.add(evs, dels);
+		=> _manager.add(evs, dels);
 
-	Set<Event<Model>> get deletes => manager.deletes;
-	ReadOnlyOrderedSet<Event<Model>> get events => manager.events;
-	Model get model => manager.model;
+	Set<Event<Model>> get deletes => _manager.deletes;
+	ReadOnlyOrderedSet<Event<Model>> get events => _manager.events;
+	Model get model => _manager.model;
 
-	void resetModel() => manager.resetModel();
+	void resetModel() => _manager.resetModel();
 
 }

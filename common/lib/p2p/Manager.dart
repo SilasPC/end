@@ -515,6 +515,20 @@ class Handle<M extends IJSON> extends EventModelHandle<M> {
 
 }
 
+class DummyPeer extends Peer {
+   @override
+   void connect() {}
+
+   @override
+   void disconnect() {}
+
+   @override
+   bool isOutgoing() => true;
+
+   @override
+   Future<List<int>?> send(String msg, List<int> data) async => null;
+}
+
 class LocalPeer extends Peer {
 
 	late final LocalPeer _other;

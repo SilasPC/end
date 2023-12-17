@@ -1,6 +1,7 @@
 
 
 import 'package:animations/animations.dart';
+import 'package:common/p2p/Manager.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/landing.dart';
 import 'package:esys_client/testing.dart';
@@ -34,7 +35,7 @@ class _LandingState extends State<Landing> {
 	void _init() async {
 		var nav = Navigator.of(context);
 		var isService = context.read<IdentityService>();
-		await context.read<LocalModel>().manager.ready;
+		await context.read<PeerManager>().ready;
 		if (await isService.isAuthorized()) {
 			nav.push(MaterialPageRoute(
 				builder: (context) => const Dashboard()

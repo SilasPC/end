@@ -4,8 +4,8 @@ import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/services/local_model.dart';
-import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/chip_strip.dart';
 import 'package:esys_client/util/input_modals.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
@@ -20,7 +20,7 @@ class EquipagesCard extends StatefulWidget {
 	final EquipageTile Function(BuildContext, EquipagesCard, Equipage, Color?) builder;
 	final void Function(Equipage)? onTap;
 	final String? emptyLabel;
-	
+
 	const EquipagesCard({
 		super.key,
 		this.builder = EquipagesCard.withPlainTiles,
@@ -127,7 +127,7 @@ Widget equipageAdministrationPopupMenuButton(Equipage eq, BuildContext context) 
 		splashRadius: splashRadius,
 		onSelected: (value) {
 			LocalModel model = context.read();
-			final author = model.id;
+			final author = context.read<IdentityService>().author;
 			switch (value) {
 				case 'start-clearance':
 					model.addSync([

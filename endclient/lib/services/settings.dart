@@ -54,7 +54,6 @@ class Settings extends IJSON {
 	final SettingsService _service;
 
 	String serverURI;
-	String author;
 	bool darkTheme;
 	bool largeUI;
 	bool showAdmin;
@@ -66,7 +65,6 @@ class Settings extends IJSON {
 	Settings(
 		this._service,
 		this.serverURI,
-		this.author,
 		this.darkTheme,
 		this.largeUI,
 		this.showAdmin,
@@ -77,7 +75,6 @@ class Settings extends IJSON {
 	);
 	Settings.defaults(this._service):
 		serverURI = "https://kastanie.ddns.net/esys",
-		author = Platform.localHostname,
 		darkTheme = false,
 		largeUI = false,
 		showAdmin = false,
@@ -95,7 +92,6 @@ class Settings extends IJSON {
 	Settings clone() => Settings(
 		_service,
 		serverURI,
-		author,
 		darkTheme,
 		largeUI,
 		showAdmin,
@@ -108,7 +104,6 @@ class Settings extends IJSON {
 	@override
 	JSON toJson() => {
 		'serverURI': serverURI,
-		'author': author,
 		'darkTheme': darkTheme,
 		'largeUI': largeUI,
 		'showAdmin': showAdmin,
@@ -122,7 +117,6 @@ class Settings extends IJSON {
 		Settings(
 			service,
 			json['serverURI'] as String,
-			json['author'] as String,
 			json['darkTheme'] as bool,
 			json['largeUI'] as bool,
 			json['showAdmin'] as bool,

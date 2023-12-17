@@ -1,5 +1,6 @@
 
 import 'package:esys_client/consts.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +8,6 @@ import 'package:common/EnduranceEvent.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 
-import '../services/settings.dart';
 import '../util/input_modals.dart';
 import '../services/local_model.dart';
 
@@ -27,7 +27,7 @@ class _ExamDataPageState extends State<ExamDataPage> {
 
 	Future<void> submit(BuildContext context, bool passed, {bool retire = false}) async {
 		LocalModel model = context.read();
-		final author = model.id;
+		final author = context.read<IdentityService>().author;
 		data.passed = passed;
 		int now = nowUNIX();
 		model.addSync([
