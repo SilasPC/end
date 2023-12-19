@@ -54,7 +54,7 @@ class TimerList {
 	int get length => times.length;
 	bool get isEmpty => times.isEmpty;
 	bool get isNotEmpty => times.isNotEmpty;
-	
+
 	void addNow() {
 		DateTime now = DateTime.now();
 		now = now.subtract(Duration(milliseconds: now.millisecond));
@@ -90,5 +90,5 @@ class BackgroundStack extends StatelessWidget {
 				child,
 			]
 		);
-		
+
 }

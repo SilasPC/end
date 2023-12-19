@@ -1,13 +1,11 @@
 
 import 'dart:convert';
-
 import 'package:common/EnduranceEvent.dart';
 import 'package:common/EventModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
-import 'package:common/util/json.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -105,7 +103,7 @@ class SqliteDatabase extends EventDatabase<Model> {
 			onCreate: (db, _) => _resetDatabase(db),
 			onUpgrade: (db, _, __) => _resetDatabase(db),
 			onDowngrade: (db, _, __) => _resetDatabase(db),
-			version: 13
+			version: 14
 		);
 		return db;
 	}

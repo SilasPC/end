@@ -1,4 +1,5 @@
 
+import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:esys_client/services/states.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
 				? IconButton(
 					icon: const Icon(Icons.cloud_download),
 					onPressed: () {
-						context.read<PeerManager>().yieldTo(p);
+						context.read<PeerManager<Model>>().yieldTo(p);
 					},
 				) : null,
 		);

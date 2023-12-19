@@ -6,24 +6,11 @@ part of 'protocol.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PrivatePeerIdentity _$PrivatePeerIdentityFromJson(Map<String, dynamic> json) =>
-    PrivatePeerIdentity(
-      const PrivateKeyConverter()
-          .fromJson(json['privateKey'] as String),
-      PeerIdentity.fromJson(json['identity'] as Map<String, dynamic>),
-    );
-
-Map<String, dynamic> _$PrivatePeerIdentityToJson(
-        PrivatePeerIdentity instance) =>
-    <String, dynamic>{
-      'privateKey': const PrivateKeyConverter().toJson(instance.privateKey),
-      'identity': instance.identity,
-    };
-
 PeerIdentity _$PeerIdentityFromJson(Map<String, dynamic> json) => PeerIdentity(
       const PublicKeyConverter().fromJson(json['key'] as String),
       const SignatureConverter().fromJson(json['signature'] as String),
       json['name'] as String,
+      PeerPermission.fromJson(json['perms'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$PeerIdentityToJson(PeerIdentity instance) =>
@@ -31,6 +18,7 @@ Map<String, dynamic> _$PeerIdentityToJson(PeerIdentity instance) =>
       'key': const PublicKeyConverter().toJson(instance.key),
       'signature': const SignatureConverter().toJson(instance.signature),
       'name': instance.name,
+      'perms': instance.perms,
     };
 
 PreSyncMsg _$PreSyncMsgFromJson(Map<String, dynamic> json) => PreSyncMsg(

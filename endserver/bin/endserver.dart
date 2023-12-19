@@ -3,19 +3,23 @@ import 'dart:async';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
+import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'socket_peer.dart';
 
 Future<void> main() async {
 
 	sqfliteFfiInit();
 	databaseFactory = databaseFactoryFfi;
 
-	var man = PeerManager<Model>(
-		PrivatePeerIdentity.server("eSys"),
-		() => NullDatabase("server", 0),//SqliteDatabase.create,
+   final identity = PrivatePeerIdentity.server();
+	final man = PeerManager<Model>(
+		identity,
+		() => NullDatabase(identity.identity.name, 0),//SqliteDatabase.create,
       MetaModel(),
 	);
 
@@ -31,94 +35,36 @@ Future<void> main() async {
 			return ok ? SyncProtocol.OK : SyncProtocol.NOT_OK;
 		});
 
+      setJsonAck(client, "auth", (json) {
+         // VULN: plaintext / hardcoded
+         // VULN: author duplication
+         PeerIdentity? id;
+         var ok = json["password"] == "password";
+         if (ok) {
+            id = PeerIdentity.signed(
+               json["name"] as String,
+               PublicKeyConverter().fromJson(json["key"]),
+               PeerPermission.all,
+               identity.signer,
+            );
+         }
+         return {
+            "id": id
+         };
+      });
+
 	});
 	io.listen(3000);
 }
 
-class SocketPeer extends Peer {
-
-	final Socket socket;
-
-	SocketPeer(this.socket) {
-		socket.on("connect", (_) {
-			print("connect $id");
-			setConnected(true);
-		});
-		socket.on("disconnect", (_) {
-			print("disconnect $id");
-			setConnected(false);
-		});
-		for (var ev in SyncProtocol.events) {
-			socket.on(ev, (data) => _handler(ev, data));
-		}
-	}
-
-	void _handler(String msg, List data) async {
-		var bin = (data.first as List).cast<int>();
-		var ack = data.last;
-		var res = await onRecieve(msg, bin);
-		if (res != null) {
-			ack(res);
-		}
-	}
-
-	@override
-	bool isOutgoing() => false;
-
-	@override
-	void connect() {}
-
-	@override
-	void disconnect() => socket.disconnect();
-
-	@override
-	Future<List<int>?> send(String msg, List<int> data) async {
-		if (socket.disconnected) {
-			return null;
-		}
-
-		Completer<List<int>?> c = Completer();
-
-		socket.emitWithAck(
-			msg,
-			data,
-			binary: true,
-			ack: (msg) {
-				if (!c.isCompleted) {
-					c.complete((msg as List).cast<int>());
-				}
-			}
-		);
-		Timer(const Duration(seconds: 5), () {
-			if (!c.isCompleted) {
-				c.complete(null);
-			}
-		});
-		return c.future;
-	}
-
-}
-
-void setJsonAck2<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<T?>? Function(T) handler) {
+void setJsonAck(dynamic client, String msg, FutureOr<JSON?>? Function(JSON) handler) {
 	client.on(msg, (data) async {
 		List dataList = data as List;
 		var reqData = dataList.first;
 		var ack = dataList.last;
-		var res = await handler(reviver(IJSON.fromBin(reqData)));
+		var res = await handler(IJSON.fromBin(reqData));
 		if (res != null) {
-			ack(res.toJsonBin());
-		}
-	});
-}
-
-void setJsonAck<T extends IJSON>(dynamic client, String msg, Reviver<T> reviver, FutureOr<String?>? Function(T) handler) {
-	client.on(msg, (data) async {
-		List dataList = data as List;
-		var reqData = dataList.first;
-		var ack = dataList.last;
-		var res = await handler(reviver(IJSON.fromBin(reqData)));
-		if (res != null) {
-			ack(res);
+			ack(IJSON.toBin(res));
 		}
 	});
 }

@@ -16,6 +16,8 @@ abstract class IJSON with JsonMixin {
 	const IJSON();
 	static JSON fromBin(List<int> bin) =>
 		jsonDecode(String.fromCharCodes(bin));
+   static List<int> toBin(JSON json) =>
+      jsonEncode(json).codeUnits;
 }
 
 /** Optionally map a dictionary key */

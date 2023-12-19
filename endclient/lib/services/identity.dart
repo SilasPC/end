@@ -6,10 +6,15 @@ import 'package:flutter/material.dart';
 
 class IdentityService extends ChangeNotifier {
 
-	final PrivatePeerIdentity _identity = PrivatePeerIdentity.client(Platform.localHostname);
+	PrivatePeerIdentity _identity = PrivatePeerIdentity.anonymous();
 
-	PrivatePeerIdentity? get identity => _identity;
+	PrivatePeerIdentity get identity => _identity;
 	String get author => Platform.localHostname;
+
+   void setIdentity(PrivatePeerIdentity id) {
+      _identity = id;
+      notifyListeners();
+   }
 
 	IdentityService() {
 		/* SharedPreferences.getInstance()
@@ -17,11 +22,5 @@ class IdentityService extends ChangeNotifier {
 				(sp) => sp.g
 			) */
 	}
-
-	bool authorized = false;
-
-	// TODO: implement
-	Future<bool> isAuthorized() =>
-		Future.value(authorized);
 
 }

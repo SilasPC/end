@@ -1,7 +1,7 @@
 
 import 'dart:async';
-import 'dart:typed_data';
-
+import 'package:crypto_keys/crypto_keys.dart';
+import 'util/typedefs.dart';
 export 'util/unix.dart';
 export 'util/json.dart';
 export 'util/list.dart';
@@ -37,3 +37,8 @@ Stream<T> futStream<T>(Iterable<Future<T>> ts) {
 }
 
 bool nullOrEmpty(str) => str == null || str == "";
+
+(PubKey, PrivKey) genKeyPair() {
+   var pair = KeyPair.generateRsa(bitStrength: 512);
+   return (pair.publicKey as PubKey, pair.privateKey as PrivKey);
+}

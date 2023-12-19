@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:common/models/Model.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:esys_client/services/local_model.dart';
@@ -274,7 +275,7 @@ class _SettingsCardState extends State<SettingsView> {
 				? IconButton(
 					icon: const Icon(Icons.cloud_download),
 					onPressed: () {
-						context.read<PeerManager>().yieldTo(p);
+						context.read<PeerManager<Model>>().yieldTo(p);
 					},
 				) : null,
 		);

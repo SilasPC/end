@@ -1,7 +1,11 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/keys.dart';
+import 'package:common/p2p/protocol.dart';
+import 'package:common/util.dart';
 import 'package:esys_client/p2p/server_peer.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +64,21 @@ class ServerConnection extends ChangeNotifier {
 		var res = await peer?.send("yield", []);
 		return res?.firstOrNull == 1;
 	}
+
+   Future<PeerIdentity?> auth(String password, PubKey key, String name) async {
+      var data = await peer?.send("auth", IJSON.toBin({
+         "password": password,
+         "key": PublicKeyConverter().toJson(key),
+         "name": name,
+      }));
+      if (data == null) return null;
+      switch (IJSON.fromBin(data)) {
+         case { "id": String id }:
+            return PeerIdentity.fromJson(jsonDecode(id));
+         default:
+            return null;
+      }
+   }
 
 }
 

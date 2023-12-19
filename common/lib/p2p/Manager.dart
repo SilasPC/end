@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
-import 'package:common/p2p/keys.dart';
 import 'package:crypto_keys/crypto_keys.dart';
 import 'package:mutex/mutex.dart';
 import '../util.dart';
@@ -96,6 +95,7 @@ class PeerManager<M extends IJSON> {
 	Stream<Null> get updateStream => _onUpdate.stream;
 	Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
+   final PeerIdentity _trustAnchor = PeerIdentity.server();
 	final PrivatePeerIdentity _id;
 	PeerIdentity get id => _id.identity;
 
@@ -337,7 +337,7 @@ class PeerManager<M extends IJSON> {
 		if (p._lastKnownState == null) {
 			// print("check certificate ${ps.identity}");
 			// note: this check does not run when loaded from database
-			if (!ps.identity.verifySignature(serverPubKey)) {
+			if (!ps.identity.verifySignature(_trustAnchor.key)) {
 				// print("bad certificate");
 				return;
 			}
@@ -389,7 +389,7 @@ class PeerManager<M extends IJSON> {
 						if (_authors.containsKey(author.name)) {
 							continue;
 						}
-						if (!author.verifySignature(serverPubKey)) {
+						if (!author.verifySignature(_trustAnchor.key)) {
 							// print("bad author certificate")
 							p.disconnect();
 							return null;

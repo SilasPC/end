@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:common/models/MetaModel.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
 import 'package:esys_client/service_graph.dart';
@@ -102,28 +103,32 @@ ServiceGraph defineServices() {
 
    var id = IdentityService();
    var pm = PeerManager(
-      id.identity!,
+      id.identity,
       SqliteDatabase.create,
       MetaModel()
    );
 
-   b.addListenable(id);
    b.add(pm);
-
-   // TODO: pipe id => peerman
-
 	b.add(SettingsService.createSync());
+
+   b.addListenable(id);
+	b.addListenable(NearbyManager());
+
+	b.addListenableDep((PeerManager<Model> pm) => LocalModel(pm));
+	b.addListenableDep((PeerManager<Model> man) => ServerConnection(man));
+	b.addListenableDep((PeerManager<Model> m) => PeerStates(m));
+	b.addListenableDep((PeerManager<Model> m) => SessionState(m));
+
 	b.deriveListenable((SettingsService s) => s.current);
 
-	b.addListenable(LocalModel());
+   // TODO: pipe id => peerman
 
 	b.pipe((Settings set, ServerConnection conn) {
 		conn.setServerUri(set.serverURI);
 		conn.autoYield = set.autoYield;
 	});
 
-	b.addListenable(NearbyManager());
-	b.pipe((NearbyManager nm, PeerManager man) {
+	b.pipe((NearbyManager nm, PeerManager<Model> man) {
 		for (var p in nm.devices) {
 			man.addPeer(p);
 		}
@@ -131,10 +136,6 @@ ServiceGraph defineServices() {
 	b.pipe((Settings set, NearbyManager nm) {
 		nm.enabled = set.useP2P;
 	});
-
-	b.addListenableDep(ServerConnection.new);
-	b.addListenableDep((PeerManager m) => PeerStates(m));
-	b.addListenableDep((PeerManager m) => SessionState(m));
 
 	b.pipe((ServerConnection conn, NearbyManager nm) {
 		nm.autoConnect = !conn.inSync;

@@ -1,12 +1,9 @@
 
 import 'dart:async';
-import 'dart:io';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
-import 'package:common/p2p/protocol.dart';
-import 'package:common/p2p/sqlite_db.dart';
 import 'package:flutter/widgets.dart';
 
 class LocalModel with ChangeNotifier {
@@ -17,12 +14,7 @@ class LocalModel with ChangeNotifier {
 
    StreamSubscription? _sub;
 
-	LocalModel() {
-		_manager = PeerManager(
-			PrivatePeerIdentity.client(Platform.localHostname),
-			SqliteDatabase.create,
-			metaModel,
-		);
+	LocalModel(this._manager) {
 		_sub = _manager.updateStream.listen((_) => notifyListeners());
 	}
 

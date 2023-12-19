@@ -1,6 +1,7 @@
 
 
 import 'package:animations/animations.dart';
+import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/landing.dart';
@@ -12,6 +13,7 @@ import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/dashboard.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
+import 'package:esys_client/v2/login_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
@@ -34,9 +36,9 @@ class _LandingState extends State<Landing> {
 
 	void _init() async {
 		var nav = Navigator.of(context);
-		var isService = context.read<IdentityService>();
-		await context.read<PeerManager>().ready;
-		if (await isService.isAuthorized()) {
+		var idService = context.read<IdentityService>();
+		await context.read<PeerManager<Model>>().ready;
+		if (idService.identity.identity.perms.admin) {
 			nav.push(MaterialPageRoute(
 				builder: (context) => const Dashboard()
 			));
@@ -77,8 +79,10 @@ class _LandingState extends State<Landing> {
 												alignment: WrapAlignment.spaceEvenly,
 												children: [
 													labelIconButton("LOGIN", Icons.login, onPressed: () {
-														Navigator.of(context)
-															.push(MaterialPageRoute(builder: (context) => const Dashboard()));
+                                          showDialog(
+                                             context: context,
+                                             builder: (_) => LoginDialog()
+                                          );
 													}),
 													labelIconButton("SETTINGS", Icons.settings, onPressed: () {
 														showModal(
@@ -101,6 +105,7 @@ class _LandingState extends State<Landing> {
 								)
 							),
 						),
+                  if (inSession)
 						SizedBox(
 							height: MediaQuery.sizeOf(context).height - 250, // IGNORED: UI: alternative to -250 ?
 							width: 400,
