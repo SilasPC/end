@@ -96,7 +96,7 @@ class PeerManager<M extends IJSON> {
   PrivatePeerIdentity _id;
   PeerIdentity get id => _id.identity;
 
-  void setPrivateId(PrivatePeerIdentity id) {
+  void changeIdentity(PrivatePeerIdentity id) {
     if (_id == id) return;
     if (!id.identity.verifySignature(_trustAnchor.key)) {
       throw Exception("cannot set id which is not trusted");
@@ -316,12 +316,12 @@ class PeerManager<M extends IJSON> {
       // print("protocol version conflict");
       return;
     }
-    var conflict =
+    /* var conflict =
         _peers.where((p2) => p2.id == ps.identity.name && p2 != p).firstOrNull;
     if (conflict != null) {
       _peers.remove(conflict);
       // disconnect ?
-    }
+    }*/
     if (p._lastKnownState == null) {
       if (await _db.loadPeer(ps.identity.name)
           case (var preSyncMsg, var syncInfo)) {
@@ -329,21 +329,15 @@ class PeerManager<M extends IJSON> {
         p._lastLocal = syncInfo;
       }
     }
-    var prevState = p._lastKnownState ?? ps;
-    if (prevState.identity.name != ps.identity.name) {
-      // TODO: client changed peer id
-      unimpl("idk what to do here yet");
-      return;
-    }
-    assert(prevState.identity == ps.identity);
-    if (p._lastKnownState == null) {
-      // print("check certificate ${ps.identity}");
-      // note: this check does not run when loaded from database
+    if (p._lastKnownState?.identity != ps.identity) {
+      // print("change id")
       if (!ps.identity.verifySignature(_trustAnchor.key)) {
         // print("bad certificate");
+        p.disconnect();
         return;
       }
     }
+    var prevState = p._lastKnownState ?? ps;
     p._lastKnownState = ps;
     // print("handle pre sync from ${ps.peerId}");
     if (ps.sessionId != sessionId) {
@@ -357,7 +351,6 @@ class PeerManager<M extends IJSON> {
       p._lastLocal = SyncInfo.zero();
     }
     p._state = PeerState.SYNC;
-    p._lastKnownState = ps;
     _db.savePeer(ps, p._lastLocal);
   }
 

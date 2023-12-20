@@ -99,7 +99,7 @@ ServiceGraph defineServices() {
   b.deriveListenable((SettingsService s) => s.current);
 
   b.pipe((IdentityService ids, PeerManager<EnduranceModel> pm) {
-    pm.setPrivateId(id.identity);
+    pm.changeIdentity(id.identity);
   });
 
   b.pipe((Settings set, ServerConnection conn) {

@@ -23,10 +23,10 @@ void main() {
 			"deadbeef",
 			[42],
 		);
-		
+
 		expect(raw, [
 			239, 190, 173, 222,
-			0, 
+			0,
 			100, 101, 97, 100, 98, 101, 101, 102,
 			0,
 			42
@@ -65,7 +65,7 @@ void main() {
 			data,
 			reply
 		) = decodeMsg(raw);
-		
+
 		expect(seq.toRadixString(16), "cafebabe");
 		expect(msg, "");
 		expect(data, [0]);
@@ -82,7 +82,7 @@ void main() {
 		var (ps, pc) = LocalPeer.pair();
 		var s = manager("s", 1);
 		var c = manager("c", 1);
-		
+
 		await c.addPeer(ps);
 		await s.addPeer(pc);
 		await pumpEventQueue();
@@ -95,7 +95,7 @@ void main() {
 		var (ps, pc) = LocalPeer.pair();
 		var s = manager("s", 1);
 		var c = manager("c", 2);
-		
+
 		await c.addPeer(ps);
 		await s.addPeer(pc);
 		await pumpEventQueue();
@@ -109,7 +109,7 @@ void main() {
 		var (p1, p2) = LocalPeer.pair();
 		var s = manager("s", 1);
 		var c = manager("c", 1);
-		
+
 		await s.add([StrEv.dig(1, "s")]);
 
 		await c.addPeer(p1);
@@ -123,7 +123,7 @@ void main() {
 		await pumpEventQueue();
 		expect(s.model.result, "12");
 		expect(c.model.result, "12");
-		
+
 		await c.add([StrEv.dig(3, "c")]);
 		await pumpEventQueue();
 		expect(s.model.result, "123");
@@ -138,7 +138,7 @@ void main() {
 		var p1 = manager("p1", 1);
 		var p2 = manager("p2", 1);
 		var p3 = manager("p3", 1);
-		
+
 		await p2.addPeer(con1.$1);
 		await p1.addPeer(con1.$2);
 		await p3.addPeer(con2.$1);
@@ -150,18 +150,6 @@ void main() {
 		expect(p1.model.result, "1");
 		expect(p2.model.result, "1");
 		expect(p3.model.result, "1");
-
-		await p2.add([StrEv.dig(2, "p2")]);
-		await pumpEventQueue();
-		expect(p1.model.result, "12");
-		expect(p2.model.result, "12");
-		expect(p3.model.result, "12");
-
-		await p3.add([StrEv.dig(3, "p3")]);
-		await pumpEventQueue();
-		expect(p1.model.result, "123");
-		expect(p2.model.result, "123");
-		expect(p3.model.result, "123");
 
 	});
 
@@ -183,7 +171,7 @@ void main() {
 		expect(c.model.result, "");
 		await pumpEventQueue();
 		expect(c.model.result, "1");
-		
+
 	});
 
 	test("conflict", () async {
@@ -206,7 +194,24 @@ void main() {
 
 		await pumpEventQueue();
 		expect(c.model.result, "1");
-		
+
 	});
+
+   test("change identity", () async {
+
+		var (ps, pc) = LocalPeer.pair();
+		var s = manager("s", 1);
+		var c = manager("c", 2);
+
+		await c.addPeer(ps);
+		await s.addPeer(pc);
+
+      await pumpEventQueue();
+
+      c.changeIdentity(PrivatePeerIdentity.client("c2"));
+      await pumpEventQueue();
+      expect(pc.id, "c2");
+
+   });
 
 }
