@@ -1,8 +1,6 @@
 {
 	"cSpell.enabled": true,
-	"editor.tabSize": 3,
-	"editor.detectIndentation": false,
-	"editor.insertSpaces": false,
+	"editor.tabSize": 2,
 	"editor.useTabStops": true,
 	"editor.stickyTabStops": true,
 	"todo-list.enableTelemetry": false,
@@ -10,4 +8,8 @@
 	"todo-list.include": "**/*.{ts,js,php,css,scss,html,dart}",
 	"todo-list.exclude": "{**/dist/**,**/build/**,**/.vscode/**,**/_output/**,**/vendor/**,**/*.min.*,**/*.map,**/.dart_tool/**}",
 	"files.eol": "\n",
+	"[dart]": {
+		"editor.defaultFormatter": "Dart-Code.dart-code",
+		"editor.formatOnSave": true,
+	}
 }

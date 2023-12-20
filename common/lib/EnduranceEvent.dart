@@ -12,459 +12,454 @@ import 'models/glob.dart';
 // with			$0'kind': instance.kind,\n$1
 part 'EnduranceEvent.g.dart';
 
-sealed class EnduranceEvent extends Event<Model> with EquatableMixin {
+sealed class EnduranceEvent extends Event<EnduranceModel> with EquatableMixin {
+  final String kind;
 
-	final String kind;
+  EnduranceEvent(super.time, this.kind, super.author /* , super.signer */);
 
-	EnduranceEvent(super.time, this.kind, super.author/* , super.signer */);
+  @override
+  void build(EventModel<EnduranceModel> m) {
+    try {
+      safeBuild(m);
+    } catch (e, t) {
+      m.model.errors.add(EventError(m.buildIndex, "$e $t"));
+    }
+  }
 
-	@override
-	void build(EventModel<Model> m) {
-		try {
-			safeBuild(m);
-		} catch (e, t) {
-			m.model.errors.add(EventError(m.buildIndex, "$e $t"));
-		}
-	}
+  EnduranceEvent copyWithTime(int time) =>
+      eventFromJSON(toJson()..["time"] = time);
 
-	EnduranceEvent copyWithTime(int time) =>
-		eventFromJSON(toJson()..["time"] = time);
+  factory EnduranceEvent.fromJson(JSON json) => eventFromJSON(json);
 
-	factory EnduranceEvent.fromJson(JSON json) =>
-		eventFromJSON(json);
+  void safeBuild(EventModel<EnduranceModel> m);
 
-	void safeBuild(EventModel<Model> m);
+  bool affectsEquipage(int eid);
 
-	bool affectsEquipage(int eid);
-
-	@override
-	List get props => [time, kind, author];
-
+  @override
+  List get props => [time, kind, author];
 }
 
 EnduranceEvent eventFromJSON(JSON json) {
-	String kind = json["kind"];
-	switch (kind) {
-		case "init":
-			return InitEvent.fromJson(json);
-		case "exam":
-			return ExamEvent.fromJson(json);
-		case "arrival":
-			return ArrivalEvent.fromJson(json);
-		case "departure":
-			return DepartureEvent.fromJson(json);
-		case "vet":
-			return VetEvent.fromJson(json);
-		case "start-clearance":
-			return StartClearanceEvent.fromJson(json);
-		case "retire":
-			return RetireEvent.fromJson(json);
-		case "change-category":
-			return ChangeCategoryEvent.fromJson(json);
-		case "disqualify":
-			return DisqualifyEvent.fromJson(json);
-		default:
-			throw new Exception("could not parse event kind $kind");
-	}
+  String kind = json["kind"];
+  switch (kind) {
+    case "init":
+      return InitEvent.fromJson(json);
+    case "exam":
+      return ExamEvent.fromJson(json);
+    case "arrival":
+      return ArrivalEvent.fromJson(json);
+    case "departure":
+      return DepartureEvent.fromJson(json);
+    case "vet":
+      return VetEvent.fromJson(json);
+    case "start-clearance":
+      return StartClearanceEvent.fromJson(json);
+    case "retire":
+      return RetireEvent.fromJson(json);
+    case "change-category":
+      return ChangeCategoryEvent.fromJson(json);
+    case "disqualify":
+      return DisqualifyEvent.fromJson(json);
+    default:
+      throw new Exception("could not parse event kind $kind");
+  }
 }
 
 @JsonSerializable()
 class InitEvent extends EnduranceEvent {
-	final Model model;
-	InitEvent(int time, String author, this.model/* , Signer<PrivateKey> signer */):
-		super(time, "init", author/* , signer */);
+  final EnduranceModel model;
+  InitEvent(
+      int time, String author, this.model /* , Signer<PrivateKey> signer */)
+      : super(time, "init", author /* , signer */);
 
-	JSON toJson() => _$InitEventToJson(this);
-	factory InitEvent.fromJson(JSON json) =>
-		_$InitEventFromJson(json);
+  JSON toJson() => _$InitEventToJson(this);
+  factory InitEvent.fromJson(JSON json) => _$InitEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		if (m.model.rideName == "") {
-			m.model = model.clone();
-		}
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    if (m.model.rideName == "") {
+      m.model = model.clone();
+    }
+  }
 
-	bool affectsEquipage(int eid) => false;
+  bool affectsEquipage(int eid) => false;
 
-	@override
-	String toString() => "Initializes model";
+  @override
+  String toString() => "Initializes model";
 
-	@override
-	List get props => super.props;
-
+  @override
+  List get props => super.props;
 }
 
 @JsonSerializable()
 class DisqualifyEvent extends EnduranceEvent {
-	final int eid;
-	final String reason;
-	DisqualifyEvent(String author, int time, this.eid, this.reason/* , Signer<PrivateKey> signer */):
-		super(time, "disqualify", author/* , signer */);
+  final int eid;
+  final String reason;
+  DisqualifyEvent(String author, int time, this.eid,
+      this.reason /* , Signer<PrivateKey> signer */)
+      : super(time, "disqualify", author /* , signer */);
 
-	JSON toJson() => _$DisqualifyEventToJson(this);
-	factory DisqualifyEvent.fromJson(JSON json) =>
-		_$DisqualifyEventFromJson(json);
+  JSON toJson() => _$DisqualifyEventToJson(this);
+  factory DisqualifyEvent.fromJson(JSON json) =>
+      _$DisqualifyEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.dsqReason != null) {
-			m.model.errors.add(EventError(m.buildIndex, "double dsq: ${reason}"));
-			return;
-		}
-		eq.dsqReason = reason;
-		eq.status = EquipageStatus.DNF;
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.dsqReason != null) {
+      m.model.errors.add(EventError(m.buildIndex, "double dsq: ${reason}"));
+      return;
+    }
+    eq.dsqReason = reason;
+    eq.status = EquipageStatus.DNF;
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() => "Disqualifies $eid for '$reason'";
+  @override
+  String toString() => "Disqualifies $eid for '$reason'";
 
-	@override
-	List get props => super.props..addAll([eid, reason]);
-
+  @override
+  List get props => super.props..addAll([eid, reason]);
 }
 
 @JsonSerializable()
 class ChangeCategoryEvent extends EnduranceEvent {
-	final int eid;
-	final String category;
-	ChangeCategoryEvent(String author, int time, this.eid, this.category/* , Signer<PrivateKey> signer */):
-		super(time, "change-category", author/* , signer */);
+  final int eid;
+  final String category;
+  ChangeCategoryEvent(String author, int time, this.eid,
+      this.category /* , Signer<PrivateKey> signer */)
+      : super(time, "change-category", author /* , signer */);
 
-	JSON toJson() => _$ChangeCategoryEventToJson(this);
-	factory ChangeCategoryEvent.fromJson(JSON json) =>
-		_$ChangeCategoryEventFromJson(json);
+  JSON toJson() => _$ChangeCategoryEventToJson(this);
+  factory ChangeCategoryEvent.fromJson(JSON json) =>
+      _$ChangeCategoryEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.status != EquipageStatus.WAITING) {
-			m.model.errors.add(EventError(m.buildIndex, "category change while status ${eq.status}"));
-			return;
-		}
-		var cat = m.model.categories[category]!;
-		eq.category.equipages.remove(eq);
-		eq.category = cat;
-		cat.equipages.add(eq);
-		// FEAT: change start no
-		// ^^^^ note that this may affect logic that
-		// expects eids to remain constant
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.status != EquipageStatus.WAITING) {
+      m.model.errors.add(EventError(
+          m.buildIndex, "category change while status ${eq.status}"));
+      return;
+    }
+    var cat = m.model.categories[category]!;
+    eq.category.equipages.remove(eq);
+    eq.category = cat;
+    cat.equipages.add(eq);
+    // FEAT: change start no
+    // ^^^^ note that this may affect logic that
+    // expects eids to remain constant
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() => "Moves $eid to $category";
+  @override
+  String toString() => "Moves $eid to $category";
 
-	@override
-	List get props => super.props..addAll([eid, category]);
-
+  @override
+  List get props => super.props..addAll([eid, category]);
 }
 
 @JsonSerializable()
 class RetireEvent extends EnduranceEvent {
+  final int eid;
+  RetireEvent(
+      String author, int time, this.eid /* , Signer<PrivateKey> signer */)
+      : super(time, "retire", author /* , signer */);
 
-	final int eid;
-	RetireEvent(String author, int time, this.eid/* , Signer<PrivateKey> signer */):
-		super(time, "retire", author/* , signer */);
+  JSON toJson() => _$RetireEventToJson(this);
+  factory RetireEvent.fromJson(JSON json) => _$RetireEventFromJson(json);
 
-	JSON toJson() => _$RetireEventToJson(this);
-	factory RetireEvent.fromJson(JSON json) =>
-		_$RetireEventFromJson(json);
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.status != EquipageStatus.RESTING) {
+      m.model.errors.add(
+          EventError(m.buildIndex, "Retire when status is ${eq.status.name}"));
+    }
+    eq.status = EquipageStatus.RETIRED;
+  }
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.status != EquipageStatus.RESTING) {
-			m.model.errors.add(EventError(m.buildIndex, "Retire when status is ${eq.status.name}"));
-		}
-		eq.status = EquipageStatus.RETIRED;
-	}
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  @override
+  String toString() => "Retires $eid";
 
-	@override
-	String toString() => "Retires $eid";
-
-	@override
-	List get props => super.props..addAll([eid]);
-
+  @override
+  List get props => super.props..addAll([eid]);
 }
 
 @JsonSerializable()
 class ExamEvent extends EnduranceEvent {
-	final int eid;
-	final int? loopHint;
-	final VetData data;
-	ExamEvent(String author, int time, this.eid, this.data, this.loopHint/* , Signer<PrivateKey> signer */):
-		super(time, "exam", author/* , signer */);
+  final int eid;
+  final int? loopHint;
+  final VetData data;
+  ExamEvent(String author, int time, this.eid, this.data,
+      this.loopHint /* , Signer<PrivateKey> signer */)
+      : super(time, "exam", author /* , signer */);
 
-	JSON toJson() => _$ExamEventToJson(this);
-	factory ExamEvent.fromJson(JSON json) =>
-		_$ExamEventFromJson(json);
+  JSON toJson() => _$ExamEventToJson(this);
+  factory ExamEvent.fromJson(JSON json) => _$ExamEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		int cl = eq.currentLoop ?? -1;
-		if (eq.currentLoopData?.nextGate case LoopGate next) {
-			if (LoopGate.EXAM.isBefore(next)) {
-				if (eq.skipLoop()) {
-					m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
-				} else {
-					m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
-					return;
-				}
-			}
-		}
-		else if (eq.status != EquipageStatus.EXAM) {
-			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
-		}
-		if (loopHint case int loopHint when loopHint != cl) {
-			m.model.errors.add(EventError(m.buildIndex, "exam out of order loop ${loopHint}, current $cl"));
-			if (loopHint > cl) {
-				cl = eq.currentLoop = loopHint;
-			}
-		}
-		if (eq.currentLoopData case LoopData ld) {
-			// regular gate
-			ld.data = data;
-			if (data.passed) {
-				if (eq.currentLoop case int currentLoop when !eq.isFinalLoop) {
-					// next loop
-					var next = eq.currentLoop = currentLoop + 1;
-					if (ld.vet case int vetTime) {
-						eq.loops[next].expDeparture = vetTime + ld.loop.restTime * 60;
-					}
-					eq.status = EquipageStatus.RESTING;
-				} else {
-					// finish
-					var minFin = eq.minFinishTime();
-					var maxFin = eq.maxFinishTime();
-					if (minFin != null && time < minFin) {
-						m.model.errors.add(EventError(m.buildIndex, "finished too early"));
-					}
-					if (maxFin != null && time > maxFin) {
-						m.model.errors.add(EventError(m.buildIndex, "finished too late"));
-					}
-					eq.status = EquipageStatus.FINISHED;
-				}
-			} else {
-				eq.status = EquipageStatus.DNF;
-			}
-			if (ld.vet case int vetTime when data.passed && time > vetTime + COOL_TIME) {
-				m.model.errors.add(EventError(m.buildIndex, "too late to pass exam"));
-			}
-			ld.nextGate = null;
-		} else {
-			// preExam
-			if (data.passed) eq.currentLoop = 0;
-			eq.preExam = data;
-			eq.status = data.passed ? EquipageStatus.RESTING : EquipageStatus.DNF;
-			eq.loops.first.expDeparture = eq.category.startTime;
-		}
-		// FEAT: check for missing data when ended
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    int cl = eq.currentLoop ?? -1;
+    if (eq.currentLoopData?.nextGate case LoopGate next) {
+      if (LoopGate.EXAM.isBefore(next)) {
+        if (eq.skipLoop()) {
+          m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
+        } else {
+          m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
+          return;
+        }
+      }
+    } else if (eq.status != EquipageStatus.EXAM) {
+      m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
+    }
+    if (loopHint case int loopHint when loopHint != cl) {
+      m.model.errors.add(EventError(
+          m.buildIndex, "exam out of order loop ${loopHint}, current $cl"));
+      if (loopHint > cl) {
+        cl = eq.currentLoop = loopHint;
+      }
+    }
+    if (eq.currentLoopData case LoopData ld) {
+      // regular gate
+      ld.data = data;
+      if (data.passed) {
+        if (eq.currentLoop case int currentLoop when !eq.isFinalLoop) {
+          // next loop
+          var next = eq.currentLoop = currentLoop + 1;
+          if (ld.vet case int vetTime) {
+            eq.loops[next].expDeparture = vetTime + ld.loop.restTime * 60;
+          }
+          eq.status = EquipageStatus.RESTING;
+        } else {
+          // finish
+          var minFin = eq.minFinishTime();
+          var maxFin = eq.maxFinishTime();
+          if (minFin != null && time < minFin) {
+            m.model.errors.add(EventError(m.buildIndex, "finished too early"));
+          }
+          if (maxFin != null && time > maxFin) {
+            m.model.errors.add(EventError(m.buildIndex, "finished too late"));
+          }
+          eq.status = EquipageStatus.FINISHED;
+        }
+      } else {
+        eq.status = EquipageStatus.DNF;
+      }
+      if (ld.vet case int vetTime
+          when data.passed && time > vetTime + COOL_TIME) {
+        m.model.errors.add(EventError(m.buildIndex, "too late to pass exam"));
+      }
+      ld.nextGate = null;
+    } else {
+      // preExam
+      if (data.passed) eq.currentLoop = 0;
+      eq.preExam = data;
+      eq.status = data.passed ? EquipageStatus.RESTING : EquipageStatus.DNF;
+      eq.loops.first.expDeparture = eq.category.startTime;
+    }
+    // FEAT: check for missing data when ended
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() =>
-		"${data.passed ? "Approves " : "Rejects "} $eid's loop ${(loopHint ?? -1) + 1} exam";
+  @override
+  String toString() =>
+      "${data.passed ? "Approves " : "Rejects "} $eid's loop ${(loopHint ?? -1) + 1} exam";
 
-	@override
-	List get props => super.props..addAll([eid, loopHint]);
-
+  @override
+  List get props => super.props..addAll([eid, loopHint]);
 }
 
 @JsonSerializable()
 class VetEvent extends EnduranceEvent {
-	final int eid;
-	final int? loopHint;
-	VetEvent(String author, int time,this.eid,this.loopHint/* , Signer<PrivateKey> signer */):
-		super(time, "vet", author/* , signer */);
+  final int eid;
+  final int? loopHint;
+  VetEvent(String author, int time, this.eid,
+      this.loopHint /* , Signer<PrivateKey> signer */)
+      : super(time, "vet", author /* , signer */);
 
-	JSON toJson() => _$VetEventToJson(this);
-	factory VetEvent.fromJson(JSON json) =>
-		_$VetEventFromJson(json);
+  JSON toJson() => _$VetEventToJson(this);
+  factory VetEvent.fromJson(JSON json) => _$VetEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.currentLoopData?.nextGate case LoopGate next) {
-			if (LoopGate.VET.isBefore(next)) {
-				if (eq.skipLoop()) {
-					m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
-				} else {
-					m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
-					return;
-				}
-			}
-		}
-		else if (eq.status != EquipageStatus.COOLING) {
-			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
-		}
-		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
-			m.model.errors.add(EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
-			if (loopHint > (eq.currentLoop ?? -1)) {
-				eq.currentLoop = loopHint;
-			}
-		}
-		if (eq.currentLoopData case LoopData ld) {
-			ld.vet = time;
-			ld.nextGate = LoopGate.EXAM;
-			eq.status = EquipageStatus.EXAM;
-		}
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.currentLoopData?.nextGate case LoopGate next) {
+      if (LoopGate.VET.isBefore(next)) {
+        if (eq.skipLoop()) {
+          m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
+        } else {
+          m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
+          return;
+        }
+      }
+    } else if (eq.status != EquipageStatus.COOLING) {
+      m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
+    }
+    if (loopHint case int loopHint when loopHint != eq.currentLoop) {
+      m.model.errors.add(
+          EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
+      if (loopHint > (eq.currentLoop ?? -1)) {
+        eq.currentLoop = loopHint;
+      }
+    }
+    if (eq.currentLoopData case LoopData ld) {
+      ld.vet = time;
+      ld.nextGate = LoopGate.EXAM;
+      eq.status = EquipageStatus.EXAM;
+    }
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() => "Registers vet for $eid loop ${(loopHint ?? 0) + 1}";
+  @override
+  String toString() => "Registers vet for $eid loop ${(loopHint ?? 0) + 1}";
 
-	@override
-	List get props => super.props..addAll([eid, loopHint]);
-
+  @override
+  List get props => super.props..addAll([eid, loopHint]);
 }
 
 @JsonSerializable()
 class ArrivalEvent extends EnduranceEvent {
-	final int? loopHint;
-	final int eid;
-	ArrivalEvent(String author, int time,this.eid,this.loopHint/* , Signer<PrivateKey> signer */):
-		super(time, "arrival", author/* , signer */);
+  final int? loopHint;
+  final int eid;
+  ArrivalEvent(String author, int time, this.eid,
+      this.loopHint /* , Signer<PrivateKey> signer */)
+      : super(time, "arrival", author /* , signer */);
 
-	JSON toJson() => _$ArrivalEventToJson(this);
-	factory ArrivalEvent.fromJson(JSON json) =>
-		_$ArrivalEventFromJson(json);
+  JSON toJson() => _$ArrivalEventToJson(this);
+  factory ArrivalEvent.fromJson(JSON json) => _$ArrivalEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.currentLoopData?.nextGate case LoopGate next) {
-			if (LoopGate.ARRIVAL.isBefore(next)) {
-				if (eq.skipLoop()) {
-					m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
-				} else {
-					m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
-					return;
-				}
-			}
-		}
-		else if (eq.status != EquipageStatus.RIDING) {
-			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
-		}
-		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
-			m.model.errors.add(EventError(m.buildIndex, "arrival out of order loop ${loopHint}"));
-			if (loopHint > (eq.currentLoop ?? -1)) {
-				eq.currentLoop = loopHint;
-			}
-		}
-		if (eq.currentLoopData case LoopData ld) {
-			ld.arrival = time;
-			ld.nextGate = LoopGate.VET;
-			eq.status = EquipageStatus.COOLING;
-		}
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.currentLoopData?.nextGate case LoopGate next) {
+      if (LoopGate.ARRIVAL.isBefore(next)) {
+        if (eq.skipLoop()) {
+          m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
+        } else {
+          m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
+          return;
+        }
+      }
+    } else if (eq.status != EquipageStatus.RIDING) {
+      m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
+    }
+    if (loopHint case int loopHint when loopHint != eq.currentLoop) {
+      m.model.errors.add(
+          EventError(m.buildIndex, "arrival out of order loop ${loopHint}"));
+      if (loopHint > (eq.currentLoop ?? -1)) {
+        eq.currentLoop = loopHint;
+      }
+    }
+    if (eq.currentLoopData case LoopData ld) {
+      ld.arrival = time;
+      ld.nextGate = LoopGate.VET;
+      eq.status = EquipageStatus.COOLING;
+    }
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() => "Registers arrival for $eid loop ${(loopHint ?? 0) + 1}";
+  @override
+  String toString() => "Registers arrival for $eid loop ${(loopHint ?? 0) + 1}";
 
-	@override
-	List get props => super.props..addAll([eid, loopHint]);
-
+  @override
+  List get props => super.props..addAll([eid, loopHint]);
 }
 
 @JsonSerializable()
 class StartClearanceEvent extends EnduranceEvent {
-	final List<int> eids;
-	StartClearanceEvent(String author, int time, this.eids/* , Signer<PrivateKey> signer */):
-		super(time, "start-clearance", author/* , signer */);
+  final List<int> eids;
+  StartClearanceEvent(
+      String author, int time, this.eids /* , Signer<PrivateKey> signer */)
+      : super(time, "start-clearance", author /* , signer */);
 
-	JSON toJson() => _$StartClearanceEventToJson(this);
-	factory StartClearanceEvent.fromJson(JSON json) =>
-		_$StartClearanceEventFromJson(json);
+  JSON toJson() => _$StartClearanceEventToJson(this);
+  factory StartClearanceEvent.fromJson(JSON json) =>
+      _$StartClearanceEventFromJson(json);
 
-	@override
-	void safeBuild(EventModel<Model> m) {
-		for (int eid in eids) {
-			var eq = m.model.equipages[eid]!;
-			if (eq.status != EquipageStatus.WAITING) {
-				m.model.errors.add(EventError(m.buildIndex, "Cannot clear $eid for start"));
-			} else {
-				eq.status = EquipageStatus.EXAM;
-			}
-		}
-	}
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    for (int eid in eids) {
+      var eq = m.model.equipages[eid]!;
+      if (eq.status != EquipageStatus.WAITING) {
+        m.model.errors
+            .add(EventError(m.buildIndex, "Cannot clear $eid for start"));
+      } else {
+        eq.status = EquipageStatus.EXAM;
+      }
+    }
+  }
 
-	bool affectsEquipage(int eid) => eids.contains(eid);
+  bool affectsEquipage(int eid) => eids.contains(eid);
 
-	@override
-	String toString() => "Clears $eids for start";
+  @override
+  String toString() => "Clears $eids for start";
 
-	@override
-	List get props => super.props..addAll([eids]);
-
+  @override
+  List get props => super.props..addAll([eids]);
 }
 
 @JsonSerializable()
 class DepartureEvent extends EnduranceEvent {
-	final int eid;
-	final int? loopHint;
-	DepartureEvent(String author, int time, this.eid, this.loopHint/* , Signer<PrivateKey> signer */):
-		super(time, "departure", author/* , signer */);
+  final int eid;
+  final int? loopHint;
+  DepartureEvent(String author, int time, this.eid,
+      this.loopHint /* , Signer<PrivateKey> signer */)
+      : super(time, "departure", author /* , signer */);
 
-	JSON toJson() => _$DepartureEventToJson(this);
-	factory DepartureEvent.fromJson(JSON json) =>
-		_$DepartureEventFromJson(json);
-	@override
-	void safeBuild(EventModel<Model> m) {
-		var eq = m.model.equipages[eid]!;
-		if (eq.currentLoopData?.nextGate case LoopGate next) {
-			if (LoopGate.DEPARTURE.isBefore(next)) {
-				if (eq.skipLoop()) {
-					m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
-				} else {
-					m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
-					return;
-				}
-			}
-		}
-		else if (eq.status != EquipageStatus.RESTING) {
-			m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
-		}
-		if (loopHint case int loopHint when loopHint != eq.currentLoop) {
-			m.model.errors.add(EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
-			if (loopHint > (eq.currentLoop ?? -1)) {
-				eq.currentLoop = loopHint;
-			}
-		}
-		var expDep = eq.currentLoopData?.expDeparture;
-		if (expDep case int expDep) {
-			if (time - expDep > MAX_DEPART_DELAY) {
-				m.model.errors.add(EventError(m.buildIndex, "$eid late departure"));
-			} else if (time < expDep) {
-				m.model.errors.add(EventError(m.buildIndex, "$eid early departure"));
-			}
-		}
-		if (eq.currentLoopData case LoopData ld) {
-			ld.departure = time;
-			ld.nextGate = LoopGate.ARRIVAL;
-			eq.status = EquipageStatus.RIDING;
-		}
-	}
+  JSON toJson() => _$DepartureEventToJson(this);
+  factory DepartureEvent.fromJson(JSON json) => _$DepartureEventFromJson(json);
+  @override
+  void safeBuild(EventModel<EnduranceModel> m) {
+    var eq = m.model.equipages[eid]!;
+    if (eq.currentLoopData?.nextGate case LoopGate next) {
+      if (LoopGate.DEPARTURE.isBefore(next)) {
+        if (eq.skipLoop()) {
+          m.model.errors.add(EventError(m.buildIndex, "loop skipped"));
+        } else {
+          m.model.errors.add(EventError(m.buildIndex, "loop skip fail"));
+          return;
+        }
+      }
+    } else if (eq.status != EquipageStatus.RESTING) {
+      m.model.errors.add(EventError(m.buildIndex, "not ready for gate"));
+    }
+    if (loopHint case int loopHint when loopHint != eq.currentLoop) {
+      m.model.errors.add(
+          EventError(m.buildIndex, "departure out of order loop ${loopHint}"));
+      if (loopHint > (eq.currentLoop ?? -1)) {
+        eq.currentLoop = loopHint;
+      }
+    }
+    var expDep = eq.currentLoopData?.expDeparture;
+    if (expDep case int expDep) {
+      if (time - expDep > MAX_DEPART_DELAY) {
+        m.model.errors.add(EventError(m.buildIndex, "$eid late departure"));
+      } else if (time < expDep) {
+        m.model.errors.add(EventError(m.buildIndex, "$eid early departure"));
+      }
+    }
+    if (eq.currentLoopData case LoopData ld) {
+      ld.departure = time;
+      ld.nextGate = LoopGate.ARRIVAL;
+      eq.status = EquipageStatus.RIDING;
+    }
+  }
 
-	bool affectsEquipage(int eid) => eid == this.eid;
+  bool affectsEquipage(int eid) => eid == this.eid;
 
-	@override
-	String toString() => "Registers departure for $eid loop ${(loopHint ?? 0) + 1}";
+  @override
+  String toString() =>
+      "Registers departure for $eid loop ${(loopHint ?? 0) + 1}";
 
-	@override
-	List get props => super.props..addAll([eid, loopHint]);
-
+  @override
+  List get props => super.props..addAll([eid, loopHint]);
 }

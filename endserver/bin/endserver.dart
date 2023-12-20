@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
@@ -12,83 +11,86 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'socket_peer.dart';
 
 Future<void> main() async {
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
-	sqfliteFfiInit();
-	databaseFactory = databaseFactoryFfi;
+  final identity = PrivatePeerIdentity.server();
+  final man = PeerManager<EnduranceModel>(
+    identity,
+    () => NullDatabase(identity.identity.name, 0), //SqliteDatabase.create,
+    MetaModel(),
+  );
 
-   final identity = PrivatePeerIdentity.server();
-	final man = PeerManager<Model>(
-		identity,
-		() => NullDatabase(identity.identity.name, 0),//SqliteDatabase.create,
-      MetaModel(),
-	);
+  Server io = Server();
+  io.on("connection", (client_) {
+    var client = client_ as Socket;
+    print("connect");
+    var peer = SocketPeer(client);
+    man.addPeer(peer);
 
-	Server io = Server();
-	io.on("connection", (client_) {
-		var client = client_ as Socket;
-		print("connect");
-		var peer = SocketPeer(client);
-		man.addPeer(peer);
+    setBinAck(client, "yield", (_) async {
+      if (peer.ident?.perms.serverAdmin != true) {
+        return SyncProtocol.NOT_OK;
+      }
+      var ok = await man.yieldTo(peer);
+      return ok ? SyncProtocol.OK : SyncProtocol.NOT_OK;
+    });
 
-		setBinAck(client, "yield", (_) async {
-			var ok = await man.yieldTo(peer);
-			return ok ? SyncProtocol.OK : SyncProtocol.NOT_OK;
-		});
-
-      setJsonAck(client, "auth", (json) {
-         // VULN: plaintext / hardcoded
-         // VULN: author duplication
-         PeerIdentity? id;
-         var ok = json["password"] == "password";
-         if (ok) {
-            id = PeerIdentity.signed(
-               json["name"] as String,
-               PublicKeyConverter().fromJson(json["key"]),
-               PeerPermission.all,
-               identity.signer,
-            );
-         }
-         return {
-            "id": id
-         };
-      });
-
-	});
-	io.listen(3000);
+    setJsonAck(client, "auth", (json) {
+      // VULN: plaintext / hardcoded
+      // VULN: author duplication
+      print(json);
+      PeerIdentity? id;
+      var ok = json["password"] == "password";
+      if (ok) {
+        id = PeerIdentity.signed(
+          json["name"] as String,
+          PublicKeyConverter().fromJson(json["key"]),
+          PeerPermission.all,
+          identity.signer,
+        );
+      }
+      return {"id": id};
+    });
+  });
+  io.listen(3000);
 }
 
-void setJsonAck(dynamic client, String msg, FutureOr<JSON?>? Function(JSON) handler) {
-	client.on(msg, (data) async {
-		List dataList = data as List;
-		var reqData = dataList.first;
-		var ack = dataList.last;
-		var res = await handler(IJSON.fromBin(reqData));
-		if (res != null) {
-			ack(IJSON.toBin(res));
-		}
-	});
+void setJsonAck(
+    dynamic client, String msg, FutureOr<JSON?>? Function(JSON) handler) {
+  client.on(msg, (data) async {
+    List dataList = data as List;
+    var reqData = (dataList.first as List).cast<int>();
+    var ack = dataList.last;
+    var res = await handler(IJSON.fromBin(reqData));
+    if (res != null) {
+      ack(IJSON.toBin(res));
+    }
+  });
 }
 
-void setStringAck(dynamic client, String msg, FutureOr<String?>? Function(String) handler) {
-	client.on(msg, (data) async {
-		List dataList = data as List;
-		var reqData = dataList.first;
-		var ack = dataList.last;
-		var res = await handler(reqData);
-		if (res != null) {
-			ack(res);
-		}
-	});
+void setStringAck(
+    dynamic client, String msg, FutureOr<String?>? Function(String) handler) {
+  client.on(msg, (data) async {
+    List dataList = data as List;
+    var reqData = dataList.first;
+    var ack = dataList.last;
+    var res = await handler(reqData);
+    if (res != null) {
+      ack(res);
+    }
+  });
 }
 
-void setBinAck<T extends IJSON>(dynamic client, String msg, FutureOr<List<int>?>? Function(List<int>) handler) {
-	client.on(msg, (data) async {
-		List dataList = data as List;
-		var reqData = (dataList.first as List).cast<int>();
-		var ack = (dataList.last) as void Function(dynamic);
-		var res = await handler(reqData);
-		if (res != null) {
-			ack(res);
-		}
-	});
+void setBinAck<T extends IJSON>(dynamic client, String msg,
+    FutureOr<List<int>?>? Function(List<int>) handler) {
+  client.on(msg, (data) async {
+    List dataList = data as List;
+    var reqData = (dataList.first as List).cast<int>();
+    var ack = (dataList.last) as void Function(dynamic);
+    var res = await handler(reqData);
+    if (res != null) {
+      ack(res);
+    }
+  });
 }

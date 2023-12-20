@@ -1,5 +1,5 @@
 
-import 'package:esys_client/service_graph.dart';
+import 'package:esys_client/util/service_graph.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';

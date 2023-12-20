@@ -6,7 +6,7 @@ part of 'Model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Model _$ModelFromJson(Map<String, dynamic> json) => Model()
+EnduranceModel _$ModelFromJson(Map<String, dynamic> json) => EnduranceModel()
   ..rideName = json['rideName'] as String
   ..equipeId = json['equipeId'] as int?
   ..categories = (json['categories'] as Map<String, dynamic>).map(
@@ -16,7 +16,7 @@ Model _$ModelFromJson(Map<String, dynamic> json) => Model()
       .map((e) => EventError.fromJson(e as Map<String, dynamic>))
       .toList();
 
-Map<String, dynamic> _$ModelToJson(Model instance) {
+Map<String, dynamic> _$ModelToJson(EnduranceModel instance) {
   final val = <String, dynamic>{
     'rideName': instance.rideName,
   };

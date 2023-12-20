@@ -1,6 +1,3 @@
+// TEST: db implementation
 
-// TODO: test database implementation
-
-void main() {
-	
-}
+void main() {}

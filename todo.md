@@ -4,6 +4,7 @@
  - ui improvements
  - test gate skipping (more)
  - coverage
+ - fix nearby service
 
 # Other
  - cryto security

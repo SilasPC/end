@@ -11,7 +11,7 @@
 ///      fonts:
 ///       - asset: fonts/MyIcons.ttf
 ///
-/// 
+///
 /// * Font Awesome 4, Copyright (C) 2016 by Dave Gandy
 ///         Author:    Dave Gandy
 ///         License:   SIL ()
@@ -29,7 +29,10 @@ class MyIcons {
   static const _kFontFam = 'MyIcons';
   static const String? _kFontPkg = null;
 
-  static const IconData trophy = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData award = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData equipe = IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData trophy =
+      IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData award =
+      IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData equipe =
+      IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
