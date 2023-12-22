@@ -5,7 +5,7 @@ import '../EnduranceEvent.dart';
 import '../EventModel.dart';
 
 List<Event<EnduranceModel>> demoInitEvent(String author, int startTime) =>
-    [InitEvent(startTime - FIVE_MINS, author, demoModel(author, startTime))];
+    [InitEvent(author, startTime - FIVE_MINS, demoModel(author, startTime))];
 
 EnduranceModel demoModel(String author, int now) {
   var c1 = Category(null, "Kort clearround", [Loop(1, 3)], now + FIVE_MINS)

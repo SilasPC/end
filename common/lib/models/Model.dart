@@ -42,9 +42,9 @@ class EnduranceModel extends IJSON {
   }
 
   EnduranceModel();
-  JSON toJson() => _$ModelToJson(this);
+  JSON toJson() => _$EnduranceModelToJson(this);
   factory EnduranceModel.fromJson(JSON json) {
-    EnduranceModel m = _$ModelFromJson(json);
+    EnduranceModel m = _$EnduranceModelFromJson(json);
     for (var cat in m.categories.values) {
       for (var eq in cat.equipages) {
         m.equipages[eq.eid] = eq;

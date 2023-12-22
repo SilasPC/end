@@ -6,13 +6,14 @@ import 'glob.dart';
 part "LoopData.g.dart";
 
 enum LoopGate {
-  DEPARTURE(0),
-  ARRIVAL(1),
-  VET(2),
-  EXAM(3);
+  DEPARTURE(0, EquipageStatus.RESTING),
+  ARRIVAL(1, EquipageStatus.RIDING),
+  VET(2, EquipageStatus.COOLING),
+  EXAM(3, EquipageStatus.EXAM);
 
   final int _disc;
-  const LoopGate(this._disc);
+  final EquipageStatus expectedStatus;
+  const LoopGate(this._disc, this.expectedStatus);
 
   bool isBefore(LoopGate other) => _disc < other._disc;
 }
