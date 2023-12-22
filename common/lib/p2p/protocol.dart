@@ -88,10 +88,12 @@ class PeerIdentity extends IJSON {
   PeerIdentity.signed(
       this.name, this.key, this.perms, Signer<PrivateKey> signer)
       : verifier = key.createVerifier(SIGNING_ALG) {
-    // TODO: proper signature instead of this incorrect trash
+    // IGNORED: TODO: proper signature instead of this trash
     var data = [
       ...key.exponent.toString().codeUnits,
+      ...":".codeUnits,
       ...key.modulus.toString().codeUnits,
+      ...":".codeUnits,
       ...name.codeUnits,
     ];
     signature = signer.sign(data);
@@ -101,7 +103,9 @@ class PeerIdentity extends IJSON {
     var verifier = signerKey.createVerifier(SIGNING_ALG);
     var data = Uint8List.fromList([
       ...key.exponent.toString().codeUnits,
+      ...":".codeUnits,
       ...key.modulus.toString().codeUnits,
+      ...":".codeUnits,
       ...name.codeUnits,
     ]);
     return verifier.verify(data, signature);

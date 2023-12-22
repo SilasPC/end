@@ -1,12 +1,14 @@
 
 # Immediate
  - phone ui
- - ui improvements
- - test gate skipping (more)
+  - departure
+  - settings
  - coverage
  - fix nearby service
 
 # Other
+ - how to assign roles to devices?
+ - test gate skipping (more)
  - cryto security
  - ftq/dsq ga me ...
  - confirm closing with unsaved data (WillPopScope)
@@ -37,7 +39,6 @@
 	- Force unexpected events
  - Equipe
  - Unimplemented
-	- Security
 	- Multiday rides
 	- Reinspection / Re-exam
 	- Equipe upload
@@ -53,10 +54,7 @@
  - uncaught exceptions
 
 # Future
- - Tablet layout
  - Multiple gate interface choices
- - Device auth
- - Security
  - Auto events
  - Checkpoints
 

@@ -76,7 +76,10 @@ class _EquipeImportSheetState extends State<EquipeImportSheet> {
         ] else if (error)
           emptyListText("An error occurred")
         else
-          AspectRatio(aspectRatio: 1, child: CircularProgressIndicator())
+          Center(
+            child: SizedBox.square(
+                dimension: 50, child: CircularProgressIndicator()),
+          )
       ],
     );
   }
@@ -131,6 +134,12 @@ class _SelectCategoriesState extends State<_SelectCategories> {
                     initiallyExpanded: true,
                     key: PageStorageKey(sec),
                     title: Text(sec.name),
+                    children: [
+                      ListTile(
+                        title: Text("Something"),
+                      )
+                    ],
+                    childrenPadding: EdgeInsets.only(left: 16),
                     trailing: Checkbox(
                       value: selected.contains(sec),
                       onChanged: (value) {
@@ -168,25 +177,33 @@ class _SelectCategoriesState extends State<_SelectCategories> {
                               ], */
                   )
               else if (!error)
-                emptyListText("Loading")
+                Center(
+                  child: SizedBox.square(
+                      dimension: 50, child: CircularProgressIndicator()),
+                )
               else
                 emptyListText("An error occured")
             ],
           ),
         ),
-        ListTile(
-          title: Text("OK"),
-          onTap: () {},
-        )
+        if (sections != null)
+          ListTile(
+            title: Text("OK"),
+            onTap: () async {
+              var nav = Navigator.of(context, rootNavigator: true);
+              await _load(context, widget.id);
+              nav.pop();
+            },
+          )
       ],
     );
   }
 }
 
-Future<void> _load(BuildContext context, EquipeMeeting meet) async {
+Future<void> _load(BuildContext context, int id) async {
   LocalModel m = context.read();
   try {
-    var evs = await meet.loadEvents(m.id);
+    var evs = await loadModelEvents(id, m.id);
     await m.addSync(evs);
   } catch (e, s) {
     print(e);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/v2/views/exam_gate/loop_card.dart';
@@ -71,8 +73,11 @@ class EquipagePageState extends State<EquipagePage> {
     // UI: new equipage page
     context.watch<LocalModel>();
     checkStatusUpdate();
+    var (bar, fab) = bottomInfo();
     return Scaffold(
-      bottomNavigationBar: bottomBar(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: fab,
+      bottomNavigationBar: bar,
       appBar: AppBar(),
       body: Card(
         child: EquipageTile(widget.equipage),
@@ -80,23 +85,28 @@ class EquipagePageState extends State<EquipagePage> {
     );
   }
 
-  Widget? bottomBar() {
-    // UI: more info
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-          gradient: backgroundGradient.gradient,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-              width: 150,
-              height: 150,
-              child: Center(child: CircularProgressIndicator(value: 0.8))),
-          Text("hello"),
-        ],
+  (Widget?, Widget?) bottomInfo() {
+    String text;
+    DateTime? target;
+    switch (widget.equipage.status) {
+      case EquipageStatus.COOLING:
+        text = "Cooldown";
+        if (widget.equipage.currentLoopData?.arrival case int arrival) {
+          target = fromUNIX(arrival + COOL_TIME);
+        }
+      case EquipageStatus.RESTING:
+        text = "Resting";
+        if (widget.equipage.currentLoopData?.expDeparture case int expDep) {
+          target = fromUNIX(expDep);
+        }
+      default:
+        return (null, null);
+    }
+    return (
+      BottomAppBar(
+        child: Text(text),
       ),
+      target == null ? null : CountDownThing(target: target)
     );
   }
 
@@ -132,5 +142,62 @@ class EquipagePageState extends State<EquipagePage> {
           ),
         )
     ];
+  }
+}
+
+class CountDownThing extends StatefulWidget {
+  final DateTime target;
+
+  const CountDownThing({
+    super.key,
+    required this.target,
+  });
+
+  @override
+  State<CountDownThing> createState() => _CountDownThingState();
+}
+
+class _CountDownThingState extends State<CountDownThing> {
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int dif = widget.target.difference(DateTime.now()).inSeconds;
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+              child: Text(
+            unixDifToMS(dif),
+            style: TextStyle(fontSize: 20),
+          )),
+          CircularProgressIndicator(
+            color: Colors.blue,
+            backgroundColor: Colors.green,
+            value: 1 - (dif / 20).clamp(0, 1),
+            strokeCap: StrokeCap.round,
+            strokeAlign: -1,
+            strokeWidth: 12,
+          ),
+        ],
+      ),
+    );
   }
 }

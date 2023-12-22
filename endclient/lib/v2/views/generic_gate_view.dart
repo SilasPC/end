@@ -2,7 +2,6 @@ import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
-import 'package:esys_client/util/submit_button.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
@@ -107,10 +106,11 @@ class _TimingListGateViewState extends State<GenericGateView> {
 													onPressed: refresh,
 												), */
                   if (widget.submit != null)
-                    SubmitButton(
-                      onPressed: submit,
-                      disabled: widget.submitDisabled,
-                    ),
+                    IconButton(
+							onPressed: widget.submitDisabled ? null : widget.submit,
+							icon: const Icon(Icons.send),
+							color: Colors.green,
+						)
                 ]),
                 for (Equipage eq in equipages) widget.builder(eq),
               ],

@@ -72,11 +72,11 @@ class _LandingState extends State<Landing> {
                               children: [
                                 labelIconButton("LOGIN", Icons.login,
                                     onPressed: () {
-                                  showDialog(
+                                  /* showDialog(
                                       context: context,
-                                      builder: (_) => LoginDialog());
-                                  /* Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => const Dashboard())); */
+                                      builder: (_) => LoginDialog()); */
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => const Dashboard()));
                                 }),
                                 labelIconButton("SETTINGS", Icons.settings,
                                     onPressed: () {

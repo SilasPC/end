@@ -18,7 +18,7 @@ class EquipeMeeting {
   EquipeMeeting(this.name, this.id);
 
   Future<List<Event<EnduranceModel>>> loadEvents(String author) =>
-      _loadModelEvents(id, author);
+      loadModelEvents(id, author);
 
   @override
   String toString() => "Meeting($name)";
@@ -36,7 +36,7 @@ Future<List<EquipeMeeting>> _loadMeetings(String uri) async {
 /// IGNORED: TODO: determine actual rest time?
 const TYPICAL_REST_TIME = 40;
 
-Future<List<Event<EnduranceModel>>> _loadModelEvents(
+Future<List<Event<EnduranceModel>>> loadModelEvents(
     int classId, String author) async {
   dynamic schd = await _loadJSON("api/v1/meetings/$classId/schedule");
   if (schd["discipline"] != "endurance")

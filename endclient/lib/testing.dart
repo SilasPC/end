@@ -1,7 +1,10 @@
 // ignore_for_file: unused_element, dead_code
 
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:common/models/glob.dart';
+import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
@@ -13,37 +16,80 @@ class TestingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(bottomNavigationBar: BottomAppBar(
-      child: Builder(builder: (context) {
-        return Row(
+    return Scaffold(
+      bottomNavigationBar: BottomAppBar(),
+      floatingActionButton: CountDownThing(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+    );
+  }
+}
+
+class CountDownThing extends StatefulWidget {
+  const CountDownThing({
+    super.key,
+  });
+
+  @override
+  State<CountDownThing> createState() => _CountDownThingState();
+}
+
+class _CountDownThingState extends State<CountDownThing> {
+  Timer? _timer;
+  int left = 20;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(Duration(seconds: 1), (_) {
+      setState(() {
+        left -= 1;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const divisions = 60;
+    Color fg = Colors.green, bg = Colors.blue;
+    if (left % (2 * divisions) >= divisions) {
+      (fg, bg) = (bg, fg);
+    }
+    var val = (left % divisions) / divisions;
+    if (val < 0) val += 1;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          left = 10;
+        });
+      },
+      child: SizedBox(
+        width: 70,
+        height: 70,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                showBottomSheet(
-                    context: context,
-                    builder: (_) => SizedBox(
-                          height: 400,
-                          child: ListView(
-                            children: [
-                              ListTile(
-                                leading: Icon(Icons.headphones),
-                                title: Text("Hello"),
-                              )
-                            ],
-                          ),
-                        ));
-              },
-            ),
-            const Spacer(),
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {},
+            Center(
+                child: Text(
+              unixDifToMS(left),
+              style: TextStyle(fontSize: 20),
+            )),
+            CircularProgressIndicator(
+              color: fg,
+              backgroundColor: bg,
+              value: val,
+              strokeCap: StrokeCap.round,
+              strokeAlign: -1,
             ),
           ],
-        );
-      }),
-    ));
+        ),
+      ),
+    );
   }
 }
 

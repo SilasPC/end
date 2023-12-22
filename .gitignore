@@ -3,3 +3,4 @@ enum_gen
 testz
 *.events.json
 results.csv
+coverage
