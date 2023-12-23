@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:common/models/MetaModel.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/sqlite_db.dart';
@@ -17,6 +16,8 @@ import 'services/nearby.dart';
 import 'services/settings.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
+late var graph;
+
 Future<void> main() async {
   var widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux) {
@@ -26,7 +27,7 @@ Future<void> main() async {
 
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  var graph = defineServices();
+  graph = defineServices();
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);

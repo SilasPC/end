@@ -26,14 +26,10 @@ class DataView extends StatelessWidget {
                 child: ListView.builder(
                     itemCount: model.events.length,
                     itemBuilder: (context, i) {
-                      var evIdx = model.events.length - 1 - i;
-                      var event = model.events[evIdx];
-                      bool isDeleted = model.deletes.contains(event);
+                      var ordIdx = model.events.length - 1 - i;
+                      var insertionIndex = model.events.toInsIndex(ordIdx)!;
                       return EventTile(
-                        model: model,
-                        event: event,
-                        isDeleted: isDeleted,
-                        insertionIndex: model.events.getInsIndex(evIdx)!,
+                        insertionIndex: insertionIndex,
                       );
                     }),
               )

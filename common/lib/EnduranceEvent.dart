@@ -22,7 +22,7 @@ sealed class EnduranceEvent extends Event<EnduranceModel> with EquatableMixin {
   }
 
   EnduranceEvent copyWithTime(int time) =>
-      eventFromJSON(toJson()..["time"] = time);
+      eventFromJSON(IJSON.cloneJSON(toJson()..["time"] = time));
 
   factory EnduranceEvent.fromJson(JSON json) => eventFromJSON(json);
 
@@ -246,11 +246,11 @@ class ExamEvent extends GateEvent {
           // finish
           var minFin = eq.minFinishTime();
           var maxFin = eq.maxFinishTime();
-          if (minFin != null && time < minFin) {
+          if (minFin != null && time < minFin && data.passed) {
             m.model.errors.add(GateError(
                 eid, LoopGate.EXAM, m.buildIndex, "finished too early"));
           }
-          if (maxFin != null && time > maxFin) {
+          if (maxFin != null && time > maxFin && data.passed) {
             m.model.errors.add(GateError(
                 eid, LoopGate.EXAM, m.buildIndex, "finished too late"));
           }

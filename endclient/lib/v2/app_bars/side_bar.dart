@@ -33,10 +33,27 @@ class SideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var canvasColor = Theme.of(context).canvasColor;
+    var canvasAccent = Color.alphaBlend(Colors.white24, canvasColor);
     var author = context.watch<IdentityService>().author;
     return Container(
         width: 200,
-        color: Theme.of(context).canvasColor,
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          stops: [
+            0.1,
+            0.5,
+            0.9,
+          ],
+          colors: [
+            canvasColor,
+            canvasAccent,
+            canvasColor,
+          ],
+        )),
+        // color: Theme.of(context).canvasColor,
         child: Column(
           children: [
             SizedBox(

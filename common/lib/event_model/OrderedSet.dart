@@ -15,6 +15,7 @@ class OrderedSet<T> extends ReadOnlyOrderedSet<T> {
 
   bool add(T t) {
     if (!_els.add(t)) return false;
+    // IGNORED: PERF: find and insert
     _byOrd
       ..add((t, _byIns.length))
       ..sort((t0, t1) => _cmp(t0.$1, t1.$1));
@@ -23,6 +24,7 @@ class OrderedSet<T> extends ReadOnlyOrderedSet<T> {
   }
 
   void addAll(Iterable<T> ts) {
+    // IGNORED: PERF: merge
     for (var t in ts) add(t);
   }
 }
@@ -39,11 +41,11 @@ class ReadOnlyOrderedSet<T> {
   ReadOnlyOrderedSet.withComparator(this._cmp);
 
   /// converts to insertion index into the corresponding ordered index
-  int? toOrdIndex(int insIdx) => findOrdIndex(byInsertionIndex(insIdx));
-  int? getInsIndex(int ordIdx) => _byOrd.skip(ordIdx).firstOrNull?.$2;
+  int? toOrdIndex(int insIdx) => ordIndexOf(indexIns(insIdx));
+  int? toInsIndex(int ordIdx) => _byOrd.skip(ordIdx).firstOrNull?.$2;
 
   /// finds the ordered index given an element
-  int? findOrdIndex(T t) {
+  int? ordIndexOf(T t) {
     int i = binarySearch((t0) => _cmp(t0, t) >= 0);
     if (i == -1) return null;
     if (_cmp(_byOrd[i].$1, t) == 0) return i;
@@ -51,7 +53,7 @@ class ReadOnlyOrderedSet<T> {
   }
 
   /// find the element given the insertion index
-  T byInsertionIndex(int i) => _byIns[i];
+  T indexIns(int i) => _byIns[i];
 
   bool get isEmpty => _els.isEmpty;
   bool get isNotEmpty => _els.isNotEmpty;

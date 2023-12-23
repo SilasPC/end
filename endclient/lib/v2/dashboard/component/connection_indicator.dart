@@ -33,8 +33,7 @@ class ConnectionIndicator2 extends StatelessWidget {
         ),
       false => ListTile(
           leading: _icon(conn),
-          title: Text(conn.connected ? "Connected" : "Disconnected",
-              style: const TextStyle(color: Colors.grey)),
+          title: Text(conn.connected ? "Connected" : "Disconnected"),
           subtitle: Text("$peerCount peer(s)"),
         ),
     };

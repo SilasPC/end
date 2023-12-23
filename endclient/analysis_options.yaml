@@ -7,7 +7,7 @@ linter:
     constant_identifier_names: false
     avoid_print: false
 
-    # PERF: read these lints
+    # IGNORED: PERF: read these lints
     unnecessary_const: false
     prefer_const_constructors: false
     prefer_const_literals_to_create_immutables: false

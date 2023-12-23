@@ -23,6 +23,12 @@ extension on DateTime {
 String toHMS(DateTime t) => t.toIso8601String().substring(11, 19);
 int toUNIX(DateTime t) => (t.millisecondsSinceEpoch / 1000).floor();
 String unixHMS(int unix) => toHMS(fromUNIX(unix));
+String unixDMY(int unix) => fromUNIX(unix)
+    .toIso8601String()
+    .substring(2, 10)
+    .split("-")
+    .reversed
+    .join("-");
 DateTime fromUNIX(int unix) => DateTime.fromMillisecondsSinceEpoch(unix * 1000);
 int nowUNIX() => toUNIX(DateTime.now());
 int hmsToUNIX(String hms) {

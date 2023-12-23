@@ -10,7 +10,7 @@ sealed class EventError extends IJSON {
 
   EventError(this.causedBy, this.description);
 
-  /// The event index of the cause.
+  /// The insertion index of the cause.
   final int causedBy;
   final String description;
 
