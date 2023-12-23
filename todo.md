@@ -30,31 +30,7 @@
  - error tolerant
 	- prefer warnings to hard errors
 
-# Presentation
- - P2P shared state
-	- data integrity
-	- offline
-	- state/real world mismatch
- - Event based
-	- Force unexpected events
- - Equipe
- - Unimplemented
-	- Multiday rides
-	- Reinspection / Re-exam
-	- Equipe upload
- - Tablet/layout
- - Future
-	- Checkpoints
-	- Hardware
-
-# Production concerns
- - data integrity
- - security
- - performance
- - uncaught exceptions
-
 # Future
- - Multiple gate interface choices
  - Auto events
  - Checkpoints
 
