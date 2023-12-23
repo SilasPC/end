@@ -191,6 +191,14 @@ class _SelectCategoriesState extends State<_SelectCategories> {
             title: Text("OK"),
             onTap: () async {
               var nav = Navigator.of(context, rootNavigator: true);
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  useRootNavigator: false,
+                  builder: (context) => Center(
+                        child: SizedBox.square(
+                            dimension: 70, child: CircularProgressIndicator()),
+                      ));
               await _load(context, widget.id);
               nav.pop();
             },

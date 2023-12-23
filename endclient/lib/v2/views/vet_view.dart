@@ -11,6 +11,7 @@ class VetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TimingListGateView(
+        gateName: "VET",
         predicate: (eq) => eq.status.isCOOLING,
         submit: (data) async {
           LocalModel model = context.read();

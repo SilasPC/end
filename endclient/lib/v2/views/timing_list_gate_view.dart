@@ -18,12 +18,14 @@ import 'package:common/models/glob.dart';
 import 'package:wakelock/wakelock.dart';
 
 class TimingListGateView extends StatefulWidget {
+  final String gateName;
   final Future<void> Function(Iterable<(Equipage, DateTime)>) submit;
   final Predicate<Equipage> predicate;
   const TimingListGateView({
     super.key,
     required this.predicate,
     required this.submit,
+    required this.gateName,
   });
 
   @override
@@ -92,38 +94,57 @@ class _TimingListGateViewState extends State<TimingListGateView> {
   }
 
   final Key _timingListKey = UniqueKey();
-  Widget timingList() => TimingList(
-          key: _timingListKey,
-          timers: timerList.times,
-          onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
-          onReorder: (i, j) => setState(() => reorder(i, j, equipages)),
-          onReorderRow: (i, dt) => setState(() {
-                timerList.times.removeAt(i);
-                int j = timerList.times.indexWhere((t) => dt.isBefore(t));
-                if (j == -1) j = timerList.times.length;
-                timerList.times.insert(j, dt);
-                swap(i, j, equipages);
-              }),
-          height: EquipageTile.height,
-          children: [
-            for (Equipage eq in equipages)
-              Padding(
-                key: ValueKey("EID${eq.eid}"),
-                padding: const EdgeInsets.only(right: 24),
-                child: EquipageTile(
-                  eq,
-                  onTap: () {
-                    if (timerList.length < equipages.length) {
-                      setState(() {
-                        swap(
-                            equipages.indexOf(eq), timerList.length, equipages);
-                        timerList.addNow();
-                      });
-                    }
-                  },
+  Widget timingList() => Stack(
+        children: [
+          // watermark name
+          Center(
+            child: Transform.rotate(
+              angle: -45,
+              child: Text(
+                widget.gateName,
+                overflow: TextOverflow.fade,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black12,
+                  fontSize: 70,
                 ),
-              )
-          ]);
+              ),
+            ),
+          ),
+          TimingList(
+              key: _timingListKey,
+              timers: timerList.times,
+              onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
+              onReorder: (i, j) => setState(() => reorder(i, j, equipages)),
+              onReorderRow: (i, dt) => setState(() {
+                    timerList.times.removeAt(i);
+                    int j = timerList.times.indexWhere((t) => dt.isBefore(t));
+                    if (j == -1) j = timerList.times.length;
+                    timerList.times.insert(j, dt);
+                    swap(i, j, equipages);
+                  }),
+              height: EquipageTile.height,
+              children: [
+                for (Equipage eq in equipages)
+                  Padding(
+                    key: ValueKey("EID${eq.eid}"),
+                    padding: const EdgeInsets.only(right: 24),
+                    child: EquipageTile(
+                      eq,
+                      onTap: () {
+                        if (timerList.length < equipages.length) {
+                          setState(() {
+                            swap(equipages.indexOf(eq), timerList.length,
+                                equipages);
+                            timerList.addNow();
+                          });
+                        }
+                      },
+                    ),
+                  )
+              ]),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +205,12 @@ class _TimingListGateViewState extends State<TimingListGateView> {
                   child: Card(
                       child: Column(
                     children: [
-                      ...cardHeader("Timings"),
+                      ...cardHeaderWithTrailing("Timings", [
+                        IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: submitable ? submit : null,
+                        )
+                      ]),
                       Expanded(child: timingList())
                     ],
                   )),

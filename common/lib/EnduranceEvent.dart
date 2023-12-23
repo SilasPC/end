@@ -46,7 +46,7 @@ sealed class GateEvent extends EnduranceEvent {
     var eq = m.model.equipages[eid]!;
     int cl = eq.currentLoop ?? -1;
     if (eq.currentLoopData?.nextGate case LoopGate next) {
-      if (LoopGate.VET.isBefore(next)) {
+      if (gate.isBefore(next)) {
         if (eq.skipLoop()) {
           m.model.errors
               .add(MissingDataError(eid, m.buildIndex, "loop skipped"));

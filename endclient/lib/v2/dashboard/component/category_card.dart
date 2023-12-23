@@ -90,7 +90,7 @@ class CategoryCard extends StatelessWidget {
               style: IconButton.styleFrom(
                 backgroundColor: primaryColor,
               ),
-              icon: Icon(MyIcons.equipe, color: secondaryColor),
+              icon: Icon(MyIcons.equipe),
               onPressed: () {
                 var uri = Uri.parse(
                     "https://online.equipe.com/da/class_sections/$equipeId");
@@ -104,7 +104,7 @@ class CategoryCard extends StatelessWidget {
             style: IconButton.styleFrom(
               backgroundColor: primaryColor,
             ),
-            icon: Icon(MyIcons.trophy, color: secondaryColor),
+            icon: Icon(MyIcons.trophy),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ResultsPage(cat: cat),

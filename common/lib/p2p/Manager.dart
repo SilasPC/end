@@ -70,7 +70,7 @@ abstract class Peer {
       _man?._onRecieve(this, msg, data) ?? Future.value(null);
 }
 
-// TODO: deal with exceptions
+// IGNORED: TODO: deal with exceptions
 class PeerManager<M extends IJSON> {
   bool _autoConnect = false;
   bool get autoConnect => _autoConnect;

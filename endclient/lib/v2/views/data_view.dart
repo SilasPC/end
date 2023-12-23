@@ -30,7 +30,11 @@ class DataView extends StatelessWidget {
                       var event = model.events[evIdx];
                       bool isDeleted = model.deletes.contains(event);
                       return EventTile(
-                          model: model, event: event, isDeleted: isDeleted);
+                        model: model,
+                        event: event,
+                        isDeleted: isDeleted,
+                        insertionIndex: model.events.getInsIndex(evIdx)!,
+                      );
                     }),
               )
             ],

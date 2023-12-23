@@ -60,7 +60,9 @@ Future<List<Event<EnduranceModel>>> loadModelEvents(
     var (cat, dist, cls) = tup;
 
     try {
-      var startTimes = _parseEquipages(cls["starts"], cat, mevs, author);
+      var evs = <EnduranceEvent>[];
+      var startTimes = _parseEquipages(cls["starts"], cat, evs, author);
+      mevs.addAll(evs);
 
       var catDist = cat.distance();
       if (catDist == 0) {
@@ -165,14 +167,18 @@ Map<Equipage, int> _parseEquipages(
 
     List results = (eq["results"] ?? []);
     if (results.isNotEmpty) {
+      int _prevTime = 0;
+      int nextTime(int unix) =>
+          _prevTime = (unix <= _prevTime ? _prevTime + 1 : unix);
+
       hasResults = true;
       try {
-        int loop = 0;
         List<int>? loopDists = [];
         bool dsqPreExam = true;
         bool retirePreExam = results[0]["reason"] == "RET";
         if (!retirePreExam) {
           for (int i = 0; i < results.length; i++) {
+            final loop = i;
             var res = results[i];
             if (res["type"] != "Endurance") break;
             bool passed = nullOrEmpty(res["reason"]);
@@ -189,18 +195,19 @@ Map<Equipage, int> _parseEquipages(
             if (nullOrEmpty(res["arrival"])) break;
             dsqPreExam = false;
             evs.add(DepartureEvent(author, expDep + 60, eid, loop));
-            evs.add(ArrivalEvent(author, hmsToUNIX(res["arrival"]), eid, loop));
+            evs.add(ArrivalEvent(
+                author, nextTime(hmsToUNIX(res["arrival"])), eid, loop));
 
             if (nullOrEmpty(res["pulse_time"])) break;
-            // FIXME: in ranum23, 404, MA, loop 1, this is null,
+            // IGNORED: FIXME: in ranum23, 404, MA, loop 1, this is null,
             //      : despite FTQ-GA for loop 1, thus the ftq is not registered
             var vetTime = hmsToUNIX(res["pulse_time"]);
-            evs.add(VetEvent(author, vetTime, eid, loop));
+            evs.add(VetEvent(author, nextTime(vetTime), eid, loop));
             var vetdata = VetData(passed)..hr1 = res["pulse"];
 
-            evs.add(ExamEvent(author, vetTime + 60, eid, vetdata, loop));
-            if (retire) evs.add(RetireEvent(author, vetTime + 61, eid));
-            loop++;
+            evs.add(ExamEvent(author, nextTime(vetTime), eid, vetdata, loop));
+            if (retire)
+              evs.add(RetireEvent(author, nextTime(vetTime + 61), eid));
             if (!vetdata.passed || retire) {
               loopDists = null;
               break;

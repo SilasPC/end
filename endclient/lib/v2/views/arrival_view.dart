@@ -11,6 +11,7 @@ class ArrivalView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TimingListGateView(
+        gateName: "ARRIVAL",
         predicate: (eq) => eq.status.isRIDING,
         submit: (data) async {
           LocalModel model = context.read();

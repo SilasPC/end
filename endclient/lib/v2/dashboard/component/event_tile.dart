@@ -13,10 +13,12 @@ class EventTile extends StatelessWidget {
     required this.model,
     required this.event,
     required this.isDeleted,
+    required this.insertionIndex,
   });
 
   final LocalModel model;
   final Event<EnduranceModel> event;
+  final int insertionIndex;
   final bool isDeleted;
 
   @override
@@ -48,6 +50,7 @@ class EventTile extends StatelessWidget {
       },
       leading: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(unixHMS(event.time)),
+        Text(insertionIndex.toString())
         /* SizedBox(
 						width: 50,
 						child: Text(

@@ -93,7 +93,7 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
         onCreate: (db, _) => _resetDatabase(db),
         onUpgrade: (db, _, __) => _resetDatabase(db),
         onDowngrade: (db, _, __) => _resetDatabase(db),
-        version: 15);
+        version: 16);
     return db;
   }
 
