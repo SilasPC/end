@@ -58,12 +58,12 @@ class _TimingGateToolbarState extends State<TimingGateToolbar> {
             ),
           const Spacer(),
           IconButton(
-            icon: Icon(Icons.send),
-            onPressed: widget.onPressed,
-          ),
-          IconButton(
             icon: Icon(Icons.delete),
             onPressed: widget.onRefresh,
+          ),
+          IconButton(
+            icon: Icon(Icons.send),
+            onPressed: widget.onPressed,
           ),
         ],
       ),
@@ -73,8 +73,12 @@ class _TimingGateToolbarState extends State<TimingGateToolbar> {
   TapRegion sheet(BuildContext context) {
     return TapRegion(
         onTapOutside: (tap) {
-          var h = MediaQuery.sizeOf(context).height;
-          if (tap.position.dy < h - 400) {
+          var s = MediaQuery.sizeOf(context);
+          var sideMargin = (s.width - 640) / 2;
+
+          if (tap.position.dy < s.height - 400 ||
+              tap.position.dx < sideMargin ||
+              tap.position.dx > s.width - sideMargin) {
             ctrl?.close();
           }
         },

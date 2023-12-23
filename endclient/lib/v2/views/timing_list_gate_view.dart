@@ -33,7 +33,6 @@ class TimingListGateView extends StatefulWidget {
 }
 
 class _TimingListGateViewState extends State<TimingListGateView> {
-  bool narrow = false;
   List<Equipage> equipages = [];
   TimerList timerList = TimerList();
 
@@ -81,7 +80,6 @@ class _TimingListGateViewState extends State<TimingListGateView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    narrow = MediaQuery.sizeOf(context).width < 550;
     if (context.read<Settings>().useWakeLock) {
       Wakelock.enable().catchError((_) {});
     }
@@ -115,6 +113,12 @@ class _TimingListGateViewState extends State<TimingListGateView> {
               key: _timingListKey,
               timers: timerList.times,
               onRemoveTimer: (i) => setState(() => timerList.times.removeAt(i)),
+              onAddTimer: (i) {
+                setState(() {
+                  swap(i, timerList.length, equipages);
+                  timerList.addNow();
+                });
+              },
               onReorder: (i, j) => setState(() => reorder(i, j, equipages)),
               onReorderRow: (i, dt) => setState(() {
                     timerList.times.removeAt(i);
@@ -148,86 +152,87 @@ class _TimingListGateViewState extends State<TimingListGateView> {
 
   @override
   Widget build(BuildContext context) {
-    var ui = context.watch<UI>();
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: TopBar(),
-      floatingActionButtonLocation: narrow
-          ? FloatingActionButtonLocation.centerDocked
-          : FloatingActionButtonLocation.endFloat,
-      floatingActionButton: fab(),
-      drawerEnableOpenDragGesture: false,
-      drawer: SideBar.fromUI(ui),
-      bottomNavigationBar: !narrow
-          ? null
-          : TimingGateToolbar(
-              selectorSheetEnabled: narrow,
-              onPressed: submitable ? submit : null,
-              onRefresh: refresh,
-              equipages: equipages,
-              onAdd: (eq) => setState(() {
-                equipages.add(eq);
-              }),
-            ),
-      body: narrow
-          ? Card(
-              child: Column(
-              children: [
-                ...cardHeader("Timings"),
-                Expanded(child: timingList())
-              ],
-            ))
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: EquipagesCard(
-                    builder: (context, self, eq, color) {
-                      var inList = equipages.contains(eq);
-                      return EquipageTile(
-                        eq,
-                        trailing: !inList
-                            ? const [Icon(Icons.chevron_right)]
-                            : const [Icon(null)],
-                        onTap: () {
-                          if (!inList) {
-                            setState(() {
-                              equipages.add(eq);
-                            });
-                          }
-                        },
-                      );
-                    },
-                    filter: (eq) => widget.predicate(eq),
+    return LayoutBuilder(builder: (context, constraints) {
+      var ui = context.watch<UI>();
+      var narrow = constraints.maxWidth < 750;
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: TopBar(),
+        floatingActionButtonLocation: narrow
+            ? FloatingActionButtonLocation.centerDocked
+            : FloatingActionButtonLocation.endFloat,
+        floatingActionButton: fab(),
+        drawerEnableOpenDragGesture: false,
+        drawer: SideBar.fromUI(ui),
+        bottomNavigationBar: !narrow
+            ? null
+            : TimingGateToolbar(
+                selectorSheetEnabled: narrow,
+                onPressed: submitable ? submit : null,
+                onRefresh: refresh,
+                equipages: equipages,
+                onAdd: (eq) => setState(() {
+                  equipages.add(eq);
+                }),
+              ),
+        body: narrow
+            ? Card(
+                child: Column(
+                children: [
+                  ...cardHeader("Timings"),
+                  Expanded(child: timingList())
+                ],
+              ))
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: EquipagesCard(
+                      builder: (context, self, eq, color) {
+                        var inList = equipages.contains(eq);
+                        return EquipageTile(
+                          eq,
+                          trailing: !inList
+                              ? const [Icon(Icons.chevron_right)]
+                              : const [Icon(null)],
+                          onTap: () {
+                            if (!inList) {
+                              setState(() {
+                                equipages.add(eq);
+                              });
+                            }
+                          },
+                        );
+                      },
+                      filter: (eq) => widget.predicate(eq),
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Card(
-                      child: Column(
-                    children: [
-                      ...cardHeaderWithTrailing("Timings", [
-                        IconButton(
-                          icon: Icon(Icons.send),
-                          onPressed: submitable ? submit : null,
-                        )
-                      ]),
-                      Expanded(child: timingList())
-                    ],
-                  )),
-                ),
-              ],
-            ),
-    );
+                  Expanded(
+                    child: Card(
+                        child: Column(
+                      children: [
+                        ...cardHeaderWithTrailing("Timings", [
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: refresh,
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.send),
+                            onPressed: submitable ? submit : null,
+                          )
+                        ]),
+                        Expanded(child: timingList())
+                      ],
+                    )),
+                  ),
+                ],
+              ),
+      );
+    });
   }
 
   FloatingActionButton fab() {
-    if (narrow) {
-      return FloatingActionButton(
-        onPressed: addTime,
-        child: Icon(Icons.add_alarm),
-      );
-    }
-    return FloatingActionButton.large(
+    return FloatingActionButton(
       onPressed: addTime,
       child: Icon(Icons.add_alarm),
     );

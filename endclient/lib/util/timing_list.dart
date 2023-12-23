@@ -6,10 +6,10 @@ import 'package:common/util.dart';
 class TimingList extends StatelessWidget {
   final List<DateTime> timers;
   final void Function(int) onRemoveTimer;
+  final void Function(int) onAddTimer;
   final void Function(int, int) onReorder;
   final void Function(int, DateTime) onReorderRow;
   final List<Widget> children;
-  //final Widget Function()? restBuilder;
   final double height;
 
   const TimingList(
@@ -18,6 +18,7 @@ class TimingList extends StatelessWidget {
       required this.onRemoveTimer,
       required this.onReorder,
       required this.onReorderRow,
+      required this.onAddTimer,
       required this.height,
       /*this.restBuilder,*/ required this.children});
 
@@ -36,25 +37,33 @@ class TimingList extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 80,
+                width: 120,
                 child: ListView(
                   children: [
                     for (int i = 0; i < timers.length; i++)
                       Container(
-                        padding: const EdgeInsets.all(8),
-                        height: height,
-                        alignment: Alignment.center,
-                        child: GestureDetector(
-                            onLongPress: () => onRemoveTimer(i),
-                            onTap: () {
+                          height: height,
+                          alignment: Alignment.center,
+                          child: InputChip(
+                            label: Text(toHMS(timers[i])),
+                            onPressed: () {
                               showHMSPicker(context, timers[i],
                                   (dt) => onReorderRow(i, dt));
                             },
-                            child: i == 0
-                                ? Text(toHMS(timers[i]))
-                                : Text(
-                                    "${toHMS(timers[i])}\n(${unixDifToMS((timers[i].millisecondsSinceEpoch - timers[i - 1].millisecondsSinceEpoch) ~/ 1000, addPlus: true)})")),
-                      ),
+                            onDeleted: () {
+                              onRemoveTimer(i);
+                            },
+                          )),
+                    for (int i = timers.length; i < children.length; i++)
+                      Container(
+                          height: height,
+                          alignment: Alignment.center,
+                          child: ActionChip(
+                            label: Icon(Icons.alarm_add),
+                            onPressed: () {
+                              onAddTimer(i);
+                            },
+                          ))
                   ],
                 ),
               ),
