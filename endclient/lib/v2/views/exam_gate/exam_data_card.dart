@@ -148,10 +148,12 @@ class _ExamDataCardState extends State<ExamDataCard> {
               val != null ? field.withValue(val).toString() : "-",
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            Text(
-              field.name,
-              textAlign: TextAlign.center,
-            ),
+            FittedBox(
+              child: Text(
+                field.name,
+                textAlign: TextAlign.center,
+              ),
+            )
           ],
         ),
       );

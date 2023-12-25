@@ -1,15 +1,12 @@
 import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:esys_client/consts.dart';
-import 'package:esys_client/v2/app_bars/side_bar.dart';
-import 'package:esys_client/v2/app_bars/top_bar.dart';
 import 'package:esys_client/v2/dashboard/component/category_card.dart';
 import 'package:esys_client/services/local_model.dart';
-import 'package:esys_client/util/my_icons.dart';
 import 'package:esys_client/v2/dashboard/component/session_summary_card.dart';
 import 'package:esys_client/v2/dashboard/component/notifications_card.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
+import 'package:esys_client/v2/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -68,11 +65,8 @@ class SecretaryView extends StatelessWidget {
             ],
           );
         }
-        return Scaffold(
+        return MyScaffold(
           backgroundColor: Colors.transparent,
-          drawer: SideBar.fromUI(context.watch()),
-          drawerEnableOpenDragGesture: false,
-          appBar: TopBar(),
           body: body,
         );
       });

@@ -44,7 +44,7 @@ DateTime fromHMS(int h, int m, int s) {
   return fromUNIX(midnight + 3600 * h + 60 * m + s);
 }
 
-String unixDifToMS(int dif,
+String formatSeconds(int dif,
     {bool addPlus = false, bool addMinus = true, bool zeroPad = true}) {
   int m = (dif.abs() / 60).floor();
   int s = dif.abs() % 60;

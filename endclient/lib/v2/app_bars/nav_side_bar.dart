@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:esys_client/util/text_clock.dart';
 import 'package:provider/provider.dart';
 
-class SideBar extends StatelessWidget {
+class NavSidebar extends StatelessWidget {
   final List<NavItem> navItems;
   final NavItem currentItem;
   final void Function(NavItem)? itemSelected;
   final bool noClock;
 
-  const SideBar({
+  const NavSidebar({
     super.key,
     required this.navItems,
     required this.itemSelected,
@@ -21,9 +21,10 @@ class SideBar extends StatelessWidget {
     this.noClock = false,
   });
 
-  static SideBar? fromUI(UI ui) {
-    if (!ui.narrow) return null;
-    return SideBar(
+  static NavSidebar? fromContext(BuildContext context) {
+    var ui = context.watch<UI?>();
+    if (ui == null || !ui.narrow) return null;
+    return NavSidebar(
       currentItem: ui.currentNavItem,
       navItems: ui.navItems,
       itemSelected: ui.navigate,
@@ -102,7 +103,11 @@ class SideBar extends StatelessWidget {
                 splashRadius: splashRadius,
                 icon: const Icon(Icons.logout),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(
+                    context,
+                  )
+                    ..pop()
+                    ..pop();
                 },
               ),
             ),

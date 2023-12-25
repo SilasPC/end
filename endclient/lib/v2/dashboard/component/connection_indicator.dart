@@ -5,11 +5,9 @@ import 'package:provider/provider.dart';
 
 class ConnectionIndicator2 extends StatelessWidget {
   final bool iconOnly;
+  final void Function()? onTap;
 
-  const ConnectionIndicator2({
-    super.key,
-    this.iconOnly = false,
-  });
+  const ConnectionIndicator2({super.key, this.iconOnly = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +27,10 @@ class ConnectionIndicator2 extends StatelessWidget {
             count: peerCount,
             child: _icon(conn),
           ),
-          onPressed: () {},
+          onPressed: () => onTap?.call(),
         ),
       false => ListTile(
+          onTap: onTap,
           leading: _icon(conn),
           title: Text(conn.connected ? "Connected" : "Disconnected"),
           subtitle: Text("$peerCount peer(s)"),

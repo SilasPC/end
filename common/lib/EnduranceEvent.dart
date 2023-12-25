@@ -260,7 +260,7 @@ class ExamEvent extends GateEvent {
         eq.status = EquipageStatus.DNF;
       }
       if (ld.vet case int vetTime
-          when data.passed && time > vetTime + COOL_TIME) {
+          when data.passed && time > vetTime + COOL_TIME.inSeconds) {
         m.model.errors.add(GateError(
             eid, LoopGate.EXAM, m.buildIndex, "too late to pass exam"));
       }
@@ -383,7 +383,7 @@ class DepartureEvent extends GateEvent {
     if (!checkSkip(m)) return;
     var expDep = eq.currentLoopData?.expDeparture;
     if (expDep case int expDep) {
-      if (time - expDep > MAX_DEPART_DELAY) {
+      if (time - expDep > MAX_DEPART_DELAY.inSeconds) {
         // TODO: what to do? this is not really an "error"
         // rather, it should be a warning if the equipage is accepted
         // despite this

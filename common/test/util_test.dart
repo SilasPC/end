@@ -48,15 +48,15 @@ void main() {
   });
 
   test("duration formating", () {
-    expect(unixDifToMS(5 * 60 + 23), "05:23");
-    expect(unixDifToMS(59), "00:59");
-    expect(unixDifToMS(60, zeroPad: false), "1:00");
-    expect(unixDifToMS(0), "00:00");
-    expect(unixDifToMS(0, addPlus: true), "+00:00");
-    expect(unixDifToMS(-1), "-00:01");
-    expect(unixDifToMS(-59), "-00:59");
-    expect(unixDifToMS(-60, addMinus: false), "01:00");
-    expect(unixDifToMS(-60 * 60 - 5), "-60:05");
+    expect(formatSeconds(5 * 60 + 23), "05:23");
+    expect(formatSeconds(59), "00:59");
+    expect(formatSeconds(60, zeroPad: false), "1:00");
+    expect(formatSeconds(0), "00:00");
+    expect(formatSeconds(0, addPlus: true), "+00:00");
+    expect(formatSeconds(-1), "-00:01");
+    expect(formatSeconds(-59), "-00:59");
+    expect(formatSeconds(-60, addMinus: false), "01:00");
+    expect(formatSeconds(-60 * 60 - 5), "-60:05");
   });
   group("reorder", () {
     var lst = () => [0, 1, 2, 3];

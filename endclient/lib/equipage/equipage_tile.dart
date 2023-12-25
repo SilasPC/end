@@ -2,7 +2,7 @@ import 'package:common/models/glob.dart';
 import 'package:flutter/material.dart';
 
 class EquipageTile extends StatelessWidget {
-  static const double height = 66;
+  static const double height = 67; // wtf does this always have to increase
 
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;

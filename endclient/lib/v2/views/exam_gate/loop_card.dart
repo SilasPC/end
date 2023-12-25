@@ -107,10 +107,11 @@ class LoopCard extends StatelessWidget {
           return AspectRatio(
             aspectRatio: crossAxisCount / mainAxisCount,
             child: GridView.count(
+              physics: NeverScrollableScrollPhysics(),
               crossAxisCount: crossAxisCount,
               children: [
                 txtCol([
-                  maybe(loopData.recoveryTime, unixDifToMS) ?? "-",
+                  maybe(loopData.recoveryTime, formatSeconds) ?? "-",
                   "Recovery"
                 ]),
                 txtCol([

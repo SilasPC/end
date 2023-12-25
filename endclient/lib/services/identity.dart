@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:common/p2p/protocol.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +5,7 @@ class IdentityService extends ChangeNotifier {
   PrivatePeerIdentity _identity = PrivatePeerIdentity.anonymous();
 
   PrivatePeerIdentity get identity => _identity;
-  String get author => Platform.localHostname;
+  String get author => identity.identity.name;
 
   void setIdentity(PrivatePeerIdentity id) {
     _identity = id;

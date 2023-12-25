@@ -1,12 +1,12 @@
 // ignore_for_file: unused_element, dead_code
 
 import 'dart:async';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/local_model.dart';
+import 'package:esys_client/util/util.dart';
 import 'package:esys_client/v2/dashboard/component/connection_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,16 +17,70 @@ class TestingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomAppBar(),
-      floatingActionButton: CountDownThing(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      body: Stack(
+        children: [
+          ListView.builder(
+            itemBuilder: (context, i) => ListTile(
+              title: Text("wack $i"),
+            ),
+          ),
+          sheet(),
+        ],
+      ),
     );
+  }
+
+  LayoutBuilder sheet() {
+    return LayoutBuilder(builder: (context, constraints) {
+      final minSize = kToolbarHeight / constraints.maxHeight;
+      const maxSize = 0.4;
+      var dsctrl = DraggableScrollableController();
+      return DraggableScrollableSheet(
+        initialChildSize: minSize,
+        minChildSize: minSize,
+        maxChildSize: maxSize,
+        snap: true,
+        controller: dsctrl,
+        builder: (context, ctrl) => Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                color: Theme.of(context).colorScheme.surface),
+            child: SingleChildScrollView(
+                controller: ctrl,
+                child: Column(
+                  children: [
+                    const DragHandle(),
+                    CountdownTimer(
+                      size: 0.5 * constraints.maxWidth,
+                      target: DateTime.now().add(Duration(seconds: 20)),
+                      low: Duration(seconds: 10),
+                      high: Duration(seconds: 30),
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Text("Recovery",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                ))),
+      );
+    });
   }
 }
 
 class CountDownThing extends StatefulWidget {
+  final double? size;
+  final Color primary, secondary;
+
+  static const defaultPrimary = Colors.blue;
+  static const defaultSecondary = Color.fromARGB(255, 12, 73, 122);
+
   const CountDownThing({
     super.key,
+    this.size = 70,
+    this.primary = defaultPrimary,
+    this.secondary = defaultSecondary,
   });
 
   @override
@@ -56,7 +110,7 @@ class _CountDownThingState extends State<CountDownThing> {
   @override
   Widget build(BuildContext context) {
     const divisions = 60;
-    Color fg = Colors.green, bg = Colors.blue;
+    Color fg = widget.primary, bg = widget.secondary;
     if (left % (2 * divisions) >= divisions) {
       (fg, bg) = (bg, fg);
     }
@@ -68,17 +122,20 @@ class _CountDownThingState extends State<CountDownThing> {
           left = 10;
         });
       },
-      child: SizedBox(
-        width: 70,
-        height: 70,
+      child: SizedBox.square(
+        dimension: widget.size,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Center(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: FittedBox(
                 child: Text(
-              unixDifToMS(left),
-              style: TextStyle(fontSize: 20),
-            )),
+                  formatSeconds(left),
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
             CircularProgressIndicator(
               color: fg,
               backgroundColor: bg,

@@ -1,6 +1,6 @@
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/v2/dashboard/helpers.dart';
-import 'package:esys_client/v2/app_bars/side_bar.dart';
+import 'package:esys_client/v2/app_bars/nav_side_bar.dart';
 import 'package:esys_client/v2/views/glob.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -66,7 +66,7 @@ class _DashboardState extends State<Dashboard> {
 
   Widget wideLayout() => Row(
         children: [
-          SideBar(
+          NavSidebar(
             navItems: navItems,
             itemSelected: navigate,
             currentItem: currentView,
@@ -97,7 +97,7 @@ class _DashboardState extends State<Dashboard> {
 				onTap: (index) => setState(() { currentView = navItems[index]; })
 			), */
       drawerEnableOpenDragGesture: false,
-      drawer: SideBar(
+      drawer: NavSidebar(
         noClock: true,
         navItems: navItems,
         itemSelected: (newView) => setState(() {

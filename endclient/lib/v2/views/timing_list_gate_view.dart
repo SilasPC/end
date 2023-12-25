@@ -6,12 +6,10 @@ import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/services/settings.dart';
 import 'package:esys_client/util/timing_list.dart';
 import 'package:esys_client/util/util.dart';
-import 'package:esys_client/v2/app_bars/side_bar.dart';
 import 'package:esys_client/v2/app_bars/timing_gate_toolbar.dart';
-import 'package:esys_client/v2/app_bars/top_bar.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
-import 'package:esys_client/v2/dashboard/helpers.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
+import 'package:esys_client/v2/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:common/models/glob.dart';
@@ -153,17 +151,13 @@ class _TimingListGateViewState extends State<TimingListGateView> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      var ui = context.watch<UI>();
       var narrow = constraints.maxWidth < 750;
-      return Scaffold(
+      return MyScaffold(
         backgroundColor: Colors.transparent,
-        appBar: TopBar(),
         floatingActionButtonLocation: narrow
             ? FloatingActionButtonLocation.centerDocked
             : FloatingActionButtonLocation.endFloat,
         floatingActionButton: fab(),
-        drawerEnableOpenDragGesture: false,
-        drawer: SideBar.fromUI(ui),
         bottomNavigationBar: !narrow
             ? null
             : TimingGateToolbar(

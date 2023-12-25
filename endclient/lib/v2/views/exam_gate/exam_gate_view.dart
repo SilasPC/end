@@ -4,8 +4,9 @@ import 'package:common/util.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/services/local_model.dart';
+import 'package:esys_client/v2/app_bars/event_side_bar.dart';
 import 'package:esys_client/v2/app_bars/exam_gate_toolbar.dart';
-import 'package:esys_client/v2/app_bars/side_bar.dart';
+import 'package:esys_client/v2/app_bars/nav_side_bar.dart';
 import 'package:esys_client/v2/app_bars/top_bar.dart';
 import 'package:esys_client/v2/dashboard/component/equipages_card.dart';
 import 'package:esys_client/v2/dashboard/helpers.dart';
@@ -51,9 +52,10 @@ class _ExamGateViewState extends State<ExamGateView> {
       var showList = constraints.maxWidth > 650;
       var showInfo = constraints.maxWidth > 900;
       return Scaffold(
+          endDrawer: EventSidebar(),
           appBar: TopBar(),
           drawerEnableOpenDragGesture: false,
-          drawer: SideBar.fromUI(ui),
+          drawer: NavSidebar.fromContext(context),
           bottomNavigationBar: showInfo
               ? null
               : ExamGateToolbar(

@@ -1,6 +1,7 @@
 import 'package:common/models/Equipage.dart';
 import 'package:esys_client/equipage/equipage_tile.dart';
 import 'package:esys_client/services/local_model.dart';
+import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:esys_client/v2/views/exam_gate/exam_gate_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,7 @@ class _TimingGateToolbarState extends State<ExamGateToolbar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
-            icon: Icon(Icons.keyboard_arrow_up),
+            icon: Icon(Icons.view_list),
             onPressed: () {
               // UI: sheet not rebuilt when toolbar rebuilds
               showModalBottomSheet(
@@ -47,22 +48,24 @@ class _TimingGateToolbarState extends State<ExamGateToolbar> {
             },
           ),
           if (widget.equipage case Equipage eq)
-            Expanded(child: EquipageTile(eq)),
+            Expanded(child: EquipageTile(eq))
+          else
+            Text(
+              "No equipage selected",
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
         ],
       ),
     );
   }
 
   Widget sheet(BuildContext context) {
-    return SizedBox(
-        height: 400,
-        child: Navigator(
-            onGenerateInitialRoutes: (context, routeSettings) => [
-                  MaterialPageRoute(builder: _selectView),
-                  if (equipage case Equipage eq)
-                    MaterialPageRoute(
-                        builder: (context) => _infoView(context, eq))
-                ]));
+    return Navigator(
+        onGenerateInitialRoutes: (context, routeSettings) => [
+              MaterialPageRoute(builder: _selectView),
+              if (equipage case Equipage eq)
+                MaterialPageRoute(builder: (context) => _infoView(context, eq))
+            ]);
   }
 
   Widget _selectView(BuildContext context) {

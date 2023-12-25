@@ -1,12 +1,12 @@
 import 'dart:async';
-
 import 'package:esys_client/consts.dart';
-import 'package:esys_client/equipage/equipage_tile.dart';
+import 'package:esys_client/util/util.dart';
+import 'package:esys_client/v2/app_bars/top_bar.dart';
+import 'package:esys_client/v2/dashboard/component/equipage_card.dart';
 import 'package:esys_client/v2/views/exam_gate/loop_card.dart';
 import 'package:flutter/material.dart';
 import 'package:locally/locally.dart';
 import 'package:provider/provider.dart';
-
 import 'package:common/consts.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/util.dart';
@@ -40,7 +40,7 @@ class EquipagePageState extends State<EquipagePage> {
         case EquipageStatus.COOLING:
           var time = widget.equipage.currentLoopData?.arrival;
           if (time == null) break;
-          msg = "Exam attendance before ${unixHMS(time + COOL_TIME)}";
+          msg = "Exam attendance before ${unixHMS(time + COOL_TIME.inSeconds)}";
           break;
         case EquipageStatus.RESTING:
           var time = widget.equipage.currentLoopData?.expDeparture;
@@ -70,44 +70,68 @@ class EquipagePageState extends State<EquipagePage> {
 
   @override
   Widget build(BuildContext context) {
-    // UI: new equipage page
     context.watch<LocalModel>();
     checkStatusUpdate();
-    var (bar, fab) = bottomInfo();
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: fab,
-      bottomNavigationBar: bar,
-      appBar: AppBar(),
-      body: Card(
-        child: EquipageTile(widget.equipage),
-      ),
-    );
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        appBar: TopBar(),
+        body: Stack(
+          children: [
+            EquipageInfoCard(widget.equipage),
+            if (infoSheet() case Widget w) w,
+          ],
+        ));
   }
 
-  (Widget?, Widget?) bottomInfo() {
-    String text;
-    DateTime? target;
+  Widget sheet(DateTime target, Duration high, Duration low) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final minSize = kToolbarHeight / constraints.maxHeight;
+      const maxSize = 0.4;
+      return DraggableScrollableSheet(
+        initialChildSize: minSize,
+        minChildSize: minSize,
+        maxChildSize: maxSize,
+        snap: true,
+        builder: (context, ctrl) => Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                color: Theme.of(context).colorScheme.surface),
+            child: SingleChildScrollView(
+                controller: ctrl,
+                child: Column(
+                  children: [
+                    const DragHandle(),
+                    CountdownTimer(
+                      size: 0.5 * constraints.maxWidth,
+                      target: target,
+                      low: low,
+                      high: high,
+                    ),
+                    Text(widget.equipage.status.name,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                ))),
+      );
+    });
+  }
+
+  Widget? infoSheet() {
     switch (widget.equipage.status) {
       case EquipageStatus.COOLING:
-        text = "Cooldown";
         if (widget.equipage.currentLoopData?.arrival case int arrival) {
-          target = fromUNIX(arrival + COOL_TIME);
+          var target = fromUNIX(arrival + COOL_TIME.inSeconds);
+          return sheet(target, COOL_TIME, Duration(minutes: 3));
         }
+        break;
       case EquipageStatus.RESTING:
-        text = "Resting";
         if (widget.equipage.currentLoopData?.expDeparture case int expDep) {
-          target = fromUNIX(expDep);
+          var target = fromUNIX(expDep);
+          return sheet(target, REST_TIME, Duration(minutes: 0));
         }
+        break;
       default:
-        return (null, null);
     }
-    return (
-      BottomAppBar(
-        child: Text(text),
-      ),
-      target == null ? null : CountDownThing(target: target)
-    );
   }
 
   List<Widget> loopCards() {
@@ -185,7 +209,7 @@ class _CountDownThingState extends State<CountDownThing> {
         children: [
           Center(
               child: Text(
-            unixDifToMS(dif),
+            formatSeconds(dif),
             style: TextStyle(fontSize: 20),
           )),
           CircularProgressIndicator(
