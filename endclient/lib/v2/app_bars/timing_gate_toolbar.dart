@@ -25,35 +25,20 @@ class TimingGateToolbar extends StatefulWidget {
 }
 
 class _TimingGateToolbarState extends State<TimingGateToolbar> {
-  PersistentBottomSheetController? ctrl;
-
   @override
   Widget build(BuildContext context) {
-    if (!widget.selectorSheetEnabled) {
-      ctrl?.close();
-      ctrl = null;
-    }
-
     return BottomAppBar(
       child: Row(
         children: [
           if (widget.selectorSheetEnabled)
             IconButton(
               icon: Icon(Icons.view_list),
-              onPressed: () async {
-                if (ctrl != null) {
-                  ctrl!.close();
-                  ctrl = null;
-                  return;
-                }
-
+              onPressed: () {
                 // UI: sheet not rebuilt when toolbar rebuilds
-                ctrl = showBottomSheet(
+                showModalBottomSheet(
                   context: context,
                   builder: sheet,
                 );
-                await ctrl!.closed;
-                ctrl = null;
               },
             ),
           const Spacer(),
@@ -70,36 +55,25 @@ class _TimingGateToolbarState extends State<TimingGateToolbar> {
     );
   }
 
-  TapRegion sheet(BuildContext context) {
-    return TapRegion(
-        onTapOutside: (tap) {
-          var s = MediaQuery.sizeOf(context);
-          var sideMargin = (s.width - 640) / 2;
-
-          if (tap.position.dy < s.height - 400 ||
-              tap.position.dx < sideMargin ||
-              tap.position.dx > s.width - sideMargin) {
-            ctrl?.close();
-          }
-        },
-        child: SizedBox(
-          height: 400,
-          child: ListView(
-            children: [
-              for (var eq in context.watch<LocalModel>().model.equipages.values)
-                EquipageTile(
-                  eq,
-                  trailing: [
-                    widget.equipages.contains(eq)
-                        ? IconButton(icon: Icon(Icons.check), onPressed: null)
-                        : IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () => widget.onAdd(eq),
-                          )
-                  ],
-                )
-            ],
-          ),
-        ));
+  Widget sheet(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: ListView(
+        children: [
+          for (var eq in context.watch<LocalModel>().model.equipages.values)
+            EquipageTile(
+              eq,
+              trailing: [
+                widget.equipages.contains(eq)
+                    ? IconButton(icon: Icon(Icons.check), onPressed: null)
+                    : IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => widget.onAdd(eq),
+                      )
+              ],
+            )
+        ],
+      ),
+    );
   }
 }

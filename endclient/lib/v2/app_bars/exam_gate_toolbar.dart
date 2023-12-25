@@ -22,7 +22,6 @@ class ExamGateToolbar extends StatefulWidget {
 
 class _TimingGateToolbarState extends State<ExamGateToolbar> {
   Equipage? equipage;
-  PersistentBottomSheetController? ctrl;
 
   @override
   void initState() {
@@ -39,20 +38,12 @@ class _TimingGateToolbarState extends State<ExamGateToolbar> {
         children: [
           IconButton(
             icon: Icon(Icons.keyboard_arrow_up),
-            onPressed: () async {
-              if (ctrl != null) {
-                ctrl!.close();
-                ctrl = null;
-                return;
-              }
-
+            onPressed: () {
               // UI: sheet not rebuilt when toolbar rebuilds
-              ctrl = showBottomSheet(
+              showModalBottomSheet(
                 context: context,
                 builder: sheet,
               );
-              await ctrl!.closed;
-              ctrl = null;
             },
           ),
           if (widget.equipage case Equipage eq)
@@ -62,23 +53,16 @@ class _TimingGateToolbarState extends State<ExamGateToolbar> {
     );
   }
 
-  TapRegion sheet(BuildContext context) {
-    return TapRegion(
-        onTapOutside: (tap) {
-          var h = MediaQuery.sizeOf(context).height;
-          if (tap.position.dy < h - 400) {
-            ctrl?.close();
-          }
-        },
-        child: SizedBox(
-            height: 400,
-            child: Navigator(
-                onGenerateInitialRoutes: (context, routeSettings) => [
-                      MaterialPageRoute(builder: _selectView),
-                      if (equipage case Equipage eq)
-                        MaterialPageRoute(
-                            builder: (context) => _infoView(context, eq))
-                    ])));
+  Widget sheet(BuildContext context) {
+    return SizedBox(
+        height: 400,
+        child: Navigator(
+            onGenerateInitialRoutes: (context, routeSettings) => [
+                  MaterialPageRoute(builder: _selectView),
+                  if (equipage case Equipage eq)
+                    MaterialPageRoute(
+                        builder: (context) => _infoView(context, eq))
+                ]));
   }
 
   Widget _selectView(BuildContext context) {
