@@ -32,7 +32,7 @@ abstract class Peer {
   bool get disconnected => !__state.connected;
 
   int? get sessionId => _lastKnownState?.sessionId;
-  String? get id => _lastKnownState?.identity.name;
+  String? get id => _lastKnownState?.identity?.name;
   PeerIdentity? get ident => _lastKnownState?.identity;
   PreSyncMsg? _lastKnownState;
   PeerManager? _man;
@@ -92,17 +92,22 @@ class PeerManager<M extends IJSON> {
   Stream<Null> get updateStream => _onUpdate.stream;
   Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
-  final PeerIdentity _trustAnchor = PeerIdentity.server();
-  PrivatePeerIdentity _id;
-  PeerIdentity get id => _id.identity;
+  final PeerIdentity _trustAnchor = PrivatePeerIdentity.server().identity;
+  PrivatePeerIdentity? _id;
+  PeerIdentity? get id => _id?.identity;
 
-  void changeIdentity(PrivatePeerIdentity id) {
+  void changeIdentity(PrivatePeerIdentity? id) {
     if (_id == id) return;
-    if (!id.identity.verifySignature(_trustAnchor.key)) {
-      throw Exception("cannot set id which is not trusted");
+    if (!(id?.identity.verifySignature() ?? true)) {
+      throw Exception("cannot set bad id");
+    }
+    if (!(id?.identity.isSignedBy(_trustAnchor) ?? true)) {
+      throw Exception("cannot set untrusted id");
     }
     _id = id;
-    _authors[id.identity.name] = id.identity;
+    if (id case PrivatePeerIdentity id) {
+      _authors[id.identity.name] = id.identity;
+    }
     _broadcastPresync();
   }
 
@@ -132,7 +137,9 @@ class PeerManager<M extends IJSON> {
     AsyncProducer<EventDatabase<M>> createDb,
     EventModelHandle<M> innerHandle,
   ) {
-    _authors[id.name] = id;
+    if (id case PeerIdentity id) {
+      _authors[id.name] = id;
+    }
     peerStateChanges.listen(_stateChangeHandler);
     _sessionId = Random().nextInt(1 << 30);
     _onSessionUpdate.add(_sessionId);
@@ -145,7 +152,7 @@ class PeerManager<M extends IJSON> {
   Future<void> _initDatabase(AsyncProducer<EventDatabase<M>> createDb) =>
       _mutex.protect(() async {
         _db = await createDb();
-        var (syncMsg, preSyncMsg) = await _db.loadData(this.id.name);
+        var (syncMsg, preSyncMsg) = await _db.loadData();
         _em.add(syncMsg.evs, syncMsg.dels);
         _eventSignatures.addAll(syncMsg.sigs);
         _authors.addEntries(syncMsg.authors.map((id) => MapEntry(id.name, id)));
@@ -162,6 +169,7 @@ class PeerManager<M extends IJSON> {
   Future<void> add(List<Event<M>> evs,
       [List<Event<M>> dels = const [], PrivatePeerIdentity? author]) async {
     var theAuthor = author ?? _id;
+    if (theAuthor == null) throw Exception("no author");
     if (evs.any((e) => e.author != theAuthor.identity.name)) {
       throw Exception(
           "event authors must match manager identifier for signing");
@@ -225,7 +233,7 @@ class PeerManager<M extends IJSON> {
     if (data.isNotEmpty) {
       await _db.add(data);
     }
-    await _db.savePeer(_curPreSyncMsg(), SyncInfo.zero());
+    await _db.saveData(_curPreSyncMsg());
     _lastDbSave = curState;
     // print("saved $peerId");
   }
@@ -322,19 +330,25 @@ class PeerManager<M extends IJSON> {
       _peers.remove(conflict);
       // disconnect ?
     }*/
-    if (p._lastKnownState == null) {
-      if (await _db.loadPeer(ps.identity.name)
-          case (var preSyncMsg, var syncInfo)) {
+    if (ps.identity?.name case String name when p._lastKnownState == null) {
+      if (await _db.loadPeer(name) case (var preSyncMsg, var syncInfo)) {
         p._lastKnownState = preSyncMsg;
         p._lastLocal = syncInfo;
       }
     }
     if (p._lastKnownState?.identity != ps.identity) {
       // print("change id")
-      if (!ps.identity.verifySignature(_trustAnchor.key)) {
-        // print("bad certificate");
-        p.disconnect();
-        return;
+      if (ps.identity case PeerIdentity id) {
+        if (!id.verifySignature()) {
+          // print("bad certificate");
+          p.disconnect();
+          return;
+        }
+        if (!id.isSignedBy(_trustAnchor)) {
+          // print("untrusted signer");
+          p.disconnect();
+          return;
+        }
       }
     }
     var prevState = p._lastKnownState ?? ps;
@@ -385,8 +399,13 @@ class PeerManager<M extends IJSON> {
               if (_authors.containsKey(author.name)) {
                 continue;
               }
-              if (!author.verifySignature(_trustAnchor.key)) {
+              if (!author.verifySignature()) {
                 // print("bad author certificate")
+                p.disconnect();
+                return null;
+              }
+              if (!author.isSignedBy(_trustAnchor)) {
+                // print("untrusted signer");
                 p.disconnect();
                 return null;
               }
@@ -451,7 +470,9 @@ class PeerManager<M extends IJSON> {
       }
       if (!keepPeerData) {
         _authors.clear();
-        _authors[id.name] = id;
+        if (id case PeerIdentity id) {
+          _authors[id.name] = id;
+        }
       }
       // print("$peerId ses = $_sessionId");
       for (var p in _peers) {

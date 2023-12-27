@@ -15,7 +15,7 @@ class VetView extends StatelessWidget {
         predicate: (eq) => eq.status.isCOOLING,
         submit: (data) async {
           LocalModel model = context.read();
-          final author = context.read<IdentityService>().author;
+          final author = context.read<IdentityService>().author!;
           List<EnduranceEvent> evs = [];
           for (var (eq, dt) in data) {
             evs.add(VetEvent(author, toUNIX(dt), eq.eid, eq.currentLoop));

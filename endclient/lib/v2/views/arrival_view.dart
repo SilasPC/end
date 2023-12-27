@@ -15,7 +15,7 @@ class ArrivalView extends StatelessWidget {
         predicate: (eq) => eq.status.isRIDING,
         submit: (data) async {
           LocalModel model = context.read();
-          final author = context.read<IdentityService>().author;
+          final author = context.read<IdentityService>().author!;
           List<EnduranceEvent> evs = [];
           for (var (eq, dt) in data) {
             evs.add(ArrivalEvent(author, toUNIX(dt), eq.eid, eq.currentLoop));

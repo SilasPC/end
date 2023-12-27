@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 class LocalModel with ChangeNotifier {
   final MetaModel metaModel = MetaModel();
 
-  late PeerManager<EnduranceModel> _manager;
+  late final PeerManager<EnduranceModel> _manager;
 
   StreamSubscription? _sub;
 
@@ -21,8 +21,6 @@ class LocalModel with ChangeNotifier {
     _sub?.cancel();
     super.dispose();
   }
-
-  String get id => _manager.id.name;
 
   Future<void> addSync(List<Event<EnduranceModel>> evs,
           [List<Event<EnduranceModel>> dels = const []]) =>

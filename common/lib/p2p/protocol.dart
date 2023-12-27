@@ -8,7 +8,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part "protocol.g.dart";
 
-AlgorithmIdentifier SIGNING_ALG = algorithms.signing.rsa.sha256;
+final AlgorithmIdentifier SIGNING_ALG = algorithms.signing.rsa.sha256;
 
 abstract class SyncProtocol {
   /// Current version of the protocol
@@ -32,23 +32,31 @@ abstract class SyncProtocol {
 class PrivatePeerIdentity {
   final RsaPrivateKey privateKey;
   final PeerIdentity identity;
-  final Signer<PrivateKey> signer;
+  Signer<PrivateKey> get signer => privateKey.createSigner(SIGNING_ALG);
 
-  PrivatePeerIdentity(this.privateKey, this.identity)
-      : signer = privateKey.createSigner(SIGNING_ALG);
+  PrivatePeerIdentity(this.privateKey, this.identity);
+
+  factory PrivatePeerIdentity.root(
+      PrivKey privateKey, PubKey key, String name, PeerPermission perms) {
+    var id = PeerIdentity._unsigned(key, name, perms);
+    id.signature = privateKey.createSigner(SIGNING_ALG).sign(id._signingData);
+    id.parent = null;
+    return PrivatePeerIdentity(privateKey, id);
+  }
 
   // TODO: should not be available
-  factory PrivatePeerIdentity.server() =>
-      PrivatePeerIdentity(serverPrivKey, PeerIdentity.server());
+  factory PrivatePeerIdentity.server() => PrivatePeerIdentity.root(
+      serverPrivKey, serverPubKey, "eSys", PeerPermission.all);
 
   // TODO: should not be available
-  factory PrivatePeerIdentity.client(String name) =>
-      PrivatePeerIdentity(clientPrivKey, PeerIdentity.client(name));
-
-  factory PrivatePeerIdentity.anonymous() => PrivatePeerIdentity(
+  factory PrivatePeerIdentity.client(String name) => PrivatePeerIdentity(
       clientPrivKey,
-      PeerIdentity.signed(
-          "anonymous", clientPubKey, PeerPermission.none, serverSigner));
+      PeerIdentity.signedBy(
+        clientPubKey,
+        name,
+        PeerPermission.all,
+        PrivatePeerIdentity.server(),
+      ));
 
   bool operator ==(Object rhs) => switch (rhs) {
         PrivatePeerIdentity rhs => identity == rhs.identity &&
@@ -58,67 +66,61 @@ class PrivatePeerIdentity {
       };
 }
 
-@JsonSerializable()
+// TODO: name is not id, key is
+@JsonSerializable(constructor: "raw")
 class PeerIdentity extends IJSON {
   @PublicKeyConverter()
   final RsaPublicKey key;
   @SignatureConverter()
   late final Signature signature;
-  // TODO: name is not id, key is
+  late final PeerIdentity? parent;
   final String name;
   final PeerPermission perms;
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  final Verifier<PublicKey> verifier;
+  PeerIdentity get signer => parent ?? this;
 
-  PeerIdentity(this.key, this.signature, this.name, this.perms)
-      : verifier = key.createVerifier(SIGNING_ALG);
+  Verifier<PublicKey> get verifier => key.createVerifier(SIGNING_ALG);
 
-  // TODO: should not be available
-  factory PeerIdentity.server() => PeerIdentity.signed(
-      "eSys", serverPubKey, PeerPermission.all, serverSigner);
+  PeerIdentity._unsigned(this.key, this.name, this.perms);
+  PeerIdentity.raw(
+      this.key, this.name, this.perms, this.signature, this.parent);
 
-  // TODO: should not be available
-  factory PeerIdentity.client(String name) =>
-      PeerIdentity.signed(name, clientPubKey, PeerPermission.all, serverSigner);
-
-  factory PeerIdentity.anonymous() => PeerIdentity.signed(
-      "anonymous", clientPubKey, PeerPermission.none, serverSigner);
-
-  PeerIdentity.signed(
-      this.name, this.key, this.perms, Signer<PrivateKey> signer)
-      : verifier = key.createVerifier(SIGNING_ALG) {
-    // IGNORED: TODO: proper signature instead of this trash
-    var data = [
-      ...key.exponent.toString().codeUnits,
-      ...":".codeUnits,
-      ...key.modulus.toString().codeUnits,
-      ...":".codeUnits,
-      ...name.codeUnits,
-    ];
-    signature = signer.sign(data);
+  PeerIdentity.signedBy(
+      this.key, this.name, this.perms, PrivatePeerIdentity id) {
+    signature = id.signer.sign(_signingData);
+    parent = id.identity;
   }
 
-  bool verifySignature(RsaPublicKey signerKey) {
-    var verifier = signerKey.createVerifier(SIGNING_ALG);
-    var data = Uint8List.fromList([
-      ...key.exponent.toString().codeUnits,
-      ...":".codeUnits,
-      ...key.modulus.toString().codeUnits,
-      ...":".codeUnits,
-      ...name.codeUnits,
-    ]);
-    return verifier.verify(data, signature);
+  bool verifySignature() {
+    if (!signer.verifier.verify(Uint8List.fromList(_signingData), signature))
+      return false;
+    return isRoot ? true : signer.verifySignature();
+  }
+
+  bool get isRoot => signer == this;
+  PeerIdentity root() => signer == this ? this : signer.root();
+
+  bool isSignedBy(PeerIdentity id) {
+    if (id.isSame(id)) return true;
+    return isRoot ? false : signer.isSignedBy(id);
   }
 
   JSON toJson() => _$PeerIdentityToJson(this);
   factory PeerIdentity.fromJson(JSON json) => _$PeerIdentityFromJson(json);
 
+  List<int> get _signingData => [
+        // IGNORED: TODO: proper signature instead of this trash
+        ...PublicKeyConverter().toJson(key).codeUnits,
+        ...":".codeUnits,
+        ...perms.toJsonBin(),
+        ...":".codeUnits,
+        ...name.codeUnits,
+      ];
+
+  bool isSame(PeerIdentity other) => listEq(_signingData, other._signingData);
+
   bool operator ==(Object rhs) => switch (rhs) {
-        PeerIdentity rhs => name == rhs.name &&
-            key.exponent == rhs.key.exponent &&
-            key.modulus == rhs.key.modulus &&
-            listEq(signature.data, rhs.signature.data),
+        PeerIdentity rhs => toJsonString() == rhs.toJsonString(),
         _ => false
       };
 
@@ -148,8 +150,7 @@ class PeerPermission extends IJSON {
 
 @JsonSerializable()
 class PreSyncMsg extends IJSON {
-  // final PeerIdentity serverIdentity;
-  final PeerIdentity identity;
+  final PeerIdentity? identity;
   final int protocolVersion;
   final int sessionId;
   final int resetCount;

@@ -2,6 +2,7 @@ import 'package:common/equipe/equipe.dart';
 import 'package:common/equipe/data_types.dart';
 import 'package:common/models/demo.dart';
 import 'package:common/util/unix.dart';
+import 'package:esys_client/services/identity.dart';
 import 'package:esys_client/services/local_model.dart';
 import 'package:esys_client/v2/dashboard/util/util.dart';
 import 'package:flutter/material.dart';
@@ -43,11 +44,12 @@ class _EquipeImportSheetState extends State<EquipeImportSheet> {
       print(st);
       error = true;
     }
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    var author = context.read<IdentityService>().author!;
     return ListView(
       children: [
         ListTile(
@@ -56,7 +58,7 @@ class _EquipeImportSheetState extends State<EquipeImportSheet> {
           onTap: () async {
             LocalModel model = context.read();
             var nav = Navigator.of(context, rootNavigator: true);
-            await model.addSync(demoInitEvent(model.id, nowUNIX() + 300));
+            await model.addSync(demoInitEvent(author, nowUNIX() + 300));
             nav.pop();
           },
         ),
@@ -210,8 +212,9 @@ class _SelectCategoriesState extends State<_SelectCategories> {
 
 Future<void> _load(BuildContext context, int id) async {
   LocalModel m = context.read();
+  var author = context.read<IdentityService>().author!;
   try {
-    var evs = await loadModelEvents(id, m.id);
+    var evs = await loadModelEvents(id, author);
     await m.addSync(evs);
   } catch (e, s) {
     print(e);

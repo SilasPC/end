@@ -27,7 +27,7 @@ class _DepartureViewState extends State<DepartureView> {
       comparator: comparator,
       submit: () async {
         LocalModel model = context.read();
-        final author = context.read<IdentityService>().author;
+        final author = context.read<IdentityService>().author!;
         List<EnduranceEvent> evs = [];
         for (var MapEntry(:key, :value) in timers.entries) {
           var eq = model.model.equipages[key]!;

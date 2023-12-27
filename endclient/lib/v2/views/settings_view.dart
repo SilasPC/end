@@ -235,15 +235,14 @@ class _SettingsCardState extends State<SettingsView> {
                   ...general,
                 ])),
               ),
-              Expanded(
-                child: Card(
-                  child: ListView(
-                    children: [
-                      ...cardHeader("Advanced"),
-                    ],
+              if (set.showAdmin)
+                Expanded(
+                  child: Card(
+                    child: ListView(
+                      children: [...cardHeader("Advanced"), ...admin()],
+                    ),
                   ),
                 ),
-              ),
             ]
             /* Card(
 					 child: SizedBox(

@@ -43,11 +43,11 @@ Future<void> main() async {
       PeerIdentity? id;
       var ok = json["password"] == "password";
       if (ok) {
-        id = PeerIdentity.signed(
-          json["name"] as String,
+        id = PeerIdentity.signedBy(
           PublicKeyConverter().fromJson(json["key"]),
+          json["name"] as String,
           PeerPermission.all,
-          identity.signer,
+          identity,
         );
       }
       return {"id": id};

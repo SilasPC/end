@@ -5,6 +5,7 @@ import 'package:common/models/glob.dart';
 import 'package:common/p2p/db.dart';
 import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
+import 'package:common/util.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -59,14 +60,15 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
   }
 
   @override
-  Future<(SyncMsg<EnduranceModel>, PreSyncMsg?)> loadData(String peerId) async {
+  Future<(SyncMsg<EnduranceModel>, PreSyncMsg?)> loadData() async {
     var data = await (_db.batch()
           ..query("events")
           ..query("deletes")
-          ..query("peers"))
+          ..query("peers")
+          ..query("self"))
         .commit();
 
-    var [events, deletes, peers] = data.cast<List>();
+    var [events, deletes, peers, self] = data.cast<List>();
 
     var evs = events
         .map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
@@ -81,10 +83,12 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
     var preSyncs = peers
         .map((d) => PreSyncMsg.fromJson(jsonDecode(d["preSync"])))
         .toList();
-    var self = preSyncs.where((p) => p.identity.name == peerId).firstOrNull;
-    var identities = preSyncs.map((d) => d.identity).toList();
+    var selfPS = maybe<JSON, PreSyncMsg>(
+        self.firstOrNull, (d) => PreSyncMsg.fromJson(jsonDecode(d["preSync"])));
+    var identities =
+        preSyncs.map((d) => d.identity).whereType<PeerIdentity>().toList();
 
-    return (SyncMsg(evs, dels, sigs, identities), self);
+    return (SyncMsg(evs, dels, sigs, identities), selfPS);
   }
 
   static Future<Database> _createDB() async {
@@ -93,7 +97,7 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
         onCreate: (db, _) => _resetDatabase(db),
         onUpgrade: (db, _, __) => _resetDatabase(db),
         onDowngrade: (db, _, __) => _resetDatabase(db),
-        version: 16);
+        version: 17);
     return db;
   }
 
@@ -118,18 +122,35 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
 					preSync STRING NOT NULL,
 					syncInfo STRING NOT NULL
 				)
-			"""))
+			""")
+          ..execute("""
+				CREATE TABLE IF NOT EXISTS self (
+					preSync STRING NOT NULL
+				)
+			""")
+          ..insert("self", {"preSync": PreSyncMsg(null, 0, 0).toJsonString()}))
         .commit(noResult: true);
   }
 
   @override
-  Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) {
+  Future<void> savePeer(PreSyncMsg state, SyncInfo syncInfo) async {
+    var id = state.identity?.name;
+    if (id == null) return;
     var row = {
-      "id": state.identity.name,
+      "id": id,
       "preSync": state.toJsonString(),
       "syncInfo": syncInfo.toJsonString(),
     };
-    return _db.insert("peers", row,
+    await _db.insert("peers", row,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  @override
+  Future<void> saveData(PreSyncMsg state) async {
+    var row = {
+      "preSync": state.toJsonString(),
+    };
+    await _db.update("peers", row,
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }

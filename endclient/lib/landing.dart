@@ -1,9 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
+import 'package:common/p2p/keys.dart';
+import 'package:common/p2p/protocol.dart';
 import 'package:esys_client/consts.dart';
 import 'package:esys_client/testing.dart';
-import 'package:esys_client/v2/dialogs/login_dialog.dart';
 import 'package:esys_client/v2/views/settings_view.dart';
 import 'package:esys_client/equipage/equipage_page.dart';
 import 'package:esys_client/services/local_model.dart';
@@ -33,7 +34,7 @@ class _LandingState extends State<Landing> {
     var nav = Navigator.of(context);
     var idService = context.read<IdentityService>();
     await context.read<PeerManager<EnduranceModel>>().ready;
-    if (idService.identity.identity.perms.admin) {
+    if (idService.identity?.identity.perms.admin ?? false) {
       nav.push(MaterialPageRoute(builder: (context) => const Dashboard()));
     }
     FlutterNativeSplash.remove();
@@ -75,6 +76,9 @@ class _LandingState extends State<Landing> {
                                   /* showDialog(
                                       context: context,
                                       builder: (_) => LoginDialog()); */
+
+                                  context.read<IdentityService>().setIdentity(
+                                      PrivatePeerIdentity.client("client"));
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (context) => const Dashboard()));
                                 }),

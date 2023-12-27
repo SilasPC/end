@@ -94,7 +94,7 @@ class NavSidebar extends StatelessWidget {
 							child: Icon(Icons.person),
 						), */
               title: Text(
-                author,
+                author ?? "anonymous",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

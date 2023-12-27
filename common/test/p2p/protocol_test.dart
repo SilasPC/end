@@ -1,6 +1,5 @@
 import 'package:common/p2p/Manager.dart';
 import 'package:common/p2p/db.dart';
-import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:test/test.dart';
 
@@ -15,7 +14,7 @@ void main() {
 
   test("self identity", () {
     var c = manager("c", 1);
-    expect(c.id.verifySignature(serverPubKey), true);
+    expect(c.id!.verifySignature(), true);
   });
 
   test("pre sync", () async {

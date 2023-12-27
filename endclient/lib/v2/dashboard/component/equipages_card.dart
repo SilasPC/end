@@ -126,7 +126,7 @@ Widget equipageAdministrationPopupMenuButton(
       splashRadius: splashRadius,
       onSelected: (value) {
         LocalModel model = context.read();
-        final author = context.read<IdentityService>().author;
+        final author = context.read<IdentityService>().author!;
         switch (value) {
           case 'start-clearance':
             model.addSync([
