@@ -8,7 +8,8 @@ abstract mixin class JsonMixin {
   JSON toJson();
   String toJsonString() => jsonEncode(toJson());
   List<int> toJsonBin() => toJsonString().codeUnits;
-  Uint8List toJsonBytes() => Uint8List.fromList(toJsonString().codeUnits);
+  Uint8List toJsonBytes() =>
+      Uint16List.fromList(toJsonBin()).buffer.asUint8List();
 }
 
 abstract class IJSON with JsonMixin {

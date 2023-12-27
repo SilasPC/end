@@ -67,6 +67,7 @@ class PrivatePeerIdentity {
 }
 
 // TODO: name is not id, key is
+// VULN: perm subset, signing perm
 @JsonSerializable(constructor: "raw")
 class PeerIdentity extends IJSON {
   @PublicKeyConverter()
@@ -92,8 +93,7 @@ class PeerIdentity extends IJSON {
   }
 
   bool verifySignature() {
-    if (!signer.verifier.verify(Uint8List.fromList(_signingData), signature))
-      return false;
+    if (!signer.verifier.verify(_signingData, signature)) return false;
     return isRoot ? true : signer.verifySignature();
   }
 
@@ -108,14 +108,14 @@ class PeerIdentity extends IJSON {
   JSON toJson() => _$PeerIdentityToJson(this);
   factory PeerIdentity.fromJson(JSON json) => _$PeerIdentityFromJson(json);
 
-  List<int> get _signingData => [
+  Uint8List get _signingData => Uint16List.fromList([
         // IGNORED: TODO: proper signature instead of this trash
         ...PublicKeyConverter().toJson(key).codeUnits,
         ...":".codeUnits,
         ...perms.toJsonBin(),
         ...":".codeUnits,
         ...name.codeUnits,
-      ];
+      ]).buffer.asUint8List();
 
   bool isSame(PeerIdentity other) => listEq(_signingData, other._signingData);
 
