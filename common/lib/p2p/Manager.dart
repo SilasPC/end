@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:common/EventModel.dart';
 import 'package:common/event_model/OrderedSet.dart';
 import 'package:crypto_keys/crypto_keys.dart';
@@ -122,7 +123,7 @@ class PeerManager<M extends IJSON> {
   List<Peer> _peers = [];
   List<Peer> get peers => _peers;
   late EventModel<M> _em;
-  final List<Signature> _eventSignatures = [];
+  final List<Signature> _eventSignatures = [], _deleteSignatures = [];
   final Map<String, PeerIdentity> _authors = {};
 
   M get model => _em.model;
@@ -155,6 +156,7 @@ class PeerManager<M extends IJSON> {
         var (syncMsg, preSyncMsg) = await _db.loadData();
         _em.add(syncMsg.evs, syncMsg.dels);
         _eventSignatures.addAll(syncMsg.sigs);
+        _deleteSignatures.addAll(syncMsg.delSigs);
         _authors.addEntries(syncMsg.authors.map((id) => MapEntry(id.name, id)));
         if (preSyncMsg case PreSyncMsg preSyncMsg) {
           _resetCount = preSyncMsg.resetCount;
@@ -171,19 +173,23 @@ class PeerManager<M extends IJSON> {
     PrivatePeerIdentity theAuthor = _id!;
     assert(!evs.any((e) => e.author != theAuthor.identity.name),
         "event authors must match identity for signing");
+    assert(!dels.any((e) => e.author != theAuthor.identity.name),
+        "event authors must match identity for signing");
     var signer = theAuthor.signer;
-    _addSigned(
-        evs, dels, evs.map((e) => signer.sign(e.toJsonBytes())).toList());
+    _addSigned(evs, dels, evs.map((e) => signer.sign(e.toJsonBytes())).toList(),
+        dels.map((e) => signer.sign([0, ...e.toJsonBytes()])).toList());
   }
 
   Future<void> _addSigned(List<Event<M>> evs, List<Event<M>> dels,
-      List<Signature> signatures) async {
+      List<Signature> signatures, List<Signature> delSignatures) async {
     assert(evs.length == signatures.length);
+    assert(dels.length == delSignatures.length);
     if (evs.isEmpty && dels.isEmpty) return;
     await _mutex.protect(() async {
       var ss = _em.syncState;
       _em.add(evs, dels);
       _eventSignatures.addAll(signatures);
+      _deleteSignatures.addAll(delSignatures);
       if (ss == _em.syncState) return;
       await _save();
       _broadcastSync();
@@ -215,6 +221,7 @@ class PeerManager<M extends IJSON> {
       await _db.clear(keepPeers: true);
       _em.reset();
       _eventSignatures.clear();
+      _deleteSignatures.clear();
       _resetCount = Random().nextInt(1 << 30);
       for (var p in _peers) {
         p._mutex.protect(() async {
@@ -231,6 +238,7 @@ class PeerManager<M extends IJSON> {
       evs,
       dels,
       _eventSignatures.sublist(info.evLen),
+      _deleteSignatures.sublist(info.delLen),
       evs.map((e) => _authors[e.author]!).toSet().toList(),
     );
   }
@@ -409,7 +417,7 @@ class PeerManager<M extends IJSON> {
               return null;
             }
             var upToDate = _em.syncState == p._lastLocal;
-            await _addSigned(msg.evs, msg.dels, msg.sigs);
+            await _addSigned(msg.evs, msg.dels, msg.sigs, msg.delSigs);
             if (upToDate) {
               p._lastLocal = _em.syncState;
             } else {
@@ -470,6 +478,7 @@ class PeerManager<M extends IJSON> {
       }
       _em.reset();
       _eventSignatures.clear();
+      _deleteSignatures.clear();
       _resetCount = Random().nextInt(1 << 30);
       _session = newSession;
       _onSessionUpdate.add(_session);
@@ -485,7 +494,8 @@ class PeerManager<M extends IJSON> {
 
   /// verify that the sync msg is not malicious
   bool _verifySyncMsg(SyncMsg<M> msg) {
-    if (msg.sigs.length != msg.evs.length) {
+    if (msg.sigs.length != msg.evs.length ||
+        msg.dels.length != msg.delSigs.length) {
       // print("bad sync");
       return false;
     }
@@ -507,6 +517,19 @@ class PeerManager<M extends IJSON> {
       var ev = msg.evs[i];
       var sig = msg.sigs[i];
       var ok = _authors[ev.author]!.verifier.verify(ev.toJsonBytes(), sig);
+      if (!ok) {
+        // print("bad event signature");
+        // print(ev.author);
+        // print(_authors[ev.author]);
+        return false;
+      }
+    }
+    for (int i = 0; i < msg.dels.length; i++) {
+      var ev = msg.dels[i];
+      var sig = msg.delSigs[i];
+      var ok = _authors[ev.author]!
+          .verifier
+          .verify(Uint8List.fromList([0, ...ev.toJsonBytes()]), sig);
       if (!ok) {
         // print("bad event signature");
         // print(ev.author);

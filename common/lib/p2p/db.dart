@@ -25,7 +25,7 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
   Future<void> clear({required bool keepPeers}) async {}
   @override
   Future<(SyncMsg<M>, PreSyncMsg?)> loadData() => Future.value((
-        SyncMsg<M>([], [], [], []),
+        SyncMsg<M>([], [], [], [], []),
         PreSyncMsg(null, session, 0),
       ));
 

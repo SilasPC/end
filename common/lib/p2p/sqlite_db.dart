@@ -80,6 +80,10 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
     var dels = deletes
         .map((d) => EnduranceEvent.fromJson(jsonDecode(d["json"] as String)))
         .toList();
+    var delSigs = deletes
+        .map((d) =>
+            SignatureConverter().fromJson(jsonDecode(d["sign"] as String)))
+        .toList();
     var preSyncs = peers
         .map((d) => PreSyncMsg.fromJson(jsonDecode(d["preSync"])))
         .toList();
@@ -88,7 +92,7 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
     var identities =
         preSyncs.map((d) => d.identity).whereType<PeerIdentity>().toList();
 
-    return (SyncMsg(evs, dels, sigs, identities), selfPS);
+    return (SyncMsg(evs, dels, sigs, delSigs, identities), selfPS);
   }
 
   static Future<Database> _createDB() async {
@@ -97,7 +101,7 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
         onCreate: (db, _) => _resetDatabase(db),
         onUpgrade: (db, _, __) => _resetDatabase(db),
         onDowngrade: (db, _, __) => _resetDatabase(db),
-        version: 17);
+        version: 18);
     return db;
   }
 
@@ -108,7 +112,8 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
           ..execute("DROP TABLE IF EXISTS peers")
           ..execute("""CREATE TABLE IF NOT EXISTS deletes (
 				time INT NOT NULL,
-				json STRING NOT NULL
+				json STRING NOT NULL,
+					sign STRING NOT NULL
 			)""")
           ..execute("""
 				CREATE TABLE IF NOT EXISTS events (

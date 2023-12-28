@@ -67,6 +67,11 @@ void main() {
     await pumpEventQueue();
     expect(s.model.result, "123");
     expect(c.model.result, "123");
+
+    await c.add([], [StrEv.dig(2, "c")]);
+    await pumpEventQueue();
+    expect(s.model.result, "13");
+    expect(c.model.result, "13");
   });
 
   test("three way indirect", () async {

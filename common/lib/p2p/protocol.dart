@@ -188,16 +188,17 @@ class PreSyncMsg extends IJSON {
 }
 
 class SyncMsg<M extends IJSON> extends IJSON {
-  final List<Event<M>> evs, dels; // VULN: dels unsigned
-  final List<Signature> sigs;
+  final List<Event<M>> evs, dels;
+  final List<Signature> sigs, delSigs;
   final List<PeerIdentity> authors;
 
-  SyncMsg(this.evs, this.dels, this.sigs, this.authors);
+  SyncMsg(this.evs, this.dels, this.sigs, this.delSigs, this.authors);
 
   JSON toJson() => {
         "evs": evs,
         "dels": dels,
         "sigs": sigs.map(SignatureConverter().toJson).toList(),
+        "delSigs": delSigs.map(SignatureConverter().toJson).toList(),
         "authors": listj(authors),
       };
 
@@ -211,6 +212,8 @@ class SyncMsg<M extends IJSON> extends IJSON {
         jlist_map(json["dels"], reviver),
         jlist_map(
             json["sigs"], (s) => SignatureConverter().fromJson(s as String)),
+        jlist_map(
+            json["delSigs"], (s) => SignatureConverter().fromJson(s as String)),
         jlist_map(json["authors"], PeerIdentity.fromJson),
       );
 }
