@@ -21,7 +21,7 @@ class ServerConnection extends ChangeNotifier {
   ServerPeer? get peer => _peer;
   PeerState? get state => peer?.state;
   bool get connected => peer?.connected ?? false;
-  int? get sessionId => peer?.sessionId;
+  int? get sessionId => peer?.session?.id;
   bool get inSync => state?.isSync ?? false;
   int get desyncCount => peer?.desyncCount ?? 0;
 
@@ -97,7 +97,8 @@ class PeerStates extends ChangeNotifier {
 }
 
 class SessionState extends ChangeNotifier {
-  int get sessionId => _manager.sessionId;
+  Session? get session => _manager.session;
+  int? get sessionId => _manager.sessionId;
 
   late StreamSubscription _sub;
 
@@ -108,7 +109,8 @@ class SessionState extends ChangeNotifier {
     });
   }
 
-  void reset() => _manager.resetSession();
+  void leave() => _manager.leaveSession();
+  void create() => _manager.createSession();
 
   @override
   void dispose() {

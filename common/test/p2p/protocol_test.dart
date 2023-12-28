@@ -8,7 +8,8 @@ import '../str.dart';
 void main() {
   var manager = (String id, int sessionId) => PeerManager<StrModel>(
         PrivatePeerIdentity.client(id),
-        () => NullDatabase<StrModel>(id, sessionId),
+        () => NullDatabase<StrModel>(
+            id, Session(sessionId, PrivatePeerIdentity.server().identity)),
         StrHandle(),
       )..autoConnect = true;
 
@@ -141,5 +142,21 @@ void main() {
     c.changeIdentity(PrivatePeerIdentity.client("c2"));
     await pumpEventQueue();
     expect(pc.id, "c2");
+  });
+
+  test("leave session", () async {
+    var (ps, pc) = LocalPeer.pair();
+    var s = manager("s", 1);
+    var c = manager("c", 1);
+
+    await c.addPeer(ps);
+    await s.addPeer(pc);
+
+    await pumpEventQueue();
+    expect(pc.state, PeerState.SYNC);
+
+    c.leaveSession();
+    await pumpEventQueue();
+    expect(pc.state, PeerState.NOSESS);
   });
 }

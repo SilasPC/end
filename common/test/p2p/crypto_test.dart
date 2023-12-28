@@ -2,8 +2,18 @@ import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
 import 'package:test/test.dart';
 
+import '../str.dart';
+
 void main() {
   // TEST: p2p crypto behaviour
+
+  test("signing works", () {
+    var c = PrivatePeerIdentity.client("c");
+    var e = StrEv.dig(1, "c").toJsonBytes();
+
+    var sig = c.signer.sign(e);
+    expect(c.identity.verifier.verify(e, sig), true);
+  });
 
   /* test("verifySignature works", () {
     var fakeSelfSigned = PrivatePeerIdentity.root(

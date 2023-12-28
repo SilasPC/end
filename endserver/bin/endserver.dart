@@ -17,7 +17,7 @@ Future<void> main() async {
   final identity = PrivatePeerIdentity.server();
   final man = PeerManager<EnduranceModel>(
     identity,
-    () => NullDatabase(identity.identity.name, 0), //SqliteDatabase.create,
+    () => NullDatabase(identity.identity.name, null), //SqliteDatabase.create,
     MetaModel(),
   );
 

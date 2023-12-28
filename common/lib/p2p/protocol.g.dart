@@ -39,7 +39,9 @@ PreSyncMsg _$PreSyncMsgFromJson(Map<String, dynamic> json) => PreSyncMsg(
       json['identity'] == null
           ? null
           : PeerIdentity.fromJson(json['identity'] as Map<String, dynamic>),
-      json['sessionId'] as int,
+      json['session'] == null
+          ? null
+          : Session.fromJson(json['session'] as Map<String, dynamic>),
       json['resetCount'] as int,
       protocolVersion: json['protocolVersion'] as int? ?? SyncProtocol.VERSION,
     );
@@ -55,7 +57,7 @@ Map<String, dynamic> _$PreSyncMsgToJson(PreSyncMsg instance) {
 
   writeNotNull('identity', instance.identity);
   val['protocolVersion'] = instance.protocolVersion;
-  val['sessionId'] = instance.sessionId;
+  writeNotNull('session', instance.session);
   val['resetCount'] = instance.resetCount;
   return val;
 }

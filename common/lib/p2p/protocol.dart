@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:common/EventModel.dart';
@@ -29,7 +30,27 @@ abstract class SyncProtocol {
   static Iterable<String> get events => [SYNC, PRE_SYNC, ACK_SYNC];
 }
 
-class PrivatePeerIdentity {
+final class Session extends IJSON {
+  late final int id;
+  final PeerIdentity root;
+
+  Session(this.id, this.root);
+  Session.newSession(this.root) {
+    id = Random().nextInt(1 << 30);
+  }
+
+  bool eq(Session rhs) => id == rhs.id && root == rhs.root;
+
+  static bool nullEq(Session? lhs, Session? rhs) =>
+      lhs == rhs || (lhs != null && rhs != null && lhs.eq(rhs));
+
+  @override
+  JSON toJson() => {"id": id, "root": root};
+  factory Session.fromJson(JSON json) =>
+      Session(json["id"], PeerIdentity.fromJson(json["root"]));
+}
+
+final class PrivatePeerIdentity {
   final RsaPrivateKey privateKey;
   final PeerIdentity identity;
   Signer<PrivateKey> get signer => privateKey.createSigner(SIGNING_ALG);
@@ -123,6 +144,7 @@ class PeerIdentity extends IJSON {
         PeerIdentity rhs => toJsonString() == rhs.toJsonString(),
         _ => false
       };
+  int get hashCode => name.hashCode;
 
   @override
   String toString() => "PeerIdentity($name)";
@@ -152,10 +174,10 @@ class PeerPermission extends IJSON {
 class PreSyncMsg extends IJSON {
   final PeerIdentity? identity;
   final int protocolVersion;
-  final int sessionId;
+  final Session? session;
   final int resetCount;
 
-  const PreSyncMsg(this.identity, this.sessionId, this.resetCount,
+  const PreSyncMsg(this.identity, this.session, this.resetCount,
       {this.protocolVersion = SyncProtocol.VERSION});
 
   JSON toJson() => _$PreSyncMsgToJson(this);

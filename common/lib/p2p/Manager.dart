@@ -10,6 +10,7 @@ import 'protocol.dart';
 
 enum PeerState {
   NOCONN,
+  NOSESS,
   PRESYNC,
   CONFLICT,
   SYNC;
@@ -31,7 +32,7 @@ abstract class Peer {
   bool get connected => __state.connected;
   bool get disconnected => !__state.connected;
 
-  int? get sessionId => _lastKnownState?.sessionId;
+  Session? get session => _lastKnownState?.session;
   String? get id => _lastKnownState?.identity?.name;
   PeerIdentity? get ident => _lastKnownState?.identity;
   PreSyncMsg? _lastKnownState;
@@ -86,23 +87,21 @@ class PeerManager<M extends IJSON> {
   }
 
   StreamController<Null> _onUpdate = StreamController.broadcast();
-  StreamController<int> _onSessionUpdate = StreamController.broadcast();
+  StreamController<Session?> _onSessionUpdate = StreamController.broadcast();
   StreamController<Peer> _onStateChange = StreamController.broadcast();
-  Stream<int> get sessionStream => _onSessionUpdate.stream;
+  Stream<Session?> get sessionStream => _onSessionUpdate.stream;
   Stream<Null> get updateStream => _onUpdate.stream;
   Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
-  final PeerIdentity _trustAnchor = PrivatePeerIdentity.server().identity;
   PrivatePeerIdentity? _id;
   PeerIdentity? get id => _id?.identity;
 
   void changeIdentity(PrivatePeerIdentity? id) {
     if (_id == id) return;
-    if (!(id?.identity.verifySignature() ?? true)) {
-      throw Exception("cannot set bad id");
-    }
-    if (!(id?.identity.isSignedBy(_trustAnchor) ?? true)) {
-      throw Exception("cannot set untrusted id");
+    assert(id?.identity.verifySignature() ?? true, "invalid identity provided");
+    if (session case Session(:var root)) {
+      assert(id?.identity.isSignedBy(root) ?? true,
+          "when in session, provided identity should be signed by session owner");
     }
     _id = id;
     if (id case PrivatePeerIdentity id) {
@@ -111,8 +110,10 @@ class PeerManager<M extends IJSON> {
     _broadcastPresync();
   }
 
-  late int _sessionId;
-  int get sessionId => _sessionId;
+  Session? _session;
+  Session? get session => _session;
+
+  int? get sessionId => _session?.id;
   int _resetCount = Random().nextInt(1 << 30);
 
   late final EventDatabase<M> _db;
@@ -137,12 +138,11 @@ class PeerManager<M extends IJSON> {
     AsyncProducer<EventDatabase<M>> createDb,
     EventModelHandle<M> innerHandle,
   ) {
-    if (id case PeerIdentity id) {
-      _authors[id.name] = id;
+    if (_id case PrivatePeerIdentity id) {
+      _authors[id.identity.name] = id.identity;
     }
     peerStateChanges.listen(_stateChangeHandler);
-    _sessionId = Random().nextInt(1 << 30);
-    _onSessionUpdate.add(_sessionId);
+    _onSessionUpdate.add(_session);
     // print("$peerId ses = $_sessionId");
     handle = Handle<M>(() => _onUpdate.add(null), innerHandle);
     _em = EventModel(handle);
@@ -158,28 +158,27 @@ class PeerManager<M extends IJSON> {
         _authors.addEntries(syncMsg.authors.map((id) => MapEntry(id.name, id)));
         if (preSyncMsg case PreSyncMsg preSyncMsg) {
           _resetCount = preSyncMsg.resetCount;
-          _sessionId = preSyncMsg.sessionId;
+          _session = preSyncMsg.session;
           // print("$peerId ses = $_sessionId");
-          _onSessionUpdate.add(_sessionId);
+          _onSessionUpdate.add(_session);
         }
         _lastDbSave = _em.syncState;
         await _save();
       });
 
-  Future<void> add(List<Event<M>> evs,
-      [List<Event<M>> dels = const [], PrivatePeerIdentity? author]) async {
-    var theAuthor = author ?? _id;
-    if (theAuthor == null) throw Exception("no author");
-    if (evs.any((e) => e.author != theAuthor.identity.name)) {
-      throw Exception(
-          "event authors must match manager identifier for signing");
-    }
+  Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
+    assert(_id != null, "add() called without assigned identity");
+    PrivatePeerIdentity theAuthor = _id!;
+    assert(!evs.any((e) => e.author != theAuthor.identity.name),
+        "event authors must match identity for signing");
     var signer = theAuthor.signer;
-    _addSigned(evs, dels, evs.map((e) => signer.sign(e.toJsonBin())).toList());
+    _addSigned(
+        evs, dels, evs.map((e) => signer.sign(e.toJsonBytes())).toList());
   }
 
   Future<void> _addSigned(List<Event<M>> evs, List<Event<M>> dels,
       List<Signature> signatures) async {
+    assert(evs.length == signatures.length);
     if (evs.isEmpty && dels.isEmpty) return;
     await _mutex.protect(() async {
       var ss = _em.syncState;
@@ -193,8 +192,18 @@ class PeerManager<M extends IJSON> {
   }
 
   /// mutex order manager -> all peers
-  Future<void> resetSession() async => _mutex.protect(() async {
-        await _reset(disconnect: false);
+  Future<bool> createSession() async => _mutex.protect(() async {
+        var id = this.id;
+        if (id == null) return false;
+        await _reset(disconnect: false, newSession: Session.newSession(id));
+        // print("$peerId ses = $_sessionId");
+        _broadcastPresync();
+        return true;
+      });
+
+  /// mutex order manager -> all peers
+  Future<void> leaveSession() async => _mutex.protect(() async {
+        await _reset(disconnect: false, newSession: null);
         // print("$peerId ses = $_sessionId");
         _broadcastPresync();
       });
@@ -277,6 +286,9 @@ class PeerManager<M extends IJSON> {
     }
     p._man = this;
     await _mutex.protect(() async {
+      if (peers.contains(p)) {
+        return;
+      }
       _peers.add(p);
       _stateChangeHandler(p);
       if (_autoConnect) {
@@ -316,7 +328,7 @@ class PeerManager<M extends IJSON> {
     }
   }
 
-  PreSyncMsg _curPreSyncMsg() => PreSyncMsg(id, _sessionId, _resetCount);
+  PreSyncMsg _curPreSyncMsg() => PreSyncMsg(id, _session, _resetCount);
 
   /// must have peer lock
   Future<void> _handlePreSync(Peer p, PreSyncMsg ps) async {
@@ -337,31 +349,33 @@ class PeerManager<M extends IJSON> {
       }
     }
     if (p._lastKnownState?.identity != ps.identity) {
-      // print("change id")
+      // print("change id");
       if (ps.identity case PeerIdentity id) {
         if (!id.verifySignature()) {
           // print("bad certificate");
           p.disconnect();
           return;
         }
-        if (!id.isSignedBy(_trustAnchor)) {
-          // print("untrusted signer");
-          p.disconnect();
-          return;
+        if (session case Session(:var root)) {
+          if (!id.isSignedBy(root)) {
+            // print("untrusted signer");
+            // TODO: correct?
+            p._state = PeerState.CONFLICT;
+            return;
+          }
         }
       }
     }
     var prevState = p._lastKnownState ?? ps;
     p._lastKnownState = ps;
-    // print("handle pre sync from ${ps.peerId}");
-    if (ps.sessionId != sessionId) {
-      p._state = PeerState.CONFLICT;
-      // print("conflict peer:${ps.sessionId} != this:${sessionId}");
+    // print("handle pre sync from ${ps.identity}");
+    if (!Session.nullEq(ps.session, session)) {
+      p._state = ps.session == null ? PeerState.NOSESS : PeerState.CONFLICT;
+      // print("conflict peer:${ps.session} != this:${session}");
       return;
     }
-    if (prevState.resetCount != ps.resetCount ||
-        prevState.sessionId != ps.sessionId) {
-      // print("discovered reset by ${ps.peerId}");
+    if (prevState.resetCount != ps.resetCount) {
+      // print("discovered reset by ${ps.identity}");
       p._lastLocal = SyncInfo.zero();
     }
     p._state = PeerState.SYNC;
@@ -384,44 +398,17 @@ class PeerManager<M extends IJSON> {
               // print("rcv: not in sync yet");
               return null;
             }
-            if (p._lastKnownState?.sessionId != _sessionId) {
+            if (!Session.nullEq(p._lastKnownState?.session, _session)) {
               // print("sync incorrect session");
               p._state = PeerState.CONFLICT;
               return null;
             }
             var msg = SyncMsg<M>.fromBin(data, handle.reviveEvent);
-            var upToDate = _em.syncState == p._lastLocal;
-            if (msg.sigs.length != msg.evs.length) {
+            if (!_verifySyncMsg(msg)) {
               p.disconnect();
               return null;
             }
-            for (var author in msg.authors) {
-              if (_authors.containsKey(author.name)) {
-                continue;
-              }
-              if (!author.verifySignature()) {
-                // print("bad author certificate")
-                p.disconnect();
-                return null;
-              }
-              if (!author.isSignedBy(_trustAnchor)) {
-                // print("untrusted signer");
-                p.disconnect();
-                return null;
-              }
-              _authors[author.name] = author;
-            }
-            for (int i = 0; i < msg.evs.length; i++) {
-              var ev = msg.evs[i];
-              var sig = msg.sigs[i];
-              var ok =
-                  _authors[ev.author]!.verifier.verify(ev.toJsonBytes(), sig);
-              if (!ok) {
-                // print("bad event signature");
-                p.disconnect();
-                return null;
-              }
-            }
+            var upToDate = _em.syncState == p._lastLocal;
             await _addSigned(msg.evs, msg.dels, msg.sigs);
             if (upToDate) {
               p._lastLocal = _em.syncState;
@@ -438,14 +425,14 @@ class PeerManager<M extends IJSON> {
   /// mutex order manager -> all peers
   Future<bool> yieldTo(Peer p) =>
       _mutex.protect(() => p._mutex.protect(() async {
-            // print("yield to ${p.id} ${p._state.name} ${p._lastKnownState?.sessionId}");
-            if (p.sessionId == null ||
-                p.sessionId == sessionId ||
+            // print("yield to ${p.id} ${p._state.name} ${p._lastKnownState?.session}");
+            if (p.session == null ||
+                Session.nullEq(p.session, session) ||
                 p._state != PeerState.CONFLICT) {
               return false;
             }
             await _reset(
-                disconnect: false, ignoreLockFor: p, newSession: p.sessionId!);
+                disconnect: false, ignoreLockFor: p, newSession: p.session!);
             await _save();
             // print("$peerId ses = $_sessionId");
             _broadcastPresync();
@@ -458,7 +445,7 @@ class PeerManager<M extends IJSON> {
       bool disconnect = true,
       bool keepPeerData = true,
       Peer? ignoreLockFor,
-      int? newSession}) async {
+      required Session? newSession}) async {
     var locks =
         _peers.where((e) => e != ignoreLockFor).map((p) => p._mutex).toList();
     try {
@@ -484,16 +471,50 @@ class PeerManager<M extends IJSON> {
       _em.reset();
       _eventSignatures.clear();
       _resetCount = Random().nextInt(1 << 30);
-      _sessionId = newSession ?? Random().nextInt(1 << 30);
-      _onSessionUpdate.add(_sessionId);
+      _session = newSession;
+      _onSessionUpdate.add(_session);
       _onUpdate.add(null);
     } catch (e) {
-      print(e);
+      // print(e);
     } finally {
       for (var l in locks) {
         l.release();
       }
     }
+  }
+
+  /// verify that the sync msg is not malicious
+  bool _verifySyncMsg(SyncMsg<M> msg) {
+    if (msg.sigs.length != msg.evs.length) {
+      // print("bad sync");
+      return false;
+    }
+    for (var author in msg.authors) {
+      if (_authors.containsKey(author.name)) {
+        continue;
+      }
+      if (!author.verifySignature()) {
+        // print("bad author certificate");
+        return false;
+      }
+      if (!author.isSignedBy(session!.root)) {
+        // print("untrusted signer");
+        return false;
+      }
+      _authors[author.name] = author;
+    }
+    for (int i = 0; i < msg.evs.length; i++) {
+      var ev = msg.evs[i];
+      var sig = msg.sigs[i];
+      var ok = _authors[ev.author]!.verifier.verify(ev.toJsonBytes(), sig);
+      if (!ok) {
+        // print("bad event signature");
+        // print(ev.author);
+        // print(_authors[ev.author]);
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -561,6 +582,7 @@ class LocalPeer extends Peer {
 
   @override
   void disconnect() {
+    // print("manual disconnect by $id");
     setConnected(false);
     _other.setConnected(false);
   }

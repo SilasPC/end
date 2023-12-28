@@ -197,7 +197,7 @@ class _SettingsCardState extends State<SettingsView> {
                         ..save();
                     });
                   }
-                  session.reset();
+                  session.leave();
                 }),
             ListTile(
               leading: const Icon(Icons.cloud_upload),

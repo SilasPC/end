@@ -15,9 +15,9 @@ abstract class EventDatabase<M extends IJSON> {
 
 class NullDatabase<M extends IJSON> extends EventDatabase<M> {
   final String peerId;
-  final int sessionId;
+  final Session? session;
 
-  NullDatabase(this.peerId, this.sessionId);
+  NullDatabase(this.peerId, this.session);
 
   @override
   Future<void> add(SyncMsg<M> msg) async {}
@@ -26,7 +26,7 @@ class NullDatabase<M extends IJSON> extends EventDatabase<M> {
   @override
   Future<(SyncMsg<M>, PreSyncMsg?)> loadData() => Future.value((
         SyncMsg<M>([], [], [], []),
-        PreSyncMsg(null, sessionId, 0),
+        PreSyncMsg(null, session, 0),
       ));
 
   @override

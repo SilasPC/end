@@ -128,7 +128,8 @@ class SqliteDatabase extends EventDatabase<EnduranceModel> {
 					preSync STRING NOT NULL
 				)
 			""")
-          ..insert("self", {"preSync": PreSyncMsg(null, 0, 0).toJsonString()}))
+          ..insert(
+              "self", {"preSync": PreSyncMsg(null, null, 0).toJsonString()}))
         .commit(noResult: true);
   }
 
