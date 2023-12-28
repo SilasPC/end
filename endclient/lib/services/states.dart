@@ -98,7 +98,7 @@ class PeerStates extends ChangeNotifier {
 
 class SessionState extends ChangeNotifier {
   Session? get session => _manager.session;
-  int? get sessionId => _manager.sessionId;
+  int? get id => _manager.session?.id;
 
   late StreamSubscription _sub;
 
@@ -111,6 +111,7 @@ class SessionState extends ChangeNotifier {
 
   void leave() => _manager.leaveSession();
   void create() => _manager.createSession();
+  void clone() => _manager.cloneSession();
 
   @override
   void dispose() {

@@ -90,8 +90,14 @@ class PeerManager<M extends IJSON> {
   StreamController<Null> _onUpdate = StreamController.broadcast();
   StreamController<Session?> _onSessionUpdate = StreamController.broadcast();
   StreamController<Peer> _onStateChange = StreamController.broadcast();
+
+  /// Updates to current session
   Stream<Session?> get sessionStream => _onSessionUpdate.stream;
+
+  /// Updates to the model
   Stream<Null> get updateStream => _onUpdate.stream;
+
+  /// Updates to peer states
   Stream<Peer> get peerStateChanges => _onStateChange.stream;
 
   PrivatePeerIdentity? _id;
@@ -114,7 +120,6 @@ class PeerManager<M extends IJSON> {
   Session? _session;
   Session? get session => _session;
 
-  int? get sessionId => _session?.id;
   int _resetCount = Random().nextInt(1 << 30);
 
   late final EventDatabase<M> _db;
@@ -168,6 +173,8 @@ class PeerManager<M extends IJSON> {
         await _save();
       });
 
+  /// Add/delete events.
+  /// Must be in session, and authors must match the current identity.
   Future<void> add(List<Event<M>> evs, [List<Event<M>> dels = const []]) async {
     assert(_id != null, "add() called without assigned identity");
     PrivatePeerIdentity theAuthor = _id!;
@@ -197,7 +204,20 @@ class PeerManager<M extends IJSON> {
     return;
   }
 
-  /// mutex order manager -> all peers
+  // mutex order manager
+  /// Take ownership of session, keeping all data
+  Future<bool> cloneSession() async => _mutex.protect(() async {
+        if (id case PeerIdentity id) {
+          _session = Session.newSession(id);
+          _onSessionUpdate.add(_session);
+          _broadcastPresync();
+          return true;
+        }
+        return false;
+      });
+
+  // mutex order manager -> all peers
+  /// Create a new session, clearing all data
   Future<bool> createSession() async => _mutex.protect(() async {
         var id = this.id;
         if (id == null) return false;
@@ -207,14 +227,18 @@ class PeerManager<M extends IJSON> {
         return true;
       });
 
-  /// mutex order manager -> all peers
+  // mutex order manager -> all peers
+  /// Leave session, clearing all data
   Future<void> leaveSession() async => _mutex.protect(() async {
         await _reset(disconnect: false, newSession: null);
         // print("$peerId ses = $_sessionId");
         _broadcastPresync();
       });
 
-  /// mutex order manager -> peer
+  // mutex order manager -> peer
+  /// Stay in session, but clear all local data.
+  /// This will cause resync with all peers,
+  /// immediately re-fetching data if possible.
   Future<void> resetModel() async {
     // print("reset $peerId");
     await _mutex.protect(() async {

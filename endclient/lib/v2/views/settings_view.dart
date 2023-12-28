@@ -188,7 +188,7 @@ class _SettingsCardState extends State<SettingsView> {
             ListTile(
                 leading: const Icon(Icons.cancel),
                 title: const Text("New session"),
-                subtitle: Text("Current: ${session.sessionId}"),
+                subtitle: Text("Current: ${session.id}"),
                 onTap: () {
                   if (set.autoYield) {
                     setState(() {

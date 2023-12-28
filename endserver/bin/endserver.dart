@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:common/models/glob.dart';
 import 'package:common/p2p/Manager.dart';
-import 'package:common/p2p/db.dart';
 import 'package:common/p2p/keys.dart';
 import 'package:common/p2p/protocol.dart';
+import 'package:common/p2p/sqlite_db.dart';
 import 'package:common/util.dart';
 import 'package:socket_io/socket_io.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -17,7 +17,7 @@ Future<void> main() async {
   final identity = PrivatePeerIdentity.server();
   final man = PeerManager<EnduranceModel>(
     identity,
-    () => NullDatabase(identity.identity.name, null), //SqliteDatabase.create,
+    SqliteDatabase.create,
     MetaModel(),
   );
 

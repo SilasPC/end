@@ -128,7 +128,7 @@ void main() {
 
     var yielded = await c.yieldTo(ps);
     expect(yielded, true);
-    expect(c.sessionId, s.sessionId);
+    expect(c.session!.eq(s.session!), true);
 
     await pumpEventQueue();
     expect(c.model.result, "1");
